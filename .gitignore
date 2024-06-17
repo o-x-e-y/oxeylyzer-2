@@ -2,3 +2,5 @@
 /corpora/*
 .venv
 /messing-with-data
+.direnv
+
