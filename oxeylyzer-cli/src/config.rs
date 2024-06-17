@@ -7,8 +7,7 @@ use oxeylyzer_core::prelude::Weights;
 use crate::Result;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AnalyzerConfig {
-}
+pub struct AnalyzerConfig {}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -21,7 +20,7 @@ pub struct Config {
 impl Config {
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
         let s = std::fs::read_to_string(path)?;
-        
+
         toml::from_str(&s).map_err(Into::into)
     }
 }

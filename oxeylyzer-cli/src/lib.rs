@@ -5,7 +5,12 @@ use config::Config;
 use itertools::Itertools;
 use oxeylyzer_core::prelude::*;
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
-use std::{collections::HashMap, fs, io::Write as _, path::{Path, PathBuf}};
+use std::{
+    collections::HashMap,
+    fs,
+    io::Write as _,
+    path::{Path, PathBuf},
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -54,17 +59,20 @@ impl Repl {
         let data = Data::load(&config.corpus)?;
 
         let a = Analyzer::new(data, config.weights);
-        
+
         let layouts = load_layouts(config.layouts)?;
 
         Ok(Self {
-            a, layouts,
+            a,
+            layouts,
             config_path,
-        }) 
+        })
     }
 
     pub fn layout(&self, name: &str) -> Result<&Layout> {
-        self.layouts.get(&name.to_lowercase()).ok_or(ReplError::UnknownLayout)
+        self.layouts
+            .get(&name.to_lowercase())
+            .ok_or(ReplError::UnknownLayout)
     }
 
     fn analyze(&self, name: &str) -> Result<()> {
@@ -117,7 +125,8 @@ impl Repl {
             .into_par_iter()
             .map(|_| {
                 let starting_layout = layout.random();
-                self.a.annealing_improve(starting_layout, 20_500_000_000_000.0, 0.987, 5000)
+                self.a
+                    .annealing_improve(starting_layout, 20_500_000_000_000.0, 0.987, 5000)
             })
             .collect_into_vec(&mut layouts);
 
@@ -167,7 +176,7 @@ impl Repl {
 
     pub fn reload(&mut self) -> Result<()> {
         let new = Self::with_config(&self.config_path)?;
-        
+
         self.a = new.a;
         self.layouts = new.layouts;
 

@@ -38,8 +38,7 @@ fn shuffle_pins<T>(slice: &mut [T], pins: &[usize]) {
 
 impl Layout {
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let s =
-            std::fs::read_to_string(path)?;
+        let s = std::fs::read_to_string(path)?;
 
         serde_json::from_str::<Dof>(&s)
             .map(Into::into)

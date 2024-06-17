@@ -2,7 +2,8 @@ use itertools::Itertools;
 use libdof::dofinitions::Finger;
 
 use crate::{
-    analyzer_data::AnalyzerData, cached_layout::*, char_mapping::CharMapping, data::Data, layout::*, weights::Weights, Result
+    analyzer_data::AnalyzerData, cached_layout::*, char_mapping::CharMapping, data::Data,
+    layout::*, weights::Weights,
 };
 
 #[derive(Debug, Clone)]
@@ -23,59 +24,6 @@ impl Analyzer {
             analyze_bigrams,
         }
     }
-
-    // pub fn show_stats(&self, layout: &Layout) {
-    //     let cache = self.cached_layout(layout.clone());
-
-    //     let sfbs = self.sfbs(&cache) as f64 / self.data.bigram_total;
-    //     let sfs = self.sfs(&cache) as f64 / self.data.skipgram_total;
-
-    //     println!("{}score: {}", cache, self.score_cache(&cache));
-    //     if let Some(hc) = cache.heatmap {
-    //         let best = self.heatmap_minmax(layout.clone(), 1) as f64;
-    //         let worst = self.heatmap_minmax(layout.clone(), -1) as f64 * -1.0;
-    //         let score = (hc.total * self.weights.heatmap) as f64;
-    //         let scaled = (score - worst) / (best - worst) * 100.0;
-    //         println!("heatmap: {scaled:.2}%");
-    //     }
-    //     println!("sfbs: {sfbs:.2}%");
-    //     println!("sfs:  {sfs:.2}%");
-    // }
-
-    // pub fn show_sfbs(&self, layout: &Layout, count: usize) {
-    //     let cache = self.cached_layout(layout.clone());
-
-    //     cache
-    //         .sfb_indices
-    //         .all
-    //         .iter()
-    //         .flat_map(|&PosPair(a, b)| {
-    //             let u1 = cache.keys[a as usize];
-    //             let u2 = cache.keys[b as usize];
-
-    //             let c1 = self.mapping().get_c(u1);
-    //             let c2 = self.mapping().get_c(u2);
-
-    //             let freq = self.data.get_bigram_u([u1, u2]) as f64 / self.data.bigram_total;
-    //             let freq2 = self.data.get_bigram_u([u2, u1]) as f64 / self.data.bigram_total;
-
-    //             [([c1, c2], freq), ([c2, c1], freq2)]
-    //         })
-    //         .sorted_by(|(_, f1), (_, f2)| f2.total_cmp(f1))
-    //         .take(count)
-    //         .for_each(|([c1, c2], f)| println!("{c1}{c2}: {f:.3}%"))
-    // }
-
-    // pub fn metric_contribution(&self, layout: &Layout) {
-    //     let cache = self.cached_layout(layout.clone());
-
-    //     let total = self.score_cache(&cache) as f64 / 100.0;
-    //     let heatmap = self.score_swap_heatmap(&cache, PosPair(0, 0)) as f64 / total;
-    //     let sfb = (self.sfbs(&cache) * self.weights.sfbs) as f64 / total;
-    //     let sfs = (self.sfs(&cache) * self.weights.sfs) as f64 / total;
-
-    //     println!("heatmap: {heatmap}\nsfb:     {sfb}\nsfs:     {sfs}");
-    // }
 
     pub fn score(&self, layout: &Layout) -> i64 {
         let cache = self.cached_layout(layout.clone());
@@ -373,49 +321,6 @@ impl Analyzer {
                     + self.data.get_weighted_bigram_u([u2, u1])
             })
             .sum()
-    }
-
-    fn heatmap_minmax(&self, layout: Layout, mul: i64) -> i64 {
-        (0..5)
-            .map(|_| {
-                let mut cache = self.cached_layout(layout.random());
-                let mut best_score = self.score_swap_heatmap(&cache, PosPair(0, 0));
-
-                while let Some((swap, score)) = self.best_swap_heatmap(&mut cache, mul) {
-                    if score <= best_score {
-                        break;
-                    }
-
-                    best_score = score;
-                    cache.swap(swap);
-                    self.update_cache_heatmap(&mut cache, swap);
-                }
-
-                best_score
-            })
-            .sorted()
-            .next()
-            .unwrap()
-    }
-
-    fn best_swap_heatmap(&self, cache: &mut CachedLayout, mul: i64) -> Option<(PosPair, i64)> {
-        let swaps = std::mem::take(&mut cache.possible_swaps);
-
-        let res = cache
-            .possible_swaps
-            .clone()
-            .iter()
-            .map(|&pair| {
-                cache.swap(pair);
-                let score = self.score_swap_heatmap(cache, pair) * mul;
-                cache.swap(pair);
-                (pair, score)
-            })
-            .max_by(|(_, s1), (_, s2)| s1.cmp(s2));
-
-        cache.possible_swaps = swaps;
-
-        res
     }
 }
 

@@ -1,7 +1,4 @@
-use std::collections::HashMap;
-
 use oxeylyzer_cli::*;
-use oxeylyzer_core::prelude::*;
 
 pub fn main() {
     // let data = Data::load("./data/shai.json")?;
@@ -25,8 +22,8 @@ pub fn main() {
 
     // let repl = Repl::new(a, layouts);
 
-    let mut repl = Repl::with_config("./analyzer-config.toml")
-        .expect("Could not initialize repl: ");
+    let mut repl =
+        Repl::with_config("./analyzer-config.toml").expect("Could not initialize repl: ");
 
     repl.run().expect("Encountered error: ")
 }

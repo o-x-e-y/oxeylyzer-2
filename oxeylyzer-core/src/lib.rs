@@ -22,7 +22,7 @@ pub mod prelude {
         data::Data,
         layout::{Layout, PosPair},
         weights::Weights,
-        REPEAT_KEY, REPLACEMENT_CHAR, SHIFT_CHAR, OxeylyzerError
+        OxeylyzerError, REPEAT_KEY, REPLACEMENT_CHAR, SHIFT_CHAR,
     };
 }
 
@@ -46,7 +46,7 @@ pub enum OxeylyzerError {
     NotAFile,
     #[error("Specifying a name for the corpus is required")]
     MissingDataName,
-    
+
     #[error("{0}")]
     IoError(#[from] std::io::Error),
     #[error("{0}")]

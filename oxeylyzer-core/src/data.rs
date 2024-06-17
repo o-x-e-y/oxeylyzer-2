@@ -5,7 +5,7 @@ use serde_with::{serde_as, serde_conv};
 
 use fxhash::FxHashMap as HashMap;
 
-use crate::{corpus_cleaner::CorpusCleanerIterator, REPLACEMENT_CHAR, OxeylyzerError};
+use crate::{corpus_cleaner::CorpusCleanerIterator, OxeylyzerError, REPLACEMENT_CHAR};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod exclude_wasm {
@@ -133,7 +133,11 @@ impl Data {
         }
     }
 
-    pub fn from_file(file: File, name: &str, cleaner: &CorpusCleaner) -> Result<Data, OxeylyzerError> {
+    pub fn from_file(
+        file: File,
+        name: &str,
+        cleaner: &CorpusCleaner,
+    ) -> Result<Data, OxeylyzerError> {
         IntermediateData::from_file(file, name, cleaner).map(Into::into)
     }
 
