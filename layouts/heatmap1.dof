@@ -1,0 +1,17 @@
+{
+    "name": "heatmap1",
+    "board": "ansi",
+    "layers": {
+        "main": [
+            "m , t z .  k s o j x",
+            "v d i r w  l c a y n",
+            "' f b ; p  g e u h q"
+        ]
+    },
+    "fingering": "traditional",
+    "heatmap": [
+        "30 24 20 22 24  33 22 20 24 30",
+        "18 13 11 10 26  26 10 11 13 18",
+        "35 30 27 23 37  22 18 24 28 33"
+    ]
+}

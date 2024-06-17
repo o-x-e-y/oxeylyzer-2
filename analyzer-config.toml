@@ -1,0 +1,7 @@
+corpus = "./data/italian.json"
+layouts = "./layouts"
+
+[weights]
+heatmap = -1
+sfbs = -60000
+sfs = -12000

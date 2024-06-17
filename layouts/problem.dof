@@ -1,0 +1,12 @@
+{
+    "name": "Problem",
+    "board": "ansi",
+    "layers": {
+        "main": [
+            "m j n v l  h i o u q",
+            "w k g ; a  d , r . s",
+            "f x y b c  ' z e p t"
+        ]
+    },
+    "fingering": "standard"
+}

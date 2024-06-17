@@ -1,0 +1,31 @@
+[package]
+name = "oxeylyzer-2"
+version = "0.1.0"
+edition = "2021"
+
+[[bench]]
+name = "benchmarks"
+harness = false
+
+[workspace]
+members = [ "oxeylyzer-core" ]
+
+[workspace.dependencies]
+thiserror = "1.0"
+itertools = "0.13"
+libdof = "0.16.3" #{ path = "../libdof" }
+rayon = "1.10.0"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+
+[dependencies]
+oxeylyzer-core = { path = "./oxeylyzer-core" }
+oxeylyzer-cli = { path = "./oxeylyzer-cli" }
+
+[dev-dependencies]
+diol = { version = "0.8.3", default-features = false }
+rand = "0.8.5"
+
+[[bin]]
+name = "oxeylyzer"
+path = "./oxeylyzer-cli/src/bin/main.rs"

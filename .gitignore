@@ -1,0 +1,4 @@
+/target
+/corpora/*
+.venv
+/messing-with-data
