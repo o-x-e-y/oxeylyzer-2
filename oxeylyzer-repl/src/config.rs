@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
@@ -6,15 +6,18 @@ use oxeylyzer_core::prelude::Weights;
 
 use crate::Result;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AnalyzerConfig {}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+enum OneOrManyString {
+    One(String),
+    Many(Vec<String>),
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    // pub analyzer: AnalyzerConfig,
     pub weights: Weights,
     pub corpus: String,
-    pub layouts: String,
+    pub layouts: Vec<PathBuf>,
 }
 
 impl Config {

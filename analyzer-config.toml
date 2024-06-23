@@ -1,7 +1,28 @@
-corpus = "./data/italian.json"
-layouts = "./layouts"
+corpus = "./data/shai.json"
+layouts = ["./layouts"]
+enable_trigrams = true
 
 [weights]
-heatmap = -1
-sfbs = -60000
-sfs = -12000
+sfbs = -8
+sfs = -1
+
+sft = -10000
+inroll = 12000
+outroll = 11000
+alternate = 9500
+redirect = -3500
+onehandin = 10
+onehandout = 0
+thumb = 0
+
+[weights.fingers]
+lp = 15
+lr = 36
+lm = 48
+li = 55
+lt = 25
+rt = 25
+ri = 55
+rm = 48
+rr = 36
+rp = 15

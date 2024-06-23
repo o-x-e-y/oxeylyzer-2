@@ -32,10 +32,9 @@ impl Analyzer {
     }
 
     pub fn score_cache(&self, cache: &CachedLayout) -> i64 {
-        let heatmap = cache.heatmap.as_ref().map(|h| h.total).unwrap_or(0);
         let weighted_bigrams = cache.weighted_bigrams.total;
 
-        heatmap * self.weights.heatmap + weighted_bigrams
+        weighted_bigrams
     }
 
     pub fn mapping(&self) -> &CharMapping {
@@ -49,53 +48,35 @@ impl Analyzer {
             .map(|&c| self.data.mapping.get_u(c))
             .collect::<Box<_>>();
 
+        let name = layout.name;
         let fingers = layout.fingers;
         let shape = layout.shape;
         let char_mapping = self.data.mapping.clone();
+        let keyboard = layout.keyboard;
 
         let possible_swaps = (0..(keys.len() as u8))
             .tuple_combinations::<(_, _)>()
             .map(Into::into)
             .collect();
 
-        let sfb_indices = SfbIndices::new(&fingers);
-
-        let heatmap = match layout.heatmap {
-            Some(heatmap) => {
-                let per_key = keys
-                    .iter()
-                    .zip(heatmap.iter())
-                    .map(|(&k, &h)| self.data.get_char_u(k) * h)
-                    .collect::<Box<_>>();
-
-                let total = per_key.iter().sum();
-
-                Some(HeatmapCache {
-                    total,
-                    per_key,
-                    map: heatmap,
-                })
-            }
-            None => None,
-        };
+        let sfb_indices = SfbIndices::new(&fingers, &keyboard, &self.weights.fingers);
 
         let mut cache = CachedLayout {
+            name,
             keys,
             fingers,
+            keyboard,
             possible_swaps,
             sfb_indices,
-            heatmap,
             shape,
             char_mapping,
             ..Default::default()
         };
 
-        cache.weighted_bigrams = BigramCache {
-            total: self.weighted_bigrams(&cache),
-            per_finger: Finger::FINGERS
-                .map(|f| self.finger_weighted_bigrams(&cache, f))
-                .into(),
-        };
+        let per_finger = Box::new(Finger::FINGERS.map(|f| self.finger_weighted_bigrams(&cache, f)));
+        let total = per_finger.iter().sum();
+
+        cache.weighted_bigrams = BigramCache { total, per_finger };
 
         cache
     }
@@ -140,13 +121,19 @@ impl Analyzer {
             .sfb_indices
             .get_finger(f)
             .iter()
-            .map(|&PosPair(a, b)| {
-                let u1 = cache.keys[a as usize];
-                let u2 = cache.keys[b as usize];
+            .map(
+                |SfbPair {
+                     pair: PosPair(a, b),
+                     dist,
+                 }| {
+                    let u1 = cache.keys[*a as usize];
+                    let u2 = cache.keys[*b as usize];
 
-                self.data.get_weighted_bigram_u([u1, u2])
-                    + self.data.get_weighted_bigram_u([u2, u1])
-            })
+                    (self.data.get_weighted_bigram_u([u1, u2])
+                        + self.data.get_weighted_bigram_u([u2, u1]))
+                        * dist
+                },
+            )
             .sum()
     }
 
@@ -155,29 +142,8 @@ impl Analyzer {
             return;
         }
 
-        if self.weights.heatmap != 0 {
-            self.update_cache_heatmap(cache, swap);
-        }
-
         if self.analyze_bigrams {
             self.update_cache_weighted_bigrams(cache, swap);
-        }
-    }
-
-    fn update_cache_heatmap(&self, cache: &mut CachedLayout, PosPair(a, b): PosPair) {
-        if let Some(hc) = cache.heatmap.as_mut() {
-            let u1 = cache.keys[a as usize];
-            let u2 = cache.keys[b as usize];
-
-            let new1 = self.data.get_char_u(u1) * hc.map[a as usize];
-            let new2 = self.data.get_char_u(u2) * hc.map[b as usize];
-
-            let prev1 = hc.per_key[a as usize];
-            let prev2 = hc.per_key[b as usize];
-
-            hc.total += new1 + new2 - prev1 - prev2;
-            hc.per_key[a as usize] = new1;
-            hc.per_key[b as usize] = new2;
         }
     }
 
@@ -206,26 +172,7 @@ impl Analyzer {
     }
 
     pub fn score_cached_swap(&self, cache: &CachedLayout, swap: PosPair) -> i64 {
-        self.score_swap_heatmap(cache, swap) + self.score_swap_weighted_bigrams(cache, swap)
-    }
-
-    fn score_swap_heatmap(&self, cache: &CachedLayout, PosPair(a, b): PosPair) -> i64 {
-        match &cache.heatmap {
-            Some(hc) if a == b => hc.total * self.weights.heatmap,
-            Some(hc) if self.weights.heatmap != 0 => {
-                let u1 = cache.keys[a as usize];
-                let u2 = cache.keys[b as usize];
-
-                let new1 = self.data.get_char_u(u1) * hc.map[a as usize];
-                let new2 = self.data.get_char_u(u2) * hc.map[b as usize];
-
-                let prev1 = hc.per_key[a as usize];
-                let prev2 = hc.per_key[b as usize];
-
-                (hc.total + new1 + new2 - prev1 - prev2) * self.weights.heatmap
-            }
-            _ => 0,
-        }
+        self.score_swap_weighted_bigrams(cache, swap)
     }
 
     fn score_swap_weighted_bigrams(&self, cache: &CachedLayout, PosPair(a, b): PosPair) -> i64 {
@@ -261,12 +208,17 @@ impl Analyzer {
             .sfb_indices
             .all
             .iter()
-            .map(|&PosPair(a, b)| {
-                let u1 = cache.keys[a as usize];
-                let u2 = cache.keys[b as usize];
+            .map(
+                |SfbPair {
+                     pair: PosPair(a, b),
+                     ..
+                 }| {
+                    let u1 = cache.keys[*a as usize];
+                    let u2 = cache.keys[*b as usize];
 
-                self.data.get_bigram_u([u1, u2]) + self.data.get_bigram_u([u2, u1])
-            })
+                    self.data.get_bigram_u([u1, u2]) + self.data.get_bigram_u([u2, u1])
+                },
+            )
             .sum()
     }
 
@@ -275,12 +227,17 @@ impl Analyzer {
             .sfb_indices
             .all
             .iter()
-            .map(|&PosPair(a, b)| {
-                let u1 = cache.keys[a as usize];
-                let u2 = cache.keys[b as usize];
+            .map(
+                |SfbPair {
+                     pair: PosPair(a, b),
+                     ..
+                 }| {
+                    let u1 = cache.keys[*a as usize];
+                    let u2 = cache.keys[*b as usize];
 
-                self.data.get_skipgram_u([u1, u2]) + self.data.get_skipgram_u([u2, u1])
-            })
+                    self.data.get_skipgram_u([u1, u2]) + self.data.get_skipgram_u([u2, u1])
+                },
+            )
             .sum()
     }
 
@@ -298,110 +255,46 @@ impl Analyzer {
         cache.sfb_indices.fingers.clone().map(|pairs| {
             pairs
                 .iter()
-                .map(|&PosPair(a, b)| {
-                    let u1 = cache.keys[a as usize];
-                    let u2 = cache.keys[b as usize];
+                .map(
+                    |SfbPair {
+                         pair: PosPair(a, b),
+                         ..
+                     }| {
+                        let u1 = cache.keys[*a as usize];
+                        let u2 = cache.keys[*b as usize];
 
-                    self.data.get_bigram_u([u1, u2]) + self.data.get_bigram_u([u2, u1])
-                })
+                        self.data.get_bigram_u([u1, u2]) + self.data.get_bigram_u([u2, u1])
+                    },
+                )
                 .sum()
         })
     }
 
     fn weighted_bigrams(&self, cache: &CachedLayout) -> i64 {
-        cache
-            .sfb_indices
-            .all
-            .iter()
-            .map(|&PosPair(a, b)| {
-                let u1 = cache.keys[a as usize];
-                let u2 = cache.keys[b as usize];
-
-                self.data.get_weighted_bigram_u([u1, u2])
-                    + self.data.get_weighted_bigram_u([u2, u1])
-            })
+        Finger::FINGERS
+            .into_iter()
+            .map(|f| self.finger_weighted_bigrams(cache, f))
             .sum()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::weights::dummy_weights;
+
     use super::*;
 
     fn analyzer_layout() -> (Analyzer, Layout) {
-        let data = Data::load("./data/shai.json").expect("this should exist");
+        let data = Data::load("../data/shai.json").expect("this should exist");
 
-        let weights = Weights {
-            heatmap: -1,
-            sfbs: -5,
-            sfs: -1,
-        };
+        let weights = dummy_weights();
 
         let analyzer = Analyzer::new(data, weights);
 
-        let layout = Layout::load("./layouts/rstn-oxey.dof")
+        let layout = Layout::load("../layouts/rstn-oxey.dof")
             .expect("this layout is valid and exists, soooo");
 
         (analyzer, layout)
-    }
-
-    #[test]
-    fn sfs_cache_eq() {
-        let (analyzer, layout) = analyzer_layout();
-
-        let cache = analyzer.cached_layout(layout);
-
-        assert_eq!(
-            cache.weighted_bigrams.total,
-            cache.weighted_bigrams.per_finger.into_iter().sum::<i64>()
-        );
-
-        println!(
-            "total: {}, sum: {}",
-            cache.weighted_bigrams.total,
-            cache.weighted_bigrams.per_finger.into_iter().sum::<i64>()
-        )
-    }
-
-    #[test]
-    fn update_cache_heatmap() {
-        let (analyzer, layout) = analyzer_layout();
-
-        let mut cache = analyzer.cached_layout(layout);
-        let reference = cache.clone();
-
-        let possible_swaps = std::mem::take(&mut cache.possible_swaps);
-
-        for (i, &swap) in possible_swaps.iter().enumerate() {
-            let initial = analyzer.score_cache(&cache);
-
-            cache.swap(swap);
-            analyzer.update_cache_heatmap(&mut cache, swap);
-
-            cache.swap(swap);
-            analyzer.update_cache_heatmap(&mut cache, swap);
-
-            let returned = analyzer.score_cache(&cache);
-
-            assert_eq!(cache.keys, reference.keys);
-
-            let heatmap = cache.heatmap.as_ref().unwrap();
-            let heatmap_ref = reference.heatmap.as_ref().unwrap();
-
-            assert_eq!(
-                heatmap.total, heatmap_ref.total,
-                "heatmap totals not equal! iteration nr: {i}"
-            );
-            assert_eq!(
-                heatmap.per_key, heatmap_ref.per_key,
-                "per key not equal! iteration nr: {i}"
-            );
-            assert_eq!(
-                initial, returned,
-                "before and after scores not equal! swap: {swap:?}, iteration nr: {i}"
-            );
-            assert_eq!(cache, reference);
-        }
     }
 
     #[test]
@@ -411,9 +304,9 @@ mod tests {
         let mut cache = analyzer.cached_layout(layout);
         let reference = cache.clone();
 
-        let possible_swaps = std::mem::take(&mut cache.possible_swaps);
+        let possible_swaps = cache.possible_swaps.clone();
 
-        for &swap in possible_swaps.iter() {
+        for (i, &swap) in possible_swaps.iter().enumerate() {
             let initial = analyzer.score_cache(&cache);
 
             cache.swap(swap);
@@ -424,8 +317,8 @@ mod tests {
 
             let returned = analyzer.score_cache(&cache);
 
-            assert_eq!(initial, returned);
-            assert_eq!(cache, reference);
+            assert_eq!(initial, returned, "iteration {i}: ");
+            assert_eq!(cache, reference, "iteration {i}: ");
         }
     }
 }

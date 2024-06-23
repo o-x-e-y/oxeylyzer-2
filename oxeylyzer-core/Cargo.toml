@@ -14,10 +14,11 @@ num_cpus = "1.16.0"
 rayon = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-serde_with = "3.8.1"
+serde_with = { workspace = true }
 sliding_window_alt = "0.1.2"
 thiserror = { workspace = true }
 time_this = "0.2.5"
+toml ={ workspace = true }
 
 [dev-dependencies]
 assert_approx_eq = "1.1.0"

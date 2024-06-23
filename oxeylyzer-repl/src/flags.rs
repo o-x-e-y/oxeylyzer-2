@@ -2,18 +2,25 @@ xflags::xflags! {
     cmd oxeylyzer {
         /// Analyze a layout.
         cmd analyze a view layout {
+            /// The name of the layout to analyze.
             required name: String
         }
         /// Rank all layouts for the currently specified language. A higher score is better.
         cmd rank {}
-        /// Generate <n> layouts based on a specified layout. Generates 5000 layouts by default.
+        /// Generate layouts by randomizing a base layout.
         cmd gen g generate {
+            /// Name of the layout to use as a basis.
             required name: String
-            optional -c, --count count: usize
+            /// Name of iterations to do. 10 by default.
+            optional count: usize
+            // /// Characters to pin. Setting pins speeds up generation.
+            // optional -p, --pins pins: String
         }
-        /// Shows the top n sfbs on a layout. 10 by default.
+        /// Shows the top n sfbs on a layout.
         cmd sfbs {
+            /// Name of the layout to show sfbs of.
             required name: String
+            /// Amount of sfbs to show. 10 by default.
             optional -c, --count count: usize
         }
         /// Reload the analyzer config file

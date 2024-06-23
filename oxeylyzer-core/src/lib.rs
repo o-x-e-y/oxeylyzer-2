@@ -12,6 +12,7 @@ pub mod layout;
 pub mod optimization;
 pub mod simulated_annealing;
 pub mod stats;
+pub mod trigrams;
 pub mod weights;
 
 pub mod prelude {
@@ -29,6 +30,7 @@ pub mod prelude {
 // pub use libdof;
 
 pub const REPLACEMENT_CHAR: char = char::REPLACEMENT_CHARACTER;
+pub const SPACE_CHAR: char = '␣';
 pub const SHIFT_CHAR: char = '⇑';
 pub const REPEAT_KEY: char = '@';
 
@@ -55,6 +57,8 @@ pub enum OxeylyzerError {
     UTF8Error(#[from] std::str::Utf8Error),
     #[error("{0}")]
     DofError(#[from] DofError),
+    #[error("{0}")]
+    TomlDeserializationError(#[from] toml::de::Error),
 
     #[cfg(target_arch = "wasm32")]
     #[error("{0}")]

@@ -488,9 +488,7 @@ checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
 
 [[package]]
 name = "libdof"
-version = "0.16.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd283f8b3febdb2f533e8ffbb048ef93d64361332d0c2fa0f3d6a3c841272f45"
+version = "0.18.0"
 dependencies = [
  "serde",
  "serde_with",
@@ -560,24 +558,9 @@ name = "oxeylyzer-2"
 version = "0.1.0"
 dependencies = [
  "diol",
- "oxeylyzer-cli",
  "oxeylyzer-core",
+ "oxeylyzer-repl",
  "rand",
-]
-
-[[package]]
-name = "oxeylyzer-cli"
-version = "0.1.0"
-dependencies = [
- "itertools",
- "libdof",
- "oxeylyzer-core",
- "rayon",
- "serde",
- "shlex",
- "thiserror",
- "toml",
- "xflags",
 ]
 
 [[package]]
@@ -599,6 +582,22 @@ dependencies = [
  "sliding_window_alt",
  "thiserror",
  "time_this",
+ "toml",
+]
+
+[[package]]
+name = "oxeylyzer-repl"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "libdof",
+ "oxeylyzer-core",
+ "rayon",
+ "serde",
+ "shlex",
+ "thiserror",
+ "toml",
+ "xflags",
 ]
 
 [[package]]

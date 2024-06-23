@@ -2,16 +2,20 @@ use itertools::Itertools;
 use libdof::prelude::{Finger, Shape};
 use std::sync::Arc;
 
-use crate::{char_mapping::CharMapping, layout::PosPair};
+use crate::{
+    char_mapping::CharMapping,
+    layout::{PhysicalPos, PosPair},
+    weights::FingerWeights,
+};
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct CachedLayout {
     pub name: String,
     pub keys: Box<[u8]>,
     pub fingers: Box<[Finger]>,
+    pub keyboard: Box<[PhysicalPos]>,
     pub shape: Shape,
     pub char_mapping: Arc<CharMapping>,
-    pub heatmap: Option<HeatmapCache>,
     pub possible_swaps: Box<[PosPair]>,
     pub sfb_indices: SfbIndices,
     pub weighted_bigrams: BigramCache,
@@ -45,28 +49,49 @@ impl std::fmt::Display for CachedLayout {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SfbPair {
+    pub pair: PosPair,
+    pub dist: i64,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct SfbIndices {
-    pub fingers: Box<[Box<[PosPair]>; 10]>,
-    pub all: Box<[PosPair]>,
+    pub fingers: Box<[Box<[SfbPair]>; 10]>,
+    pub all: Box<[SfbPair]>,
 }
 
 impl SfbIndices {
-    pub fn new(fingers: &[Finger]) -> Self {
+    pub fn new(
+        fingers: &[Finger],
+        keyboard: &[PhysicalPos],
+        finger_weights: &FingerWeights,
+    ) -> Self {
         assert!(
             fingers.len() <= u8::MAX as usize,
             "Too many keys to index with u8, max is {}",
             u8::MAX
         );
+        assert_eq!(
+            fingers.len(),
+            keyboard.len(),
+            "finger len is not the same as keyboard len: "
+        );
 
-        let fingers: Box<[Box<[PosPair]>; 10]> = Finger::FINGERS
+        let weights = finger_weights.normalized();
+
+        let fingers: Box<[Box<[SfbPair]>; 10]> = Finger::FINGERS
             .map(|finger| {
                 fingers
                     .iter()
+                    .zip(keyboard)
                     .zip(0u8..)
-                    .filter_map(|(f, i)| (f == &finger).then_some(i))
+                    .filter_map(|((f, k), i)| (f == &finger).then_some((k, i)))
                     .tuple_combinations::<(_, _)>()
-                    .map(PosPair::from)
+                    .map(|((k1, i1), (k2, i2))| SfbPair {
+                        pair: PosPair(i1, i2),
+                        dist: k1.dist(k2) * weights.get(finger),
+                    })
                     .collect::<Box<_>>()
             })
             .into();
@@ -74,22 +99,15 @@ impl SfbIndices {
         let all = fingers
             .iter()
             .flat_map(|f| f.iter())
-            .copied()
+            .cloned()
             .collect::<Box<_>>();
 
         Self { fingers, all }
     }
 
-    pub fn get_finger(&self, finger: Finger) -> &[PosPair] {
+    pub fn get_finger(&self, finger: Finger) -> &[SfbPair] {
         &self.fingers[finger as usize]
     }
-}
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct HeatmapCache {
-    pub total: i64,
-    pub per_key: Box<[i64]>,
-    pub map: Box<[i64]>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

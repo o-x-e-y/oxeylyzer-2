@@ -36,11 +36,22 @@ impl Analyzer {
         (cache.into(), best_score)
     }
 
+    pub fn alternative_d3(&self, layout: Layout) -> (Layout, i64) {
+        let (layout, _) = self.always_better_swap(layout);
+        self.greedy_depth3_improve(layout)
+    }
+
+    pub fn optimize_depth3(&self, layout: Layout) -> (Layout, i64) {
+        let (layout, _) = self.greedy_improve(layout);
+        let (layout, _) = self.greedy_depth2_improve(layout);
+        self.greedy_depth3_improve(layout)
+    }
+
     pub fn optimize_depth4(&self, layout: Layout) -> (Layout, i64) {
         let (layout, _) = self.greedy_improve(layout);
         let (layout, _) = self.greedy_depth2_improve(layout);
         let (layout, _) = self.greedy_depth3_improve(layout);
-        time_this::time!(self.greedy_depth4_improve(layout))
+        self.greedy_depth4_improve(layout)
     }
 
     pub fn greedy_depth2_improve(&self, layout: Layout) -> (Layout, i64) {
@@ -238,17 +249,13 @@ mod tests {
     use super::*;
 
     fn analyzer_layout() -> (Analyzer, Layout) {
-        let data = crate::prelude::Data::load("./data/shai.json").expect("this should exist");
+        let data = crate::prelude::Data::load("../data/shai.json").expect("this should exist");
 
-        let weights = crate::weights::Weights {
-            heatmap: -1,
-            sfbs: -5,
-            sfs: -1,
-        };
+        let weights = crate::weights::dummy_weights();
 
         let analyzer = Analyzer::new(data, weights);
 
-        let layout = Layout::load("./layouts/rstn-oxey.dof")
+        let layout = Layout::load("../layouts/rstn-oxey.dof")
             .expect("this layout is valid and exists, soooo");
 
         (analyzer, layout)

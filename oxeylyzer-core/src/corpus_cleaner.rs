@@ -196,9 +196,13 @@ impl CorpusCleanerBuilder {
     pub fn build(&mut self) -> CorpusCleaner {
         use std::mem::take;
 
-        let chars = take(&mut self.chars);
+        let mut chars = take(&mut self.chars);
         let shifted_chars = take(&mut self.shifted_chars);
-        let mappings = take(&mut self.mappings);
+        let mut mappings = take(&mut self.mappings);
+
+        if chars.remove(&' ') {
+            mappings.insert(' ', vec![SPACE_CHAR]);
+        }
 
         let map = chars
             .into_iter()

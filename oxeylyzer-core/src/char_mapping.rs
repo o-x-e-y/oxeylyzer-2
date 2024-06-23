@@ -1,6 +1,6 @@
 use indexmap::IndexMap;
 
-use crate::{REPLACEMENT_CHAR, SHIFT_CHAR};
+use crate::{REPLACEMENT_CHAR, SHIFT_CHAR, SPACE_CHAR};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct CharMapping(IndexMap<char, u8>);
@@ -11,6 +11,7 @@ impl CharMapping {
 
         map.push(REPLACEMENT_CHAR);
         map.push(SHIFT_CHAR);
+        map.push(SPACE_CHAR);
 
         map
     }
@@ -114,7 +115,7 @@ mod tests {
         let mapping_s = "abcdefhgijklmnopqrstuvwxyz ";
         let mapping = mapping_s.chars().collect::<CharMapping>();
 
-        assert_eq!(mapping.len(), mapping_s.len() + 2);
+        assert_eq!(mapping.len(), mapping_s.len() + 3);
 
         let s = "this is epic-";
         let u = mapping.map_cs(s).collect::<Vec<_>>();

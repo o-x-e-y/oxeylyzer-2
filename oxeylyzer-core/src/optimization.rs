@@ -20,6 +20,9 @@ pub struct GreedyDepth4;
 pub struct GreedyAlternative;
 
 #[derive(Debug, Clone)]
+pub struct GreedyAlternativeD3;
+
+#[derive(Debug, Clone)]
 pub struct SimulatedAnnealing;
 
 #[derive(Debug, Clone)]
@@ -32,16 +35,20 @@ pub enum OptimizationMethod {
     GreedyDepth3,
     GreedyDepth4,
     GreedyAlternative,
+    GreedyAlternativeD3,
 }
 
 impl OptimizationMethod {
     pub fn optimize(&self, a: &Analyzer, layout: Layout) -> (Layout, i64) {
+        use OptimizationMethod as OM;
+
         match self {
-            OptimizationMethod::Greedy => Greedy::optimize(a, layout),
-            OptimizationMethod::GreedyDepth2 => GreedyDepth2::optimize(a, layout),
-            OptimizationMethod::GreedyDepth3 => GreedyDepth3::optimize(a, layout),
-            OptimizationMethod::GreedyDepth4 => GreedyDepth4::optimize(a, layout),
-            OptimizationMethod::GreedyAlternative => GreedyAlternative::optimize(a, layout),
+            OM::Greedy => Greedy::optimize(a, layout),
+            OM::GreedyDepth2 => GreedyDepth2::optimize(a, layout),
+            OM::GreedyDepth3 => GreedyDepth3::optimize(a, layout),
+            OM::GreedyDepth4 => GreedyDepth4::optimize(a, layout),
+            OM::GreedyAlternative => GreedyAlternative::optimize(a, layout),
+            OM::GreedyAlternativeD3 => GreedyAlternativeD3::optimize(a, layout),
         }
     }
 }
@@ -73,6 +80,12 @@ impl OptimizeLayout for GreedyDepth4 {
 impl OptimizeLayout for GreedyAlternative {
     fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
         a.always_better_swap(layout)
+    }
+}
+
+impl OptimizeLayout for GreedyAlternativeD3 {
+    fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
+        a.alternative_d3(layout)
     }
 }
 

@@ -28,6 +28,7 @@ fn main() -> std::io::Result<()> {
             OptimizationMethod::GreedyDepth3,
             // OptimizationMethod::GreedyDepth4,
             OptimizationMethod::GreedyAlternative,
+            OptimizationMethod::GreedyAlternativeD3,
         ],
     );
 

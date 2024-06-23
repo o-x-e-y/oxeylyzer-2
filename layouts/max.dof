@@ -1,0 +1,13 @@
+{
+    "name": "max",
+    "board": "colstag",
+    "fingering": "traditional",
+    "layers": {
+        "main": [
+            "i . e c g m q , s k",
+            "y a / ' b z h ⇑ v d",
+            "; o ~ p w j l u f t",
+            "    n x r ~ spc ~  "
+        ]
+    }
+}

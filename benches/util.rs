@@ -3,11 +3,7 @@ use oxeylyzer_core::{analyze::Analyzer, data::Data, layout::Layout, weights::Wei
 pub fn analyzer_layout(corpus: &str, layout: &str) -> (Analyzer, Layout) {
     let data = Data::load(format!("./data/{corpus}.json")).expect("this should exist");
 
-    let weights = Weights {
-        heatmap: -1,
-        sfbs: -3000,
-        sfs: -500,
-    };
+    let weights = oxeylyzer_core::weights::dummy_weights();
 
     let analyzer = Analyzer::new(data, weights);
 

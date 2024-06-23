@@ -3,10 +3,10 @@ mod flags;
 
 use config::Config;
 use itertools::Itertools;
-use oxeylyzer_core::prelude::*;
+use oxeylyzer_core::{cached_layout::SfbPair, prelude::*};
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs,
     io::Write as _,
     path::{Path, PathBuf},
@@ -15,8 +15,10 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ReplError {
-    #[error("Layout not found. It might exist, but it's not currently loaded.")]
-    UnknownLayout,
+    #[error("Layout '{0}' not found. It might exist, but it's not currently loaded.")]
+    UnknownLayout(String),
+    #[error("Path '{0}' either doesn't exist or is not a directory")]
+    NotADirectory(PathBuf),
     #[error("Invalid quotation marks")]
     ShlexError,
     #[error("{0}")]
@@ -48,10 +50,6 @@ pub struct Repl {
 }
 
 impl Repl {
-    // pub fn new(a: Analyzer, layouts: HashMap<String, Layout>) -> Self {
-    //     Self { a, layouts }
-    // }
-
     pub fn with_config<P: AsRef<Path>>(path: P) -> Result<Self> {
         let config_path = path.as_ref().to_path_buf();
         let config = Config::load(&config_path)?;
@@ -60,7 +58,15 @@ impl Repl {
 
         let a = Analyzer::new(data, config.weights);
 
-        let layouts = load_layouts(config.layouts)?;
+        let layouts = config
+            .layouts
+            .iter()
+            .flat_map(|p| {
+                load_layouts(p)
+                    .inspect_err(|e| println!("Error loading layout at '{}': {e}", p.display()))
+            })
+            .flat_map(|h| h.into_iter())
+            .collect();
 
         Ok(Self {
             a,
@@ -72,7 +78,7 @@ impl Repl {
     pub fn layout(&self, name: &str) -> Result<&Layout> {
         self.layouts
             .get(&name.to_lowercase())
-            .ok_or(ReplError::UnknownLayout)
+            .ok_or(ReplError::UnknownLayout(name.into()))
     }
 
     fn analyze(&self, name: &str) -> Result<()> {
@@ -84,10 +90,6 @@ impl Repl {
         let score = self.a.score(layout);
 
         print!("{}\n{}", name, layout);
-
-        if let Some(h) = stats.heatmap {
-            println!("heatmap: {:.1?}", h)
-        }
 
         println!(
             concat!(
@@ -114,9 +116,10 @@ impl Repl {
             .for_each(|(n, s)| println!("{n:<15} {s}"));
     }
 
-    fn generate(&self, name: &str, count: Option<usize>) -> Result<()> {
+    fn generate(&self, name: &str, count: Option<usize>, pin_chars: Option<String>) -> Result<()> {
         let layout = self.layout(name)?;
-        let count = count.unwrap_or(25000);
+        let count = count.unwrap_or(10);
+        let pins = pin_positions(layout, pin_chars);
 
         let start = std::time::Instant::now();
 
@@ -124,24 +127,25 @@ impl Repl {
         (0..count)
             .into_par_iter()
             .map(|_| {
-                let starting_layout = layout.random();
-                self.a
-                    .annealing_improve(starting_layout, 20_500_000_000_000.0, 0.987, 5000)
+                let l = layout.random_with_pins(&pins);
+                self.a.alternative_d3(l)
+                // self.a.greedy_depth2_improve(l)
+                // .annealing_improve(starting_layout, 20_500_000_000_000.0, 0.987, 5000)
             })
             .collect_into_vec(&mut layouts);
 
         layouts.sort_by(|(_, s1), (_, s2)| s2.cmp(s1));
 
+        for (i, (mut layout, score)) in layouts.into_iter().enumerate().take(10) {
+            layout.name = "".into();
+            println!("#{}, score: {}{}", i, score, layout);
+        }
+
         println!(
-            "generating {} variants took: {:.1} seconds",
+            "generating {} variants took {:.2} seconds.",
             count,
             start.elapsed().as_secs_f64()
         );
-
-        for (i, (layout, score)) in layouts.iter().enumerate().take(10) {
-            // let printable = heatmap_string(&gen.data, layout);
-            println!("#{}, score: {}{}", i, score, layout);
-        }
 
         Ok(())
     }
@@ -155,18 +159,24 @@ impl Repl {
             .sfb_indices
             .all
             .iter()
-            .flat_map(|&PosPair(a, b)| {
-                let u1 = cache.keys[a as usize];
-                let u2 = cache.keys[b as usize];
+            .flat_map(
+                |SfbPair {
+                     pair: PosPair(a, b),
+                     ..
+                 }| {
+                    let u1 = cache.keys[*a as usize];
+                    let u2 = cache.keys[*b as usize];
 
-                let c1 = self.a.mapping().get_c(u1);
-                let c2 = self.a.mapping().get_c(u2);
+                    let c1 = self.a.mapping().get_c(u1);
+                    let c2 = self.a.mapping().get_c(u2);
 
-                let freq = self.a.data.get_bigram_u([u1, u2]) as f64 / self.a.data.bigram_total;
-                let freq2 = self.a.data.get_bigram_u([u2, u1]) as f64 / self.a.data.bigram_total;
+                    let freq = self.a.data.get_bigram_u([u1, u2]) as f64 / self.a.data.bigram_total;
+                    let freq2 =
+                        self.a.data.get_bigram_u([u2, u1]) as f64 / self.a.data.bigram_total;
 
-                [([c1, c2], freq), ([c2, c1], freq2)]
-            })
+                    [([c1, c2], freq), ([c2, c1], freq2)]
+                },
+            )
             .sorted_by(|(_, f1), (_, f2)| f2.total_cmp(f1))
             .take(count)
             .for_each(|([c1, c2], f)| println!("{c1}{c2}: {f:.3}%"));
@@ -197,7 +207,7 @@ impl Repl {
         match flags.subcommand {
             OxeylyzerCmd::Analyze(a) => self.analyze(&a.name)?,
             OxeylyzerCmd::Rank(_) => self.rank(),
-            OxeylyzerCmd::Gen(g) => self.generate(&g.name, g.count)?,
+            OxeylyzerCmd::Gen(g) => self.generate(&g.name, g.count, None)?,
             OxeylyzerCmd::Sfbs(s) => self.sfbs(&s.name, s.count)?,
             OxeylyzerCmd::R(_) => self.reload()?,
             OxeylyzerCmd::Q(_) => return Ok(ReplStatus::Quit),
@@ -221,7 +231,7 @@ impl Repl {
                 Ok(Continue) => continue,
                 Ok(Quit) => break,
                 Err(err) => {
-                    println!("{err}");
+                    println!("Invalid line: {err}");
                 }
             }
         }
@@ -244,15 +254,35 @@ fn load_layouts<P: AsRef<Path>>(path: P) -> Result<HashMap<String, Layout>> {
     if let Ok(readdir) = fs::read_dir(&path) {
         let map = readdir
             .flatten()
-            .flat_map(|p| Layout::load(p.path()))
+            .flat_map(|p| {
+                Layout::load(p.path()).inspect_err(|e| {
+                    println!("Error loading layout from '{}': {e}", p.path().display())
+                })
+            })
             .map(|l| (l.name.to_lowercase(), l))
             .collect();
 
         Ok(map)
+    // } else if !path.exists() {
+    //     fs::create_dir_all(path)?;
+    //     Ok(HashMap::default())
     } else {
-        if path.as_ref().is_dir() {
-            fs::create_dir_all(&path)?;
-        }
-        Ok(HashMap::default())
+        Err(ReplError::NotADirectory(path.as_ref().into()))
+    }
+}
+
+fn pin_positions(layout: &Layout, pin_chars: Option<String>) -> Vec<usize> {
+    match pin_chars {
+        Some(s) => {
+            let m = HashSet::<char>::from_iter(s.chars());
+
+            layout.keys
+                .iter()
+                .enumerate()
+                .filter_map(|(i, k)| m.contains(k).then_some(i))
+                .collect()
+            
+        },
+        None => vec![],
     }
 }

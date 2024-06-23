@@ -1,16 +1,45 @@
 use std::path::Path;
 
-use libdof::prelude::{Dof, Finger, Shape};
+use libdof::prelude::{Dof, Finger, Keyboard, PhysicalKey, Shape};
 use nanorand::{tls_rng, Rng as _};
 
-use crate::{cached_layout::CachedLayout, Result};
+use crate::{
+    cached_layout::CachedLayout, Result, REPEAT_KEY, REPLACEMENT_CHAR, SHIFT_CHAR, SPACE_CHAR,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct PosPair(pub u8, pub u8);
 
 impl<U: Into<u8>> From<(U, U)> for PosPair {
     fn from((p1, p2): (U, U)) -> Self {
-        PosPair(p1.into(), p2.into())
+        Self(p1.into(), p2.into())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PhysicalPos(pub i64, pub i64);
+
+impl PhysicalPos {
+    pub fn dist(&self, other: &Self) -> i64 {
+        let x = self.0.abs_diff(other.0) as f64;
+        let y = self.1.abs_diff(other.1) as f64;
+
+        x.hypot(y) as i64
+    }
+}
+
+impl<F: Into<f64>> From<(F, F)> for PhysicalPos {
+    fn from((x, y): (F, F)) -> Self {
+        Self((x.into() * 100.0) as i64, (y.into() * 100.0) as i64)
+    }
+}
+
+impl From<PhysicalKey> for PhysicalPos {
+    fn from(pk: PhysicalKey) -> Self {
+        let x = pk.x() + (0.5 * pk.width());
+        let y = pk.y() + (0.5 * pk.height());
+
+        (x, y).into()
     }
 }
 
@@ -19,7 +48,7 @@ pub struct Layout {
     pub name: String,
     pub keys: Box<[char]>,
     pub fingers: Box<[Finger]>,
-    pub heatmap: Option<Box<[i64]>>,
+    pub keyboard: Box<[PhysicalPos]>,
     pub shape: Shape,
 }
 
@@ -52,7 +81,7 @@ impl Layout {
     pub fn random_with_pins(&self, pins: &[usize]) -> Self {
         let shape = self.shape.clone();
         let fingers = self.fingers.clone();
-        let heatmap = self.heatmap.clone();
+        let keyboard = self.keyboard.clone();
 
         let mut keys = self.keys.clone();
         shuffle_pins(&mut keys, pins);
@@ -61,7 +90,7 @@ impl Layout {
             name: keys.iter().collect(),
             keys,
             fingers,
-            heatmap,
+            keyboard,
             shape,
         }
     }
@@ -69,32 +98,33 @@ impl Layout {
 
 impl From<Dof> for Layout {
     fn from(dof: Dof) -> Self {
-        let shape = dof
+        use libdof::prelude::{Key, SpecialKey};
+
+        let keys = dof
             .main_layer()
-            .rows()
-            .map(|r| r.len())
-            .collect::<Vec<_>>()
-            .into();
-
-        let mut keys = Vec::new();
-        let mut fingers = Vec::new();
-
-        dof.main_layer()
             .keys()
-            .zip(dof.fingering().keys().copied())
-            .filter_map(|(k, f)| k.char_output().map(|c| (c, f)))
-            .for_each(|(c, f)| {
-                keys.push(c);
-                fingers.push(f);
-            });
+            .map(|k| match k {
+                Key::Char(c) => *c,
+                Key::Special(s) => match s {
+                    SpecialKey::Repeat => REPEAT_KEY,
+                    SpecialKey::Space => SPACE_CHAR,
+                    SpecialKey::Shift => SHIFT_CHAR,
+                    _ => REPLACEMENT_CHAR,
+                },
+                _ => REPLACEMENT_CHAR,
+            })
+            .collect();
 
-        let heatmap = dof.heatmap().map(|h| h.keys().copied().collect::<Box<_>>());
+        let name = dof.name().to_owned();
+        let fingers = dof.fingering().keys().copied().collect();
+        let keyboard = dof.board().keys().cloned().map(Into::into).collect();
+        let shape = dof.main_layer().shape();
 
         Layout {
-            name: dof.name().into(),
-            keys: keys.into(),
-            fingers: fingers.into(),
-            heatmap,
+            name,
+            keys,
+            fingers,
+            keyboard,
             shape,
         }
     }
@@ -110,8 +140,8 @@ impl From<CachedLayout> for Layout {
                 .map(|&u| layout.char_mapping.get_c(u))
                 .collect(),
             fingers: layout.fingers,
+            keyboard: layout.keyboard,
             shape: layout.shape,
-            heatmap: layout.heatmap.map(|h| h.map),
         }
     }
 }
