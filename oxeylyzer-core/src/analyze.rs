@@ -32,9 +32,8 @@ impl Analyzer {
     }
 
     pub fn score_cache(&self, cache: &CachedLayout) -> i64 {
-        let weighted_bigrams = cache.weighted_bigrams.total;
-
-        weighted_bigrams
+        // more metrics will obviously also go here
+        cache.weighted_bigrams.total
     }
 
     pub fn mapping(&self) -> &CharMapping {
@@ -270,7 +269,7 @@ impl Analyzer {
         })
     }
 
-    fn weighted_bigrams(&self, cache: &CachedLayout) -> i64 {
+    pub fn weighted_bigrams(&self, cache: &CachedLayout) -> i64 {
         Finger::FINGERS
             .into_iter()
             .map(|f| self.finger_weighted_bigrams(cache, f))

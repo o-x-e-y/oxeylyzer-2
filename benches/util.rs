@@ -1,4 +1,4 @@
-use oxeylyzer_core::{analyze::Analyzer, data::Data, layout::Layout, weights::Weights};
+use oxeylyzer_core::{analyze::Analyzer, data::Data, layout::Layout};
 
 pub fn analyzer_layout(corpus: &str, layout: &str) -> (Analyzer, Layout) {
     let data = Data::load(format!("./data/{corpus}.json")).expect("this should exist");
