@@ -128,7 +128,7 @@ impl Repl {
             .into_par_iter()
             .map(|_| {
                 let l = layout.random_with_pins(&pins);
-                self.a.alternative_d3(l)
+                self.a.alternative_d3(l, &pins)
                 // self.a.greedy_depth2_improve(l)
                 // .annealing_improve(starting_layout, 20_500_000_000_000.0, 0.987, 5000)
             })
@@ -152,7 +152,7 @@ impl Repl {
 
     fn sfbs(&self, name: &str, count: Option<usize>) -> Result<()> {
         let layout = self.layout(name)?;
-        let cache = self.a.cached_layout(layout.clone());
+        let cache = self.a.cached_layout(layout.clone(), &[]);
         let count = count.unwrap_or(10);
 
         cache
@@ -207,7 +207,7 @@ impl Repl {
         match flags.subcommand {
             OxeylyzerCmd::Analyze(a) => self.analyze(&a.name)?,
             OxeylyzerCmd::Rank(_) => self.rank(),
-            OxeylyzerCmd::Gen(g) => self.generate(&g.name, g.count, None)?,
+            OxeylyzerCmd::Gen(g) => self.generate(&g.name, g.count, g.pins)?,
             OxeylyzerCmd::Sfbs(s) => self.sfbs(&s.name, s.count)?,
             OxeylyzerCmd::R(_) => self.reload()?,
             OxeylyzerCmd::Q(_) => return Ok(ReplStatus::Quit),

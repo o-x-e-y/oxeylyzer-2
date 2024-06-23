@@ -55,37 +55,37 @@ impl OptimizationMethod {
 
 impl OptimizeLayout for Greedy {
     fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
-        a.greedy_improve(layout)
+        a.greedy_improve(layout, &[])
     }
 }
 
 impl OptimizeLayout for GreedyDepth2 {
     fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
-        a.greedy_depth2_improve(layout)
+        a.greedy_depth2_improve(layout, &[])
     }
 }
 
 impl OptimizeLayout for GreedyDepth3 {
     fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
-        a.greedy_depth3_improve(layout)
+        a.greedy_depth3_improve(layout, &[])
     }
 }
 
 impl OptimizeLayout for GreedyDepth4 {
     fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
-        a.optimize_depth4(layout)
+        a.optimize_depth4(layout, &[])
     }
 }
 
 impl OptimizeLayout for GreedyAlternative {
     fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
-        a.always_better_swap(layout)
+        a.always_better_swap(layout, &[])
     }
 }
 
 impl OptimizeLayout for GreedyAlternativeD3 {
     fn optimize(a: &Analyzer, layout: Layout) -> (Layout, i64) {
-        a.alternative_d3(layout)
+        a.alternative_d3(layout, &[])
     }
 }
 

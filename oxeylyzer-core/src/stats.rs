@@ -24,7 +24,7 @@ pub struct TrigramStats {
 
 impl Analyzer {
     pub fn stats(&self, layout: &Layout) -> Stats {
-        let cache = self.cached_layout(layout.clone());
+        let cache = self.cached_layout(layout.clone(), &[]);
 
         let finger_use = self
             .finger_use(&cache)

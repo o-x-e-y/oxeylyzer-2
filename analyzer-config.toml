@@ -1,19 +1,9 @@
 corpus = "./data/shai.json"
 layouts = ["./layouts"]
-enable_trigrams = true
 
 [weights]
-sfbs = -8
+sfbs = -7
 sfs = -1
-
-sft = -10000
-inroll = 12000
-outroll = 11000
-alternate = 9500
-redirect = -3500
-onehandin = 10
-onehandout = 0
-thumb = 0
 
 [weights.fingers]
 lp = 15

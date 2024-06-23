@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+
+use fxhash::FxHashSet;
 use itertools::Itertools;
 use libdof::dofinitions::Finger;
 
@@ -26,7 +29,7 @@ impl Analyzer {
     }
 
     pub fn score(&self, layout: &Layout) -> i64 {
-        let cache = self.cached_layout(layout.clone());
+        let cache = self.cached_layout(layout.clone(), &[]);
 
         self.score_cache(&cache)
     }
@@ -40,7 +43,7 @@ impl Analyzer {
         &self.data.mapping
     }
 
-    pub fn cached_layout(&self, layout: Layout) -> CachedLayout {
+    pub fn cached_layout(&self, layout: Layout, pins: &[usize]) -> CachedLayout {
         let keys = layout
             .keys
             .iter()
@@ -54,6 +57,7 @@ impl Analyzer {
         let keyboard = layout.keyboard;
 
         let possible_swaps = (0..(keys.len() as u8))
+            .filter(|v| !pins.contains(&(*v as usize)))
             .tuple_combinations::<(_, _)>()
             .map(Into::into)
             .collect();
@@ -80,8 +84,8 @@ impl Analyzer {
         cache
     }
 
-    pub fn greedy_improve(&self, layout: Layout) -> (Layout, i64) {
-        let mut cache = self.cached_layout(layout);
+    pub fn greedy_improve(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let mut cache = self.cached_layout(layout, pins);
         let mut best_score = self.score_cache(&cache);
 
         while let Some((swap, score)) = self.best_swap(&mut cache) {
@@ -300,7 +304,7 @@ mod tests {
     fn update_cache_bigrams() {
         let (analyzer, layout) = analyzer_layout();
 
-        let mut cache = analyzer.cached_layout(layout);
+        let mut cache = analyzer.cached_layout(layout, &[]);
         let reference = cache.clone();
 
         let possible_swaps = cache.possible_swaps.clone();

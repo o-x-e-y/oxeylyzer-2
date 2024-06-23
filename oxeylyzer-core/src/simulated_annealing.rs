@@ -10,11 +10,12 @@ impl Analyzer {
     pub fn annealing_improve(
         &self,
         layout: Layout,
+        pins: &[usize],
         initial_temperature: f64,
         cooling_rate: f64,
         max_iterations: usize,
     ) -> (Layout, i64) {
-        let mut cache = self.cached_layout(layout);
+        let mut cache = self.cached_layout(layout, pins);
         let mut rng = WyRand::new();
 
         let mut current_score = self.score_cache(&cache);
@@ -44,11 +45,12 @@ impl Analyzer {
     pub fn annealing_depth2_improve(
         &self,
         layout: Layout,
+        pins: &[usize],
         initial_temperature: f64,
         cooling_rate: f64,
         max_iterations: usize,
     ) -> (Layout, i64) {
-        let mut cache = self.cached_layout(layout);
+        let mut cache = self.cached_layout(layout, pins);
         let mut rng = WyRand::new();
 
         let mut current_score = self.score_cache(&cache);

@@ -1,0 +1,16 @@
+{
+	"name": "Nerps",
+	"authors": [
+		"Smudge"
+	],
+	"board": "ansi",
+	"year": 2022,
+	"layers": {
+		"main": [
+			"x l d p v z k o u ;",
+			"n r t s g y h e i a /",
+			" j m c w q b f ' , ."
+		]
+	},
+	"fingering": "angle"
+}

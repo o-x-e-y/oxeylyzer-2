@@ -5,8 +5,8 @@ use crate::{
 };
 
 impl Analyzer {
-    pub fn always_better_swap(&self, layout: Layout) -> (Layout, i64) {
-        let mut cache = self.cached_layout(layout);
+    pub fn always_better_swap(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let mut cache = self.cached_layout(layout, pins);
         let mut best_score = self.score_cache(&cache);
 
         let swaps = std::mem::take(&mut cache.possible_swaps);
@@ -36,26 +36,26 @@ impl Analyzer {
         (cache.into(), best_score)
     }
 
-    pub fn alternative_d3(&self, layout: Layout) -> (Layout, i64) {
-        let (layout, _) = self.always_better_swap(layout);
-        self.greedy_depth3_improve(layout)
+    pub fn alternative_d3(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let (layout, _) = self.always_better_swap(layout, pins);
+        self.greedy_depth3_improve(layout, pins)
     }
 
-    pub fn optimize_depth3(&self, layout: Layout) -> (Layout, i64) {
-        let (layout, _) = self.greedy_improve(layout);
-        let (layout, _) = self.greedy_depth2_improve(layout);
-        self.greedy_depth3_improve(layout)
+    pub fn optimize_depth3(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let (layout, _) = self.greedy_improve(layout, pins);
+        let (layout, _) = self.greedy_depth2_improve(layout, pins);
+        self.greedy_depth3_improve(layout, pins)
     }
 
-    pub fn optimize_depth4(&self, layout: Layout) -> (Layout, i64) {
-        let (layout, _) = self.greedy_improve(layout);
-        let (layout, _) = self.greedy_depth2_improve(layout);
-        let (layout, _) = self.greedy_depth3_improve(layout);
-        self.greedy_depth4_improve(layout)
+    pub fn optimize_depth4(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let (layout, _) = self.greedy_improve(layout, pins);
+        let (layout, _) = self.greedy_depth2_improve(layout, pins);
+        let (layout, _) = self.greedy_depth3_improve(layout, pins);
+        self.greedy_depth4_improve(layout, pins)
     }
 
-    pub fn greedy_depth2_improve(&self, layout: Layout) -> (Layout, i64) {
-        let mut cache = self.cached_layout(layout);
+    pub fn greedy_depth2_improve(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let mut cache = self.cached_layout(layout, pins);
         let mut best_score = self.score_cache(&cache);
 
         while let Some((swaps, score)) = self.best_swap_depth2(&mut cache) {
@@ -73,8 +73,8 @@ impl Analyzer {
         (cache.into(), best_score)
     }
 
-    pub fn greedy_depth4_improve(&self, layout: Layout) -> (Layout, i64) {
-        let mut cache = self.cached_layout(layout);
+    pub fn greedy_depth4_improve(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let mut cache = self.cached_layout(layout, pins);
         let mut best_score = self.score_cache(&cache);
 
         while let Some((swaps, score)) = self.best_swap_depth4(&mut cache) {
@@ -92,8 +92,8 @@ impl Analyzer {
         (cache.into(), best_score)
     }
 
-    pub fn greedy_depth3_improve(&self, layout: Layout) -> (Layout, i64) {
-        let mut cache = self.cached_layout(layout);
+    pub fn greedy_depth3_improve(&self, layout: Layout, pins: &[usize]) -> (Layout, i64) {
+        let mut cache = self.cached_layout(layout, pins);
         let mut best_score = self.score_cache(&cache);
 
         while let Some((swaps, score)) = self.best_swap_depth3(&mut cache) {
@@ -264,7 +264,7 @@ mod tests {
     #[test]
     fn cache_intact() {
         let (analyzer, layout) = analyzer_layout();
-        let mut cache = analyzer.cached_layout(layout);
+        let mut cache = analyzer.cached_layout(layout, &[]);
         let reference = cache.clone();
 
         analyzer.best_swap(&mut cache);

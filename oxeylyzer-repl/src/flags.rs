@@ -13,8 +13,8 @@ xflags::xflags! {
             required name: String
             /// Name of iterations to do. 10 by default.
             optional count: usize
-            // /// Characters to pin. Setting pins speeds up generation.
-            // optional -p, --pins pins: String
+            /// Characters to pin. Setting pins speeds up generation.
+            optional -p, --pins pins: String
         }
         /// Shows the top n sfbs on a layout.
         cmd sfbs {
