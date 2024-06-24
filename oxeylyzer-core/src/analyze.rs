@@ -1,6 +1,3 @@
-use std::collections::HashSet;
-
-use fxhash::FxHashSet;
 use itertools::Itertools;
 use libdof::dofinitions::Finger;
 
