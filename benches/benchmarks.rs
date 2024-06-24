@@ -49,13 +49,13 @@ fn init_cached_layout(bencher: Bencher, layout_name: &str) {
     let (analyzer, layout) = util::analyzer_layout("shai", layout_name);
 
     bencher.bench(|| {
-        black_box(analyzer.cached_layout(layout.clone()));
+        black_box(analyzer.cached_layout(layout.clone(), &[]));
     })
 }
 
 fn analyze_swap(bencher: Bencher, swap: PosPair) {
     let (analyzer, layout) = util::analyzer_layout("shai", "rstn-oxey");
-    let cache = analyzer.cached_layout(layout);
+    let cache = analyzer.cached_layout(layout, &[]);
 
     bencher.bench(|| black_box(analyzer.score_cached_swap(&cache, black_box(swap))))
 }
@@ -98,7 +98,7 @@ fn generate_real_data(bencher: Bencher, name: &str) {
 fn find_best_swap(bencher: Bencher, layout_name: &str) {
     let (analyzer, layout) = util::analyzer_layout("shai", layout_name);
 
-    let mut cache = analyzer.cached_layout(layout);
+    let mut cache = analyzer.cached_layout(layout, &[]);
 
     bencher.bench(|| {
         analyzer.best_swap(&mut cache);
