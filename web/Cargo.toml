@@ -1,0 +1,25 @@
+[package]
+name = "oxeylyzer-web"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+console_error_panic_hook = "0.1"
+gloo-net = { version = "0.5", default-features = false }
+leptos = { version = "0.6", features = ["csr", "nightly"] }
+leptos-use = "0.10"
+leptos_meta = { version = "0.6", features = ["csr", "nightly"] }
+leptos_router = { version = "0.6", features = ["csr", "nightly"] }
+libdof = { workspace = true }
+oxeylyzer-core = { workspace = true }
+rust-embed = { version = "8.4.0", features = ["debug-embed", "include-exclude"] }
+serde = { workspace = true }
+stylance = { version = "0.5", features = ["nightly"] }
+thiserror = { workspace = true }
+wasm-timer = "0.2.5"
+
+[package.metadata.stylance]
+output_file = "public/index.css"
+folders = ["./css/"]
+extensions = [".module.scss", ".module.css"]
+hash_len = 7

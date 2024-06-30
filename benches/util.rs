@@ -1,7 +1,8 @@
-use oxeylyzer_core::{analyze::Analyzer, data::Data, layout::Layout};
-
+#[cfg(not(target_arch = "wasm32"))]
 pub fn analyzer_layout(corpus: &str, layout: &str) -> (Analyzer, Layout) {
-    let data = Data::load(format!("./data/{corpus}.json")).expect("this should exist");
+    use oxeylyzer_core::{analyze::Analyzer, data::Data, layout::Layout};
+
+    let data = Data::load(&format!("./data/{corpus}.json")).expect("this should exist");
 
     let weights = oxeylyzer_core::weights::dummy_weights();
 

@@ -1,0 +1,16 @@
+{
+	"name": "Sertain",
+	"authors": [
+		"Smudge"
+	],
+	"board": "ansi",
+	"year": 2021,
+	"layers": {
+		"main": [
+			"x l d k v z w o u ;",
+			"s r t n f g y e i a /",
+			" j m h b q p c ' , ."
+		]
+	},
+	"fingering": "angle"
+}
