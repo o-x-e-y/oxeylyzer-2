@@ -2,7 +2,7 @@ name: Release to Github Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
