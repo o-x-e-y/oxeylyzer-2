@@ -1,5 +1,4 @@
 mod keyboard;
-mod test;
 mod util;
 
 use leptos::*;
@@ -17,7 +16,10 @@ pub fn main() {
 #[component]
 fn App() -> impl IntoView {
     view! {
-        <Router trailing_slash=leptos_router::TrailingSlash::Redirect>
+        <Router
+            trailing_slash=leptos_router::TrailingSlash::Redirect
+            base="oxeylyzer-2"
+        >
             <nav class=css::nav>
                 <A href="/">
                     <h3>{"Go Home"}</h3>
@@ -29,7 +31,6 @@ fn App() -> impl IntoView {
                     <Route path=":name" view=keyboard::Layout/>
                     <Route path="/" view=keyboard::Layouts/>
                 </Route>
-                <Route path="test" view=test::Test/>
             </Routes>
         </Router>
     }
