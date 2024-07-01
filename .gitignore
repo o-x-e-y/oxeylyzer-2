@@ -1,3 +1,4 @@
 /target
 /corpora/*
 .venv
+/web/dist
