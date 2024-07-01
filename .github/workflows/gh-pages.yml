@@ -48,6 +48,9 @@ jobs:
       # will obviously return error 404 not found.
       run: cd ./web && ../trunk build --release --public-url "/" && cp ./dist/index.html ./dist/404.html
 
+    - name: Create .nojekyll file
+      run: touch web/dist/.nojekyll
+    
     # Deploy to gh-pages branch
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4
