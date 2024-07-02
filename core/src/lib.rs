@@ -22,7 +22,7 @@ pub mod prelude {
         corpus_cleaner::*,
         data::Data,
         layout::{Layout, PosPair},
-        weights::{Weights, FingerWeights},
+        weights::{FingerWeights, Weights},
         OxeylyzerError, REPEAT_KEY, REPLACEMENT_CHAR, SHIFT_CHAR,
     };
 }

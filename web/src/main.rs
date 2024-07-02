@@ -40,7 +40,10 @@ fn App() -> impl IntoView {
 
 #[component]
 fn Home() -> impl IntoView {
-    "home"
+    view! {
+        <div>"Home page"</div>
+        <A href="./layouts">{"layouts"}</A>
+    }
 }
 
 #[component]

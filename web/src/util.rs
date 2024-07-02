@@ -65,7 +65,7 @@ pub fn pin_positions(layout: &Layout, pin_chars: String) -> Vec<usize> {
                 Some(i) => vec![i],
                 None => vec![],
             }
-        },
+        }
         _ => {
             let m = HashSet::<char>::from_iter(pin_chars.chars());
 

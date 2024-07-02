@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use ev::{DragEvent, MouseEvent};
 use leptos::*;
 use leptos_router::*;
-use libdof::prelude::{PhysicalKey, Dof, Finger};
-use oxeylyzer_core::prelude::{Analyzer, Layout, Weights, Data};
+use libdof::prelude::{Dof, Finger, PhysicalKey};
+use oxeylyzer_core::prelude::{Analyzer, Data, Layout, Weights};
 use rust_embed::Embed;
 use stylance::{classes, import_crate_style};
 
@@ -19,7 +19,7 @@ struct LayoutsFolder;
 
 #[component]
 pub fn Layouts() -> impl IntoView {
-    let url = |s: &str| format!("/layouts/{s}");
+    let url = |s: &str| format!("./{s}");
 
     view! {
         <ul>
@@ -63,7 +63,7 @@ fn MaybeViewLayout(dof: JsonResource<Dof>) -> impl IntoView {
         async {}
     });
 
-    view!{
+    view! {
         {move || match dof.get() {
             Some(Ok(dof)) => {
                 let layout = create_rw_signal(Layout::from(dof));
@@ -72,7 +72,7 @@ fn MaybeViewLayout(dof: JsonResource<Dof>) -> impl IntoView {
 
                 let data = create_resource(move || format!("/data/shai.json"), load_json::<Data>);
                 let weights = create_resource(move || format!("/weights/default.json"), load_json::<Weights>);
-    
+
                 view! {
                     <div>
                         <div class=css::layout_wrapper>
@@ -130,8 +130,9 @@ fn ViewLayout(layout: RwSignal<Layout>) -> impl IntoView {
                     layout.with(|l| l.keys.iter()
                     .copied()
                     .zip(layout.get().keyboard)
+                    .zip(layout.get().fingers)
                     .enumerate()
-                    .map(|(index, (c, pos))| {
+                    .map(|(index, ((c, pos), f))| {
                         view! {
                             <div
                                 draggable="true"
@@ -139,7 +140,7 @@ fn ViewLayout(layout: RwSignal<Layout>) -> impl IntoView {
                                 on:drop=move |ev| on_drop(ev, index)
                                 on:dragover=on_drag_over
                             >
-                                <Key c pos lx ly kw ym/>
+                                <Key c pos lx ly kw ym f/>
                             </div>
                         }
                     })
@@ -151,11 +152,24 @@ fn ViewLayout(layout: RwSignal<Layout>) -> impl IntoView {
 }
 
 #[component]
-fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64) -> impl IntoView {
+fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger) -> impl IntoView {
     let x = (pos.x() - lx) * kw;
     let y = (pos.y() - ly) * kw * ym;
     let width = (pos.width()) * kw;
     let height = (pos.height()) * kw * ym;
+
+    // let bg = match f {
+    //     Finger::LP => "#CC2F00",
+    //     Finger::LR => "#DB6600",
+    //     Finger::LM => "#E39E00",
+    //     Finger::LI => "#76B80D",
+    //     Finger::LT => "#007668",
+    //     Finger::RT => "#006486",
+    //     Finger::RI => "#007CB5",
+    //     Finger::RM => "#465AB2",
+    //     Finger::RR => "#6D47B1",
+    //     Finger::RP => "#873B9C",
+    // };
 
     view! {
         <div
@@ -165,6 +179,7 @@ fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64) -> impl In
             style:width=format!("{}%", width)
             style:height=format!("{}%", height)
             style:z-index=format!("{}", (y * 10.0) as u16)
+            // style:background-color=bg
         >
             {c}
         </div>
@@ -174,40 +189,54 @@ fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64) -> impl In
 #[component]
 fn MaybeViewAnalysis(data: JsonResource<Data>, weights: JsonResource<Weights>) -> impl IntoView {
     let err = move |e: &str| format!("Analysis failed: {}", e);
-    
+
     let view = move || match data.get() {
-        Some(Ok(data)) => {
-            match weights.get() {
-                Some(Ok(weights)) => {
-                    view! {
-                        <div>
-                            <ViewAnalysis data weights />
-                        </div>
-                    }
+        Some(Ok(data)) => match weights.get() {
+            Some(Ok(weights)) => {
+                view! {
+                    <div>
+                        <ViewAnalysis data weights />
+                    </div>
                 }
-                Some(Err(e)) => {
-                    view! { <div>{move || err(&e)}</div> }
-                }
-                None => view! { <div>"Loading..."</div> },
             }
-        }
+            Some(Err(e)) => {
+                view! { <div>{move || err(&e)}</div> }
+            }
+            None => view! { <div>"Loading..."</div> },
+        },
         Some(Err(e)) => {
             view! { <div>{move || err(&e)}</div> }
         }
         None => view! { <div>"Loading..."</div> },
     };
-    
-    view!{
+
+    view! {
         <div>{view}</div>
     }
+}
+
+async fn generate(analyzer: ReadSignal<Analyzer>, layout: RwSignal<Layout>, pins: ReadSignal<Vec<usize>>) -> Layout {
+    (0..100)
+        .into_iter()
+        .map(|_| {
+            analyzer.get_untracked().annealing_depth2_improve(
+                layout.get_untracked(),
+                &pins.get_untracked(),
+                10_000_000_000.0,
+                0.999,
+                5000,
+            )
+        })
+        .max_by(|(_, s1), (_, s2)| s1.cmp(s2))
+        .map(|(layout, _)| layout)
+        .unwrap()
 }
 
 #[component]
 fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let (analyzer, _) = create_signal(Analyzer::new(data, weights));
 
-    let layout = use_context::<RwSignal<Layout>>()
-        .expect("Couldn't get layout for whatever reason");
+    let layout = expect_context::<RwSignal<Layout>>();
 
     let stats = move || layout.with(|l| analyzer().stats(l));
 
@@ -216,16 +245,15 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let score = move || layout.with(|l| analyzer().score(l));
 
     let (pins, set_pins) = create_signal(vec![]);
+    let (is_analyzing, set_is_analyzing) = create_signal(false);
 
-    let generate = move |_: MouseEvent| {
-        let start = wasm_timer::Instant::now();
-
-        // let (l, _) = analyzer().annealing_depth2_improve(layout.get(), &pins(), 10_000_000_000.0, 0.9999, 20000);
-        let (l, _) = analyzer().alternative_d3(layout.get(), &pins());
-
-        logging::log!("generated a layout in {:.2}s", start.elapsed().as_secs_f64());
-
-        layout.set(l);
+    let optimize_layout = move |_: MouseEvent| {
+        set_is_analyzing.set(true);
+        spawn_local(async move {
+            let l = generate(analyzer, layout, pins).await;
+            layout.set(l);
+            set_is_analyzing.set(false);
+        });
     };
 
     view! {
@@ -245,7 +273,8 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
                 <label>
                     <button
                         class=css::optimize_button
-                        on:click=generate
+                        on:click=optimize_layout
+                        disable=is_analyzing
                     >
                         {"Generate"}
                     </button>
@@ -290,8 +319,9 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
 
 #[component]
 fn StatRow<T, F>(text: &'static str, f: F) -> impl IntoView
-    where T: IntoView + 'static,
-          F: Fn() -> T + 'static
+where
+    T: IntoView + 'static,
+    F: Fn() -> T + 'static,
 {
     view! {
         <tr class=css::stat_row>
@@ -303,7 +333,10 @@ fn StatRow<T, F>(text: &'static str, f: F) -> impl IntoView
 
 #[component]
 fn FingerStatRow(stat: Memo<[f64; 10]>, i: usize) -> impl IntoView {
-    let (v1, v2) = (move || format!("{:.3}%", stat()[i]), move || format!("{:.3}%", stat()[i + 5]));
+    let (v1, v2) = (
+        move || format!("{:.3}%", stat()[i]),
+        move || format!("{:.3}%", stat()[i + 5]),
+    );
     let (f1, f2) = (Finger::FINGERS[i], Finger::FINGERS[i + 5]);
 
     view! {

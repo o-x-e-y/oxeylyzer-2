@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use oxeylyzer_core::prelude::Weights;
+use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 use crate::Result;

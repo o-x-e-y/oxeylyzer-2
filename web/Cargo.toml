@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 console_error_panic_hook = "0.1"
 gloo-net = { version = "0.5", default-features = false }
+gloo-timers = "0.3.0"
 leptos = { version = "0.6", features = ["csr", "nightly"] }
 leptos-use = "0.10"
 leptos_meta = { version = "0.6", features = ["csr", "nightly"] }
@@ -16,7 +17,6 @@ rust-embed = { version = "8.4.0", features = ["debug-embed", "include-exclude"] 
 serde = { workspace = true }
 stylance = { version = "0.5", features = ["nightly"] }
 thiserror = { workspace = true }
-wasm-timer = "0.2.5"
 
 [package.metadata.stylance]
 output_file = "public/index.css"
