@@ -19,7 +19,7 @@ struct LayoutsFolder;
 
 #[component]
 pub fn Layouts() -> impl IntoView {
-    let url = |s: &str| format!("./{s}");
+    let url = |s: &str| format!("/layouts/{s}");
 
     view! {
         <ul>
@@ -45,7 +45,7 @@ pub fn Layout() -> impl IntoView {
     let params = use_params_map();
     let name = move || params.with(|p| p.get("name").cloned().unwrap_or_default());
 
-    let dof = create_resource(move || format!("../layouts/{}.dof", name()), load_json::<Dof>);
+    let dof = create_resource(move || format!("/layouts/{}.dof", name()), load_json::<Dof>);
 
     view! {
         <div>
@@ -70,8 +70,8 @@ fn MaybeViewLayout(dof: JsonResource<Dof>) -> impl IntoView {
 
                 provide_context(layout);
 
-                let data = create_resource(move || format!("../../data/shai.json"), load_json::<Data>);
-                let weights = create_resource(move || format!("../../weights/default.json"), load_json::<Weights>);
+                let data = create_resource(move || format!("/data/shai.json"), load_json::<Data>);
+                let weights = create_resource(move || format!("/weights/default.json"), load_json::<Weights>);
 
                 view! {
                     <div>

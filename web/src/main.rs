@@ -18,16 +18,13 @@ fn App() -> impl IntoView {
     view! {
         <Router
             // trailing_slash=leptos_router::TrailingSlash::Redirect
-            base="/oxeylyzer-2"
         >
             <nav class=css::nav>
-                <A href="/oxeylyzer-2">
+                <A href="/">
                     <h3>{"Go Home"}</h3>
                 </A>
             </nav>
-            <Routes
-                base="/oxeylyzer-2".to_string()
-            >
+            <Routes>
                 <Route path="/" view=Home/>
                 <Route path="/layouts" view=LayoutsWrapper>
                     <Route path="" view=keyboard::Layouts/>
@@ -42,7 +39,8 @@ fn App() -> impl IntoView {
 fn Home() -> impl IntoView {
     view! {
         <div>"Home page"</div>
-        <A href="./layouts">{"layouts"}</A>
+        <br/>
+        <A href="/layouts">{"layouts"}</A>
     }
 }
 
