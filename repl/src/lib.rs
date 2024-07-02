@@ -120,7 +120,10 @@ impl Repl {
     fn generate(&self, name: &str, count: Option<usize>, pin_chars: Option<String>) -> Result<()> {
         let layout = self.layout(name)?;
         let count = count.unwrap_or(10);
-        let pins = pin_positions(layout, pin_chars);
+        let pins = match pin_chars {
+            Some(chars) => pin_positions(layout, chars),
+            None => vec![],
+        };
 
         let start = std::time::Instant::now();
 

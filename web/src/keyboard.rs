@@ -59,7 +59,7 @@ fn MaybeViewLayout(dof: JsonResource<Dof>) -> impl IntoView {
     let navigate = use_navigate();
 
     let redirect = create_action(move |_: &()| {
-        navigate("/layouts", NavigateOptions::default());
+        navigate("/layouts", Default::default());
         async {}
     });
 
