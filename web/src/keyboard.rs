@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{collections::HashSet, path::PathBuf};
 
 use ev::{DragEvent, MouseEvent};
 use leptos::*;
@@ -16,6 +16,9 @@ import_crate_style!(css, "./css/keyboard.module.css");
 #[folder = "../layouts"]
 #[include = "*.dof"]
 struct LayoutsFolder;
+
+#[derive(Debug, Clone, Default)]
+struct Pins(HashSet<usize>);
 
 #[component]
 pub fn Layouts() -> impl IntoView {
@@ -46,6 +49,9 @@ pub fn Layout() -> impl IntoView {
     let name = move || params.with(|p| p.get("name").cloned().unwrap_or_default());
 
     let dof = create_resource(move || format!("/layouts/{}.dof", name()), load_json::<Dof>);
+
+    let pins = create_rw_signal(Pins::default());
+    provide_context(pins);
 
     view! {
         <div>
@@ -112,6 +118,18 @@ fn ViewLayout(layout: RwSignal<Layout>) -> impl IntoView {
         ev.prevent_default();
     };
 
+    let pins = expect_context::<RwSignal<Pins>>();
+
+    let on_contextmenu = move |ev: MouseEvent, i: usize| {
+        ev.prevent_default();
+        
+        pins.update(|p| {
+            if !p.0.insert(i) {
+                p.0.remove(&i);
+            }
+        });
+    };
+
     let (lx, hx) = layout.with_untracked(|l| minmax_x(l));
     let (ly, hy) = layout.with_untracked(|l| minmax_y(l));
     let (dx, dy) = (hx - lx, hy - ly);
@@ -133,14 +151,16 @@ fn ViewLayout(layout: RwSignal<Layout>) -> impl IntoView {
                     .zip(layout.get().fingers)
                     .enumerate()
                     .map(|(index, ((c, pos), f))| {
+                        let pinned = pins.get().0.contains(&index);
                         view! {
                             <div
                                 draggable="true"
                                 on:dragstart=move |ev| on_drag_start(ev, index)
                                 on:drop=move |ev| on_drop(ev, index)
                                 on:dragover=on_drag_over
+                                on:contextmenu=move |ev| on_contextmenu(ev, index)
                             >
-                                <Key c pos lx ly kw ym f/>
+                                <Key c pos lx ly kw ym f pinned/>
                             </div>
                         }
                     })
@@ -152,26 +172,41 @@ fn ViewLayout(layout: RwSignal<Layout>) -> impl IntoView {
 }
 
 #[component]
-fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger) -> impl IntoView {
+fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger, pinned: bool) -> impl IntoView {
     let x = (pos.x() - lx) * kw;
     let y = (pos.y() - ly) * kw * ym;
     let width = (pos.width()) * kw;
     let height = (pos.height()) * kw * ym;
 
-    let bg = match f {
-        Finger::LP => "#2d120b",
-        Finger::LR => "#2f1c0b",
-        Finger::LM => "#30250b",
-        Finger::LI => "#1e290d",
-        Finger::LT => "#0b1e1c",
-        Finger::RT => "#0b1b21",
-        Finger::RI => "#0b1f29",
-        Finger::RM => "#161a28",
-        Finger::RR => "#1d1628",
-        Finger::RP => "#211425",
+    let outline = match f {
+        //            pastel1, mic light, mic dark, rainbow dark,
+        Finger::LP => "#9e0142",//"#270010",//"#23000e",//"#22000e",//"#3b3803",//"#312e03",//"#310303",
+        Finger::LR => "#d53e4f",//"#350f13",//"#300e11",//"#2e0d11",//"#3b2203",//"#311c03",//"#311a03",
+        Finger::LM => "#f46d43",//"#3d1b10",//"#37180f",//"#35170e",//"#36060a",//"#2d0609",//"#313103",
+        Finger::LI => "#fdae61",//"#3f2b18",//"#392716",//"#372515",//"#370322",//"#2d031c",//"#1a3103",
+        Finger::LT => "#fee08b",//"#3f3822",//"#39321f",//"#37301e",//"#1a0a1e",//"#150919",//"#033103",
+        Finger::RT => "#e6f598",//"#393d26",//"#343722",//"#323521",//"#030822",//"#03071d",//"#03311a",
+        Finger::RI => "#abdda4",//"#2a3729",//"#263225",//"#253023",//"#032c38",//"#03252f",//"#033131",
+        Finger::RM => "#66c2a5",//"#193029",//"#172c25",//"#162a23",//"#032a23",//"#03231d",//"#031a31",
+        Finger::RR => "#3288bd",//"#0c222f",//"#0b1e2a",//"#0a1d29",//"#032613",//"#031f10",//"#030331",
+        Finger::RP => "#5e4fa2",//"#171328",//"#151124",//"#141123",//"#2c3305",//"#242a04",//"#1a0331",
+    };
+
+    let (_bw, bg, op, _outline) = match pinned {
+        true => ("0.0cqw", "#191919", "1.0", "#333"),
+        false => ("0.2cqw", "#111", "0.0", outline)
     };
 
     view! {
+        <div
+            class=css::key_border
+            style:left=format!("{}%", x)
+            style:top=format!("{}%", y)
+            style:width=format!("{}%", width)
+            style:height=format!("{}%", height)
+            style:z-index=format!("{}", (y * 10.0) as u16 + 2)
+            style:border-color=outline
+        ></div>
         <div
             class=css::key
             style:left=format!("{}%", x)
@@ -179,8 +214,16 @@ fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger)
             style:width=format!("{}%", width)
             style:height=format!("{}%", height)
             style:z-index=format!("{}", (y * 10.0) as u16)
-            style:background-color=bg
+            // style:background-color=bg
+            // style:border-width=bw
         >
+            <div
+                class=css::pinned
+                style:opacity=op
+                style:border-top-color=outline
+                style:border-right-color=outline
+            >
+            </div>
             {c}
         </div>
     }
@@ -215,16 +258,18 @@ fn MaybeViewAnalysis(data: JsonResource<Data>, weights: JsonResource<Weights>) -
     }
 }
 
-async fn generate(analyzer: Analyzer, layout: Layout, pins: Vec<usize>) -> Layout {
+async fn generate(analyzer: Analyzer, layout: Layout, pins: Pins) -> Layout {
+    let pin_vec = pins.0.into_iter().collect::<Vec<_>>();
+
     (0..100)
         .into_iter()
         .map(|_| {
             analyzer.annealing_depth2_improve(
                 layout.clone(),
-                &pins,
+                &pin_vec,
                 10_000_000_000.0,
                 0.999,
-                5000,
+                6000,
             )
         })
         .max_by(|(_, s1), (_, s2)| s1.cmp(s2))
@@ -237,6 +282,7 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let (analyzer, _) = create_signal(Analyzer::new(data, weights));
 
     let layout = expect_context::<RwSignal<Layout>>();
+    let pins = expect_context::<RwSignal<Pins>>();
 
     let stats = move || layout.with(|l| analyzer().stats(l));
 
@@ -244,8 +290,6 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let finger_sfbs = create_memo(move |_| stats().finger_sfbs);
     let finger_distance = create_memo(move |_| stats().finger_distance);
     let score = move || layout.with(|l| analyzer().score(l));
-
-    let (pins, set_pins) = create_signal(vec![]);
 
     let optimize = create_action(move |_: &()| {
         let a = analyzer.get_untracked();
@@ -288,17 +332,17 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
             <FingerStat stat=finger_use name="usage"/>
             <FingerStat stat=finger_distance name="dist"/>
         </table>
-        <div class=css::optimize_button_wrapper>
-            <div class=css::optimize_button>
-                <label>
-                    <input
-                        type="text"
-                        placeholder="pins..."
-                        on:input=move |ev| set_pins(pin_positions(&layout(), event_target_value(&ev)))
-                    />
-                </label>
-            </div>
-        </div>
+        // <div class=css::optimize_button_wrapper>
+        //     <div class=css::optimize_button>
+        //         <label>
+        //             <input
+        //                 type="text"
+        //                 placeholder="pins..."
+        //                 on:input=move |ev| pins.set(Pins(pin_positions(&layout(), event_target_value(&ev))))
+        //             />
+        //         </label>
+        //     </div>
+        // </div>
         <div class=css::optimize_button_wrapper>
             <div class=css::optimize_button>
                 <label>

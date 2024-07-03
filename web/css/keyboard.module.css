@@ -14,13 +14,32 @@
     font-size: 3.5cqw;
     position: absolute;
     background-color: #111;
-    border: 0.1cqw solid #555;
-    border-radius: 0.6cqw;
-    /* margin: 1cqw; */
+    /* border-radius: 0.4cqw; */
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
+    container-type: inline-size;
+}
+
+.key-border {
+    position: absolute;
+    background-color: transparent;
+    border: 0.2cqw solid #555;
+    /* border-radius: 0.4cqw; */
+}
+
+.pinned {
+    position: absolute;
+    left: 69.9cqw;
+    top: 0.1cqw;
+    width: 0;
+    height: 0;
+    border-left: 15.0cqw solid transparent;
+    border-top: 15.0cqw solid #ddd;
+    border-right: 15.0cqw solid #ddd;
+    border-bottom: 15.0cqw solid transparent;
+    /* background-color: red; */
 }
 
 .stats-wrapper {
