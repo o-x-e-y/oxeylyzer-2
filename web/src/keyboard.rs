@@ -265,9 +265,9 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
             <tbody>
                 <tr>
                     <td class=css::stat_td>{"sfbs"}</td>
-                    <td class=css::stat_td>{stat_fmt(stats().sfbs)}</td>
+                    <td class=css::stat_td>{move || stat_fmt(stats().sfbs)}</td>
                     <td class=css::stat_td>{"sfs"}</td>
-                    <td class=css::stat_td>{stat_fmt(stats().sfs)}</td>
+                    <td class=css::stat_td>{move || stat_fmt(stats().sfs)}</td>
                     <td class=css::stat_td>{"score"}</td>
                     <td class=css::stat_td>{score}</td>
                 </tr>
