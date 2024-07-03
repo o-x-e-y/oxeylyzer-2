@@ -4,6 +4,7 @@ use crate::prelude::{Analyzer, Layout};
 pub struct Stats {
     pub finger_use: [f64; 10],
     pub finger_sfbs: [f64; 10],
+    pub finger_distance: [f64; 10],
     pub sfbs: f64,
     pub sfs: f64,
 }
@@ -34,12 +35,17 @@ impl Analyzer {
             .finger_sfbs(&cache)
             .map(|s| s as f64 / self.data.bigram_total);
 
+        let finger_distance = self
+            .finger_distance(&cache)
+            .map(|s| s as f64 / ((self.data.bigram_total + self.data.skipgram_total) * 100.0));
+
         let sfbs = self.sfbs(&cache) as f64 / self.data.char_total;
         let sfs = self.sfs(&cache) as f64 / self.data.bigram_total;
 
         Stats {
             finger_use,
             finger_sfbs,
+            finger_distance,
             sfbs,
             sfs,
         }

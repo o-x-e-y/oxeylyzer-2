@@ -254,6 +254,11 @@ impl Analyzer {
         res
     }
 
+    pub fn finger_distance(&self, cache: &CachedLayout) -> [i64; 10] {
+        Finger::FINGERS
+            .map(|f| self.finger_weighted_bigrams(cache, f))
+    }
+
     pub fn finger_sfbs(&self, cache: &CachedLayout) -> [i64; 10] {
         cache.sfb_indices.fingers.clone().map(|pairs| {
             pairs

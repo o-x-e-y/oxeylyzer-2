@@ -20,9 +20,16 @@ fn App() -> impl IntoView {
             // trailing_slash=leptos_router::TrailingSlash::Redirect
         >
             <nav class=css::nav>
-                <A href="/">
-                    <h3>{"Go Home"}</h3>
-                </A>
+                {
+                    let loc = use_location();
+                    let href = move || format!("{}/..", loc.pathname.get());
+                    
+                    view! {
+                        <A href>
+                            <h3>{"Go Back"}</h3>
+                        </A>
+                    }
+                }
             </nav>
             <Routes>
                 <Route path="/" view=Home/>
@@ -39,15 +46,15 @@ fn App() -> impl IntoView {
 fn Home() -> impl IntoView {
     view! {
         <div>"Home page"</div>
-        <br/>
-        <A href="/layouts">{"layouts"}</A>
+        <div style="margin-top: 1cqw">
+            <A href="/layouts">{"layouts"}</A>
+        </div>
     }
 }
 
 #[component]
 fn LayoutsWrapper() -> impl IntoView {
     view! {
-        // <h1>Layouts</h1>
         <div style="margin-top: 1cqw"></div>
         <Outlet/>
     }

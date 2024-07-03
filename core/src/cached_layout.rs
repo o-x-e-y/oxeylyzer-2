@@ -211,6 +211,6 @@ fn thing() {
 
     let layout = crate::layout::Layout::load("../layouts/qwerty.dof").unwrap();
 
-    layout.key_info('b');
-    layout.key_info('␣');
+    layout.print_key_info('b');
+    layout.print_key_info('␣');
 }

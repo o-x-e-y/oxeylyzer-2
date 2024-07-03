@@ -109,7 +109,7 @@ impl Layout {
         }
     }
 
-    pub(crate) fn key_info(&self, c: char) {
+    pub fn print_key_info(&self, c: char) {
         let i = match self.keys.iter().position(|k| k == &c) {
             Some(i) => i,
             None => {

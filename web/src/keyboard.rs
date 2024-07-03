@@ -158,18 +158,18 @@ fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger)
     let width = (pos.width()) * kw;
     let height = (pos.height()) * kw * ym;
 
-    // let bg = match f {
-    //     Finger::LP => "#CC2F00",
-    //     Finger::LR => "#DB6600",
-    //     Finger::LM => "#E39E00",
-    //     Finger::LI => "#76B80D",
-    //     Finger::LT => "#007668",
-    //     Finger::RT => "#006486",
-    //     Finger::RI => "#007CB5",
-    //     Finger::RM => "#465AB2",
-    //     Finger::RR => "#6D47B1",
-    //     Finger::RP => "#873B9C",
-    // };
+    let bg = match f {
+        Finger::LP => "#2d120b",
+        Finger::LR => "#2f1c0b",
+        Finger::LM => "#30250b",
+        Finger::LI => "#1e290d",
+        Finger::LT => "#0b1e1c",
+        Finger::RT => "#0b1b21",
+        Finger::RI => "#0b1f29",
+        Finger::RM => "#161a28",
+        Finger::RR => "#1d1628",
+        Finger::RP => "#211425",
+    };
 
     view! {
         <div
@@ -179,7 +179,7 @@ fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger)
             style:width=format!("{}%", width)
             style:height=format!("{}%", height)
             style:z-index=format!("{}", (y * 10.0) as u16)
-            // style:background-color=bg
+            style:background-color=bg
         >
             {c}
         </div>
@@ -215,13 +215,13 @@ fn MaybeViewAnalysis(data: JsonResource<Data>, weights: JsonResource<Weights>) -
     }
 }
 
-async fn generate(analyzer: ReadSignal<Analyzer>, layout: RwSignal<Layout>, pins: ReadSignal<Vec<usize>>) -> Layout {
+async fn generate(analyzer: Analyzer, layout: Layout, pins: Vec<usize>) -> Layout {
     (0..100)
         .into_iter()
         .map(|_| {
-            analyzer.get_untracked().annealing_depth2_improve(
-                layout.get_untracked(),
-                &pins.get_untracked(),
+            analyzer.annealing_depth2_improve(
+                layout.clone(),
+                &pins,
                 10_000_000_000.0,
                 0.999,
                 5000,
@@ -242,21 +242,52 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
 
     let finger_use = create_memo(move |_| stats().finger_use);
     let finger_sfbs = create_memo(move |_| stats().finger_sfbs);
+    let finger_distance = create_memo(move |_| stats().finger_distance);
     let score = move || layout.with(|l| analyzer().score(l));
 
     let (pins, set_pins) = create_signal(vec![]);
-    let (is_analyzing, set_is_analyzing) = create_signal(false);
 
-    let optimize_layout = move |_: MouseEvent| {
-        set_is_analyzing.set(true);
-        spawn_local(async move {
-            let l = generate(analyzer, layout, pins).await;
+    let optimize = create_action(move |_: &()| {
+        let a = analyzer.get_untracked();
+        let l = layout.get_untracked();
+        let p = pins.get_untracked();
+        
+        async move {
+            let l = generate(a, l, p).await;
             layout.set(l);
-            set_is_analyzing.set(false);
-        });
-    };
+        }
+    });
+
+    let stat_fmt = move |v| format!("{:.3}%", v);
 
     view! {
+        <table class=css::stats_table>
+            <tbody>
+                <tr>
+                    <td class=css::stat_td>{"sfbs"}</td>
+                    <td class=css::stat_td>{stat_fmt(stats().sfbs)}</td>
+                    <td class=css::stat_td>{"sfs"}</td>
+                    <td class=css::stat_td>{stat_fmt(stats().sfs)}</td>
+                    <td class=css::stat_td>{"score"}</td>
+                    <td class=css::stat_td>{score}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class=css::stats_table>
+            <tr>
+                <td class=css::stat_td/>
+                {move || {
+                    Finger::FINGERS
+                        .iter()
+                        .copied()
+                        .map(|f| view! { <td class=css::stat_td>{f.to_string()}</td> })
+                        .collect_view()
+                }}
+            </tr>
+            <FingerStat stat=finger_sfbs name="sfbs"/>
+            <FingerStat stat=finger_use name="usage"/>
+            <FingerStat stat=finger_distance name="dist"/>
+        </table>
         <div class=css::optimize_button_wrapper>
             <div class=css::optimize_button>
                 <label>
@@ -273,47 +304,14 @@ fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
                 <label>
                     <button
                         class=css::optimize_button
-                        on:click=optimize_layout
-                        disable=is_analyzing
+                        on:click=move |_| optimize.dispatch(())
+                        disable=optimize.pending()
                     >
-                        {"Generate"}
+                        {"Optimize"}
                     </button>
                 </label>
             </div>
         </div>
-        <table class=css::stats_table>
-            <tbody>
-                <StatRow text="score" f=move || score() />
-                <StatRow text="sfbs" f=move || format!("{:.3}%", stats().sfbs) />
-                <StatRow text="sfs" f=move || format!("{:.3}%", stats().sfs) />
-            </tbody>
-        </table>
-        <p class=css::stat_table_header>{"Sfbs per finger"}</p>
-        <table class=css::stats_table>
-            {
-                (0..5)
-                    .into_iter()
-                    .map(|i| {
-                        view! {
-                            <FingerStatRow  stat={finger_sfbs} i />
-                        }
-                    })
-                    .collect_view()
-            }
-        </table>
-        <p class=css::stat_table_header>{"Finger usage"}</p>
-        <table class=css::stats_table>
-            {
-                (0..5)
-                    .into_iter()
-                    .map(|i| {
-                        view! {
-                            <FingerStatRow  stat={finger_use} i />
-                        }
-                    })
-                    .collect_view()
-            }
-        </table>
     }
 }
 
@@ -332,19 +330,21 @@ where
 }
 
 #[component]
-fn FingerStatRow(stat: Memo<[f64; 10]>, i: usize) -> impl IntoView {
-    let (v1, v2) = (
-        move || format!("{:.3}%", stat()[i]),
-        move || format!("{:.3}%", stat()[i + 5]),
-    );
-    let (f1, f2) = (Finger::FINGERS[i], Finger::FINGERS[i + 5]);
+fn FingerStat(stat: Memo<[f64; 10]>, name: &'static str) -> impl IntoView {
+    let fmt = move |v| format!("{:.3}", v);
 
     view! {
         <tr>
-            <td class=css::stat_finger>{f1.to_string()}</td>
-            <td class=css::stat_td>{v1}</td>
-            <td class=css::stat_finger>{f2.to_string()}</td>
-            <td class=css::stat_td>{v2}</td>
+            <td class=css::stat_td>{name}</td>
+            {move || {
+                stat()
+                    .iter()
+                    .copied()
+                    .map(|v| view! {
+                        <td class=css::stat_td>{fmt(v)}</td>
+                    })
+                    .collect_view()
+            }}
         </tr>
     }
 }
