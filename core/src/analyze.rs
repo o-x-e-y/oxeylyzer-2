@@ -60,7 +60,7 @@ impl Analyzer {
             .collect();
 
         let sfb_indices = SfbIndices::new(&fingers, &keyboard, &self.weights.fingers);
-        // let stretch_indices = StretchIndices::new(&fingers, &keyboard, &layout.keys);
+        let stretch_indices = StretchIndices::new(&fingers, &keyboard, &layout.keys);
 
         let mut cache = CachedLayout {
             name,
@@ -69,7 +69,7 @@ impl Analyzer {
             keyboard,
             possible_swaps,
             sfb_indices,
-            // stretch_indices,
+            stretch_indices,
             shape,
             char_mapping,
             weighted_bigrams: Default::default(),
@@ -255,8 +255,7 @@ impl Analyzer {
     }
 
     pub fn finger_distance(&self, cache: &CachedLayout) -> [i64; 10] {
-        Finger::FINGERS
-            .map(|f| self.finger_weighted_bigrams(cache, f))
+        Finger::FINGERS.map(|f| self.finger_weighted_bigrams(cache, f))
     }
 
     pub fn finger_sfbs(&self, cache: &CachedLayout) -> [i64; 10] {

@@ -1,394 +1,381 @@
-use std::{collections::HashSet, path::PathBuf};
+// use std::{collections::HashSet, path::PathBuf};
 
-use ev::{DragEvent, MouseEvent};
-use leptos::*;
-use leptos_router::*;
-use libdof::prelude::{Dof, Finger, PhysicalKey};
-use oxeylyzer_core::prelude::{Analyzer, Data, Layout, Weights};
-use rust_embed::Embed;
-use stylance::{classes, import_crate_style};
+// use ev::{DragEvent, MouseEvent};
+// use fxhash::FxHashMap;
+// use leptos::*;
+// use leptos_router::*;
+// use libdof::prelude::{Dof, Finger, PhysicalKey};
+// use oxeylyzer_core::prelude::{Analyzer, Data, Layout, Weights};
+// use rust_embed::Embed;
+// use stylance::import_crate_style;
 
-use crate::util::*;
+// use crate::util::*;
 
-import_crate_style!(css, "./css/keyboard.module.css");
+// import_crate_style!(css, "./css/keyboard.module.css");
 
-#[derive(Embed)]
-#[folder = "../layouts"]
-#[include = "*.dof"]
-struct LayoutsFolder;
+// #[derive(Embed)]
+// #[folder = "../layouts"]
+// #[include = "*.dof"]
+// struct LayoutsFolder;
 
-#[derive(Debug, Clone, Default)]
-struct Pins(HashSet<usize>);
+// #[derive(Debug, Clone, Default)]
+// struct Pins(HashSet<usize>);
 
-#[component]
-pub fn Layouts() -> impl IntoView {
-    let url = |s: &str| format!("/layouts/{s}");
+// #[component]
+// pub fn Layouts() -> impl IntoView {
+//     let url = |s: &str| format!("/layouts/{s}");
 
-    view! {
-        <ul>
-            {LayoutsFolder::iter()
-                .flat_map(|s| PathBuf::from(s.to_string()).file_stem().map(ToOwned::to_owned))
-                .flat_map(|os| os.into_string())
-                .map(|i| {
-                    view! {
-                        <li>
-                            <A href=url(&i)>{i.to_string()}</A>
-                        </li>
-                    }
-                })
-                .collect_view()}
+//     view! {
+//         <ul>
+//             {LayoutsFolder::iter()
+//                 .flat_map(|s| PathBuf::from(s.to_string()).file_stem().map(ToOwned::to_owned))
+//                 .flat_map(|os| os.into_string())
+//                 .map(|i| {
+//                     view! {
+//                         <li>
+//                             <A href=url(&i)>{i.to_string()}</A>
+//                         </li>
+//                     }
+//                 })
+//                 .collect_view()}
 
-        </ul>
-        <Outlet/>
-    }
-}
+//         </ul>
+//     }
+// }
 
-#[component]
-pub fn Layout() -> impl IntoView {
-    let params = use_params_map();
-    let name = move || params.with(|p| p.get("name").cloned().unwrap_or_default());
+// #[component]
+// pub fn Layout() -> impl IntoView {
+//     let params = use_params_map();
+//     let name = move || params.with(|p| p.get("name").cloned().unwrap_or_default());
 
-    let dof = create_resource(move || format!("/layouts/{}.dof", name()), load_json::<Dof>);
+//     let dof = create_resource(move || format!("/layouts/{}.dof", name()), load_json::<Dof>);
 
-    let pins = create_rw_signal(Pins::default());
-    provide_context(pins);
+//     let pins = create_rw_signal(Pins::default());
+//     provide_context(pins);
 
-    view! {
-        <div>
-            <MaybeViewLayout dof />
-        </div>
-    }
-}
+//     let char_freq = create_rw_signal(FxHashMap::<char, f64>::default());
+//     provide_context(char_freq);
 
-#[component]
-fn MaybeViewLayout(dof: JsonResource<Dof>) -> impl IntoView {
-    let navigate = use_navigate();
+//     view! {
+//         <div>
+//             <MaybeViewLayout dof />
+//         </div>
+//     }
+// }
 
-    let redirect = create_action(move |_: &()| {
-        navigate("/layouts", Default::default());
-        async {}
-    });
+// #[component]
+// fn MaybeViewLayout(dof: JsonResource<Dof>) -> impl IntoView {
+//     let navigate = use_navigate();
 
-    view! {
-        {move || match dof.get() {
-            Some(Ok(dof)) => {
-                let layout = create_rw_signal(Layout::from(dof));
+//     let redirect = create_action(move |_: &()| {
+//         navigate("/layouts", Default::default());
+//         async {}
+//     });
 
-                provide_context(layout);
+//     view! {
+//         {move || match dof.get() {
+//             Some(Ok(dof)) => {
+//                 let layout = create_rw_signal(Layout::from(dof));
 
-                let data = create_resource(move || format!("/data/shai.json"), load_json::<Data>);
-                let weights = create_resource(move || format!("/weights/default.json"), load_json::<Weights>);
+//                 provide_context(layout);
 
-                view! {
-                    <div>
-                        <div class=css::layout_wrapper>
-                            <ViewLayout layout/>
-                        </div>
-                        <div>
-                            <div class=css::stats_wrapper>
-                                <MaybeViewAnalysis data weights />
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-            Some(Err(_)) => {
-                redirect.dispatch(());
-                view! { <div>"Layout not found. Redirecting..."</div> }
-            }
-            None => view! { <div>"Loading..."</div> },
-        }}
-    }
-}
+//                 let data = create_resource(move || format!("/data/shai.json"), load_json::<Data>);
+//                 let weights = create_resource(move || format!("/public/weights/default.json"), load_json::<Weights>);
 
-#[component]
-fn ViewLayout(layout: RwSignal<Layout>) -> impl IntoView {
-    let (dragged_index, set_dragged_index) = create_signal(Some(0));
+//                 view! {
+//                     <div>
+//                         <div class=css::layout_wrapper>
+//                             <ViewLayout/>
+//                         </div>
+//                         <div>
+//                             <div class=css::stats_wrapper>
+//                                 <MaybeViewAnalysis data weights />
+//                             </div>
+//                         </div>
+//                     </div>
+//                 }
+//             }
+//             Some(Err(_)) => {
+//                 redirect.dispatch(());
+//                 view! { <div>"Layout not found. Redirecting..."</div> }
+//             }
+//             None => view! { <div>"Loading..."</div> },
+//         }}
+//     }
+// }
 
-    let on_drag_start = move |_: DragEvent, index: usize| set_dragged_index(Some(index));
+// #[component]
+// fn ViewLayout() -> impl IntoView {
+//     let layout = expect_context::<RwSignal<Layout>>();
 
-    let on_drop = move |_: DragEvent, target_index: usize| {
-        if let Some(source_index) = dragged_index.get() {
-            layout.update(|l| l.keys.swap(source_index, target_index));
-            set_dragged_index(None);
-        }
-    };
+//     let (dragged_index, set_dragged_index) = create_signal(Some(0));
 
-    let on_drag_over = move |ev: DragEvent| {
-        ev.prevent_default();
-    };
+//     let on_drag_start = move |_: DragEvent, index: usize| set_dragged_index(Some(index));
 
-    let pins = expect_context::<RwSignal<Pins>>();
+//     let on_drop = move |_: DragEvent, target_index: usize| {
+//         if let Some(source_index) = dragged_index.get() {
+//             layout.update(|l| l.keys.swap(source_index, target_index));
+//             set_dragged_index(None);
+//         }
+//     };
 
-    let on_contextmenu = move |ev: MouseEvent, i: usize| {
-        ev.prevent_default();
-        
-        pins.update(|p| {
-            if !p.0.insert(i) {
-                p.0.remove(&i);
-            }
-        });
-    };
+//     let on_drag_over = move |ev: DragEvent| {
+//         ev.prevent_default();
+//     };
 
-    let (lx, hx) = layout.with_untracked(|l| minmax_x(l));
-    let (ly, hy) = layout.with_untracked(|l| minmax_y(l));
-    let (dx, dy) = (hx - lx, hy - ly);
+//     let pins = expect_context::<RwSignal<Pins>>();
 
-    let w = 100.0;
-    let kw = w / dx;
-    let h = dy * kw;
-    let ym = dx / dy;
+//     let on_contextmenu = move |ev: MouseEvent, i: usize| {
+//         ev.prevent_default();
 
-    view! {
-        <div class=css::layout_wrapper_inner>
-            <div style=move || {
-                format!("width: {w}cqw; height: {h}cqw")
-            }>
-                {move || {
-                    layout.with(|l| l.keys.iter()
-                    .copied()
-                    .zip(layout.get().keyboard)
-                    .zip(layout.get().fingers)
-                    .enumerate()
-                    .map(|(index, ((c, pos), f))| {
-                        let pinned = pins.get().0.contains(&index);
-                        view! {
-                            <div
-                                draggable="true"
-                                on:dragstart=move |ev| on_drag_start(ev, index)
-                                on:drop=move |ev| on_drop(ev, index)
-                                on:dragover=on_drag_over
-                                on:contextmenu=move |ev| on_contextmenu(ev, index)
-                            >
-                                <Key c pos lx ly kw ym f pinned/>
-                            </div>
-                        }
-                    })
-                    .collect_view())
-                }}
-            </div>
-        </div>
-    }
-}
+//         pins.update(|p| {
+//             if !p.0.insert(i) {
+//                 p.0.remove(&i);
+//             }
+//         });
+//     };
 
-#[component]
-fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger, pinned: bool) -> impl IntoView {
-    let x = (pos.x() - lx) * kw;
-    let y = (pos.y() - ly) * kw * ym;
-    let width = (pos.width()) * kw;
-    let height = (pos.height()) * kw * ym;
+//     let (lx, hx) = layout.with_untracked(|l| minmax_x(l));
+//     let (ly, hy) = layout.with_untracked(|l| minmax_y(l));
+//     let (dx, dy) = (hx - lx, hy - ly);
 
-    let outline = match f {
-        //            pastel1, mic light, mic dark, rainbow dark,
-        Finger::LP => "#9e0142",//"#270010",//"#23000e",//"#22000e",//"#3b3803",//"#312e03",//"#310303",
-        Finger::LR => "#d53e4f",//"#350f13",//"#300e11",//"#2e0d11",//"#3b2203",//"#311c03",//"#311a03",
-        Finger::LM => "#f46d43",//"#3d1b10",//"#37180f",//"#35170e",//"#36060a",//"#2d0609",//"#313103",
-        Finger::LI => "#fdae61",//"#3f2b18",//"#392716",//"#372515",//"#370322",//"#2d031c",//"#1a3103",
-        Finger::LT => "#fee08b",//"#3f3822",//"#39321f",//"#37301e",//"#1a0a1e",//"#150919",//"#033103",
-        Finger::RT => "#e6f598",//"#393d26",//"#343722",//"#323521",//"#030822",//"#03071d",//"#03311a",
-        Finger::RI => "#abdda4",//"#2a3729",//"#263225",//"#253023",//"#032c38",//"#03252f",//"#033131",
-        Finger::RM => "#66c2a5",//"#193029",//"#172c25",//"#162a23",//"#032a23",//"#03231d",//"#031a31",
-        Finger::RR => "#3288bd",//"#0c222f",//"#0b1e2a",//"#0a1d29",//"#032613",//"#031f10",//"#030331",
-        Finger::RP => "#5e4fa2",//"#171328",//"#151124",//"#141123",//"#2c3305",//"#242a04",//"#1a0331",
-    };
+//     let w = 100.0;
+//     let kw = w / dx;
+//     let h = dy * kw;
+//     let ym = dx / dy;
 
-    let (_bw, bg, op, _outline) = match pinned {
-        true => ("0.0cqw", "#191919", "1.0", "#333"),
-        false => ("0.2cqw", "#111", "0.0", outline)
-    };
+//     view! {
+//         <div class=css::layout_wrapper_inner>
+//             <div style=move || {
+//                 format!("width: {w}cqw; height: {h}cqw")
+//             }>
+//                 {move || {
+//                     layout.with(|l| l.keys.iter()
+//                     .copied()
+//                     .zip(layout.get().keyboard)
+//                     .zip(layout.get().fingers)
+//                     .enumerate()
+//                     .map(|(index, ((c, pos), f))| {
+//                         let pinned = pins.get().0.contains(&index);
+//                         view! {
+//                             <div
+//                                 draggable="true"
+//                                 on:dragstart=move |ev| on_drag_start(ev, index)
+//                                 on:drop=move |ev| on_drop(ev, index)
+//                                 on:dragover=on_drag_over
+//                                 on:contextmenu=move |ev| on_contextmenu(ev, index)
+//                             >
+//                                 <Key c pos lx ly kw ym f pinned/>
+//                             </div>
+//                         }
+//                     })
+//                     .collect_view())
+//                 }}
+//             </div>
+//         </div>
+//     }
+// }
 
-    view! {
-        <div
-            class=css::key_border
-            style:left=format!("{}%", x)
-            style:top=format!("{}%", y)
-            style:width=format!("{}%", width)
-            style:height=format!("{}%", height)
-            style:z-index=format!("{}", (y * 10.0) as u16 + 2)
-            style:border-color=outline
-        ></div>
-        <div
-            class=css::key
-            style:left=format!("{}%", x)
-            style:top=format!("{}%", y)
-            style:width=format!("{}%", width)
-            style:height=format!("{}%", height)
-            style:z-index=format!("{}", (y * 10.0) as u16)
-            // style:background-color=bg
-            // style:border-width=bw
-        >
-            <div
-                class=css::pinned
-                style:opacity=op
-                style:border-top-color=outline
-                style:border-right-color=outline
-            >
-            </div>
-            {c}
-        </div>
-    }
-}
+// #[component]
+// fn Key(c: char, pos: PhysicalKey, lx: f64, ly: f64, kw: f64, ym: f64, f: Finger, pinned: bool) -> impl IntoView {
+//     let x = (pos.x() - lx) * kw;
+//     let y = (pos.y() - ly) * kw * ym;
+//     let width = (pos.width()) * kw;
+//     let height = (pos.height()) * kw * ym;
 
-#[component]
-fn MaybeViewAnalysis(data: JsonResource<Data>, weights: JsonResource<Weights>) -> impl IntoView {
-    let err = move |e: &str| format!("Analysis failed: {}", e);
+//     // let char_freq = expect_context::<RwSignal<FxHashMap<char, f64>>>();
+//     // let freq = move || char_freq.get().get(&c).copied().unwrap_or(0.0);
+//     // let heatmap = move || format!("#{:02x}0000", ((freq() * 12.0) as usize).min(255));
 
-    let view = move || match data.get() {
-        Some(Ok(data)) => match weights.get() {
-            Some(Ok(weights)) => {
-                view! {
-                    <div>
-                        <ViewAnalysis data weights />
-                    </div>
-                }
-            }
-            Some(Err(e)) => {
-                view! { <div>{move || err(&e)}</div> }
-            }
-            None => view! { <div>"Loading..."</div> },
-        },
-        Some(Err(e)) => {
-            view! { <div>{move || err(&e)}</div> }
-        }
-        None => view! { <div>"Loading..."</div> },
-    };
+//     let outline = match f {
+//         Finger::LP => "#9e0142",
+//         Finger::LR => "#d53e4f",
+//         Finger::LM => "#f46d43",
+//         Finger::LI => "#fdae61",
+//         Finger::LT => "#fee08b",
+//         Finger::RT => "#e6f598",
+//         Finger::RI => "#abdda4",
+//         Finger::RM => "#66c2a5",
+//         Finger::RR => "#3288bd",
+//         Finger::RP => "#5e4fa2",
+//     };
 
-    view! {
-        <div>{view}</div>
-    }
-}
+//     let op = match pinned {
+//         true => 1,
+//         false => 0
+//     };
 
-async fn generate(analyzer: Analyzer, layout: Layout, pins: Pins) -> Layout {
-    let pin_vec = pins.0.into_iter().collect::<Vec<_>>();
+//     view! {
+//         <div
+//             class=css::key_border
+//             style:left=format!("{}%", x)
+//             style:top=format!("{}%", y)
+//             style:width=format!("{}%", width)
+//             style:height=format!("{}%", height)
+//             style:z-index=format!("{}", (y * 10.0) as u16 + 2)
+//             style:border-color=outline
+//         ></div>
+//         <div
+//             class=css::key
+//             style:left=format!("{}%", x)
+//             style:top=format!("{}%", y)
+//             style:width=format!("{}%", width)
+//             style:height=format!("{}%", height)
+//             style:z-index=format!("{}", (y * 10.0) as u16)
+//             // style:background-color=heatmap
+//         >
+//             <div
+//                 class=css::pinned
+//                 style:opacity=op
+//                 style:border-top-color=outline
+//                 style:border-right-color=outline
+//             >
+//             </div>
+//             {c}
+//         </div>
+//     }
+// }
 
-    (0..100)
-        .into_iter()
-        .map(|_| {
-            analyzer.annealing_depth2_improve(
-                layout.clone(),
-                &pin_vec,
-                10_000_000_000.0,
-                0.999,
-                6000,
-            )
-        })
-        .max_by(|(_, s1), (_, s2)| s1.cmp(s2))
-        .map(|(layout, _)| layout)
-        .unwrap()
-}
+// #[component]
+// fn MaybeViewAnalysis(data: JsonResource<Data>, weights: JsonResource<Weights>) -> impl IntoView {
+//     let err = move |e: &str| format!("Analysis failed: {}", e);
 
-#[component]
-fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
-    let (analyzer, _) = create_signal(Analyzer::new(data, weights));
+//     let view = move || match data.get() {
+//         Some(Ok(data)) => {
+//             let char_freq = expect_context::<RwSignal<FxHashMap<char, f64>>>();
+//             char_freq.set(data.chars.clone());
 
-    let layout = expect_context::<RwSignal<Layout>>();
-    let pins = expect_context::<RwSignal<Pins>>();
+//             match weights.get() {
+//                 Some(Ok(weights)) => {
+//                     view! {
+//                         <div>
+//                             <ViewAnalysis data weights />
+//                         </div>
+//                     }
+//                 }
+//                 Some(Err(e)) => {
+//                     view! { <div>{move || err(&e)}</div> }
+//                 }
+//                 None => view! { <div>"Loading..."</div> },
+//             }
+//         },
+//         Some(Err(e)) => {
+//             view! { <div>{move || err(&e)}</div> }
+//         }
+//         None => view! { <div>"Loading..."</div> },
+//     };
 
-    let stats = move || layout.with(|l| analyzer().stats(l));
+//     view! {
+//         <div>{view}</div>
+//     }
+// }
 
-    let finger_use = create_memo(move |_| stats().finger_use);
-    let finger_sfbs = create_memo(move |_| stats().finger_sfbs);
-    let finger_distance = create_memo(move |_| stats().finger_distance);
-    let score = move || layout.with(|l| analyzer().score(l));
+// async fn generate(analyzer: Analyzer, layout: Layout, pins: Pins) -> Layout {
+//     let pin_vec = pins.0.into_iter().collect::<Vec<_>>();
 
-    let optimize = create_action(move |_: &()| {
-        let a = analyzer.get_untracked();
-        let l = layout.get_untracked();
-        let p = pins.get_untracked();
-        
-        async move {
-            let l = generate(a, l, p).await;
-            layout.set(l);
-        }
-    });
+//     (0..100)
+//         .into_iter()
+//         .map(|_| {
+//             analyzer.annealing_depth2_improve(
+//                 layout.clone(),
+//                 &pin_vec,
+//                 10_000_000_000.0,
+//                 0.999,
+//                 6000,
+//             )
+//         })
+//         .max_by(|(_, s1), (_, s2)| s1.cmp(s2))
+//         .map(|(layout, _)| layout)
+//         .unwrap()
+// }
 
-    let stat_fmt = move |v| format!("{:.3}%", v);
+// #[component]
+// fn ViewAnalysis(data: Data, weights: Weights) -> impl IntoView {
+//     let (analyzer, _) = create_signal(Analyzer::new(data, weights));
 
-    view! {
-        <table class=css::stats_table>
-            <tbody>
-                <tr>
-                    <td class=css::stat_td>{"sfbs"}</td>
-                    <td class=css::stat_td>{move || stat_fmt(stats().sfbs)}</td>
-                    <td class=css::stat_td>{"sfs"}</td>
-                    <td class=css::stat_td>{move || stat_fmt(stats().sfs)}</td>
-                    <td class=css::stat_td>{"score"}</td>
-                    <td class=css::stat_td>{score}</td>
-                </tr>
-            </tbody>
-        </table>
-        <table class=css::stats_table>
-            <tr>
-                <td class=css::stat_td/>
-                {move || {
-                    Finger::FINGERS
-                        .iter()
-                        .copied()
-                        .map(|f| view! { <td class=css::stat_td>{f.to_string()}</td> })
-                        .collect_view()
-                }}
-            </tr>
-            <FingerStat stat=finger_sfbs name="sfbs"/>
-            <FingerStat stat=finger_use name="usage"/>
-            <FingerStat stat=finger_distance name="dist"/>
-        </table>
-        // <div class=css::optimize_button_wrapper>
-        //     <div class=css::optimize_button>
-        //         <label>
-        //             <input
-        //                 type="text"
-        //                 placeholder="pins..."
-        //                 on:input=move |ev| pins.set(Pins(pin_positions(&layout(), event_target_value(&ev))))
-        //             />
-        //         </label>
-        //     </div>
-        // </div>
-        <div class=css::optimize_button_wrapper>
-            <div class=css::optimize_button>
-                <label>
-                    <button
-                        class=css::optimize_button
-                        on:click=move |_| optimize.dispatch(())
-                        disable=optimize.pending()
-                    >
-                        {"Optimize"}
-                    </button>
-                </label>
-            </div>
-        </div>
-    }
-}
+//     let layout = expect_context::<RwSignal<Layout>>();
+//     let pins = expect_context::<RwSignal<Pins>>();
 
-#[component]
-fn StatRow<T, F>(text: &'static str, f: F) -> impl IntoView
-where
-    T: IntoView + 'static,
-    F: Fn() -> T + 'static,
-{
-    view! {
-        <tr class=css::stat_row>
-            <td class=css::stat_td>{text}</td>
-            <td class=css::stat_td>{f}</td>
-        </tr>
-    }
-}
+//     let stats = move || layout.with(|l| analyzer().stats(l));
 
-#[component]
-fn FingerStat(stat: Memo<[f64; 10]>, name: &'static str) -> impl IntoView {
-    let fmt = move |v| format!("{:.3}", v);
+//     let finger_use = create_memo(move |_| stats().finger_use);
+//     let finger_sfbs = create_memo(move |_| stats().finger_sfbs);
+//     let finger_distance = create_memo(move |_| stats().finger_distance);
+//     let score = move || layout.with(|l| analyzer().score(l));
 
-    view! {
-        <tr>
-            <td class=css::stat_td>{name}</td>
-            {move || {
-                stat()
-                    .iter()
-                    .copied()
-                    .map(|v| view! {
-                        <td class=css::stat_td>{fmt(v)}</td>
-                    })
-                    .collect_view()
-            }}
-        </tr>
-    }
-}
+//     let optimize = create_action(move |_: &()| {
+//         let a = analyzer.get_untracked();
+//         let l = layout.get_untracked();
+//         let p = pins.get_untracked();
+
+//         async move {
+//             let l = generate(a, l, p).await;
+//             layout.set(l);
+//         }
+//     });
+
+//     let stat_fmt = move |v| format!("{:.3}%", v);
+
+//     view! {
+//         <table class=css::stats_table>
+//             <tbody>
+//                 <tr>
+//                     <td class=css::stat_td>{"sfbs"}</td>
+//                     <td class=css::stat_td>{move || stat_fmt(stats().sfbs)}</td>
+//                     <td class=css::stat_td>{"sfs"}</td>
+//                     <td class=css::stat_td>{move || stat_fmt(stats().sfs)}</td>
+//                     <td class=css::stat_td>{"score"}</td>
+//                     <td class=css::stat_td>{score}</td>
+//                 </tr>
+//             </tbody>
+//         </table>
+//         <table class=css::stats_table>
+//             <tr>
+//                 <td class=css::stat_td/>
+//                 {move || {
+//                     Finger::FINGERS
+//                         .iter()
+//                         .copied()
+//                         .map(|f| view! { <td class=css::stat_td>{f.to_string()}</td> })
+//                         .collect_view()
+//                 }}
+//             </tr>
+//             <FingerStat stat=finger_sfbs name="sfbs"/>
+//             <FingerStat stat=finger_use name="usage"/>
+//             <FingerStat stat=finger_distance name="dist"/>
+//         </table>
+//         <div class=css::optimize_button_wrapper>
+//             <div class=css::optimize_button>
+//                 <label>
+//                     <button
+//                         class=css::optimize_button
+//                         on:click=move |_| optimize.dispatch(())
+//                         disable=optimize.pending()
+//                     >
+//                         {"Optimize"}
+//                     </button>
+//                 </label>
+//             </div>
+//         </div>
+//     }
+// }
+
+// #[component]
+// fn FingerStat(stat: Memo<[f64; 10]>, name: &'static str) -> impl IntoView {
+//     let fmt = move |v| format!("{:.3}", v);
+
+//     view! {
+//         <tr>
+//             <td class=css::stat_td>{name}</td>
+//             {move || {
+//                 stat()
+//                     .iter()
+//                     .copied()
+//                     .map(|v| view! {
+//                         <td class=css::stat_td>{fmt(v)}</td>
+//                     })
+//                     .collect_view()
+//             }}
+//         </tr>
+//     }
+// }

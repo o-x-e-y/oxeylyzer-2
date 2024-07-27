@@ -2,3 +2,4 @@
 /corpora/*
 .venv
 /web/dist
+/node_modules

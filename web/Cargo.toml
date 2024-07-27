@@ -5,17 +5,19 @@ edition = "2021"
 
 [dependencies]
 console_error_panic_hook = "0.1"
+fxhash = "0.2.1"
 gloo-net = { version = "0.5", default-features = false }
 gloo-timers = "0.3.0"
+gray_matter = { version = "0.2.8", default-features = false, features = ["yaml"] }
 leptos = { version = "0.6", features = ["csr", "nightly"] }
 leptos-use = "0.10"
-leptos_meta = { version = "0.6", features = ["csr", "nightly"] }
+leptos_meta = { version = "0.6.13", features = ["csr", "nightly"] }
 leptos_router = { version = "0.6", features = ["csr", "nightly"] }
 libdof = { workspace = true }
 oxeylyzer-core = { workspace = true }
+pulldown-cmark = "0.11.0"
 rust-embed = { version = "8.4.0", features = ["debug-embed", "include-exclude"] }
 serde = { workspace = true }
-stylance = { version = "0.5", features = ["nightly"] }
 thiserror = { workspace = true }
 
 [package.metadata.stylance]

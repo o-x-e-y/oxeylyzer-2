@@ -63,16 +63,25 @@ pastel = [
     "5e4fa2",
 ]
 
+pastel5 = [
+    "#f09898",
+	"#fff2cc",
+	"#d9ead3",
+	"#a0dbe6",
+	"#d9d2e9",
+]
+
 def h(num: int) -> str:
     return f"{num:0{2}x}"
 
 
 def n(num: int) -> int:
-    return int((num // 4))
+    return min(int((num * 1.14)), 255)
 
 
 def p(colors: list[str]):
     for c in colors:
+        c = c.removeprefix("#")
         r, g, b = c[0:2], c[2:4], c[4:6]
         r, g, b = int(r, 16), int(g, 16), int(b, 16)
 
@@ -81,6 +90,21 @@ def p(colors: list[str]):
         c = h(r) + h(g) + h(b)
 
         print(f"\"#{c}\",")
+
+
+def fmt(colors: list[str]):
+    for c in colors:
+        c = c.removeprefix("#")
+
+        print(f"\"#{c.lower()}\",")
+
+
+def with_reverse(colors: list[str]):
+    for c in colors:
+        fmt(c)
+
+    for c in reversed(colors):
+        fmt(c)
 
 
 if __name__ == "__main__":

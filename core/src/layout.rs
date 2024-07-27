@@ -108,21 +108,6 @@ impl Layout {
             shape,
         }
     }
-
-    pub fn print_key_info(&self, c: char) {
-        let i = match self.keys.iter().position(|k| k == &c) {
-            Some(i) => i,
-            None => {
-                println!("layout '{}' does not contain '{c}'", self.name);
-                return;
-            }
-        };
-
-        let p = &self.keyboard[i];
-        let f = &self.fingers[i];
-
-        println!("{c} uses {f}\nkey: {p:?}")
-    }
 }
 
 impl From<Dof> for Layout {

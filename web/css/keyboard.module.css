@@ -78,15 +78,3 @@
     border: 1px solid #555;
     /* background-color: red; */
 }
-
-.stat-finger {
-    width: 5cqw;
-}
-
-.stat-table-header {
-    font-size: 130%;
-    width: 100%;
-    margin: auto;
-    margin-top: 1cqw;
-    margin-bottom: 1cqw;
-}

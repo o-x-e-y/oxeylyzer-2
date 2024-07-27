@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use libdof::{
-    dofinitions::Hand,
+    // dofinitions::Hand,
     prelude::{Finger, PhysicalKey, Shape},
 };
 use std::sync::Arc;
@@ -18,7 +18,7 @@ pub struct CachedLayout {
     pub possible_swaps: Box<[PosPair]>,
     pub sfb_indices: SfbIndices,
     pub weighted_bigrams: BigramCache,
-    // pub stretch_indices: StretchIndices,
+    pub stretch_indices: StretchIndices,
     // pub stretch_bigrams: StretchCache,
 }
 
@@ -146,9 +146,13 @@ impl StretchIndices {
                 f1 != f2 && (!((**f1 as u8) < 5) && !((**f2 as u8) < 5))
             })
             .for_each(|(((k1, f1), c1), ((k2, f2), c2))| {
-                let fd = (*f1 as u8).abs_diff(*f2 as u8) as f64 * 1.4;
-                let fd = match f1.is_thumb() || f2.is_thumb() {
-                    true => fd + 4.2,
+                let fd = (*f1 as u8).abs_diff(*f2 as u8) as f64 * 1.3;
+                // let fd = match f1.is_thumb() || f2.is_thumb() {
+                //     true => fd + 4.2,
+                //     false => fd,
+                // };
+                let fd = match f1.is_pinky() || f2.is_pinky() {
+                    true => fd + 0.6,
                     false => fd,
                 };
 
@@ -162,7 +166,10 @@ impl StretchIndices {
 
         // Self { per_key }
 
-        todo!()
+        #[cfg(not(target_arch = "wasm32"))]
+        todo!();
+        #[cfg(target_arch = "wasm32")]
+        Self::default()
     }
 }
 
@@ -171,12 +178,37 @@ pub struct StretchCache {}
 
 fn dist(k1: &PhysicalKey, k2: &PhysicalKey, f1: &Finger, f2: &Finger) -> f64 {
     let flen = |f: &Finger| match f {
-        Finger::LP | Finger::RP => 0.0, // -0.15,
-        Finger::LR | Finger::RR => 0.0, // 0.35,
-        Finger::LM | Finger::RM => 0.0, // 0.25,
-        Finger::LI | Finger::RI => 0.0, // -0.30,
-        Finger::LT | Finger::RT => 0.0, // -0.3,
+        Finger::LP | Finger::RP => -0.15,
+        Finger::LR | Finger::RR => 0.35,
+        Finger::LM | Finger::RM => 0.25,
+        Finger::LI | Finger::RI => -0.30,
+        Finger::LT | Finger::RT => -1.80,
     };
+
+    let x_factor = |f: &Finger| match f {
+        Finger::LP | Finger::RP => 1f64,
+        Finger::LR | Finger::RR => 1.0,
+        Finger::LM | Finger::RM => 1.0,
+        Finger::LI | Finger::RI => 1.0,
+        Finger::LT | Finger::RT => 1.4,
+    };
+
+    let y_factor = |f: &Finger| match f {
+        Finger::LP | Finger::RP => 1f64,
+        Finger::LR | Finger::RR => 1.0,
+        Finger::LM | Finger::RM => 1.0,
+        Finger::LI | Finger::RI => 1.0,
+        Finger::LT | Finger::RT => 0.6,
+    };
+
+    let x_factor = x_factor(f1).max(x_factor(f2));
+    let y_factor = y_factor(f1).max(y_factor(f2));
+
+    // let x_thumb_offset = match (f1, f2) {
+    //     (Finger::LT, _) => (k2.x()),
+    //     (_, Finger::LT) => ,
+    //     (Finger::RT, _) | (_, Finger::RT)
+    // }
 
     let l1 = k1.x() + 0.5;
     let r1 = k1.x() + 0.5 + (k1.width() - 1.0).max(0.0);
@@ -188,8 +220,8 @@ fn dist(k1: &PhysicalKey, k2: &PhysicalKey, f1: &Finger, f2: &Finger) -> f64 {
     let t2 = k2.y() + 0.5 + flen(f2);
     let b2 = k2.y() + 0.5 + (k2.height() - 1.0).max(0.0) + flen(f2);
 
-    let dx = 0f64.max((l1.max(l2) - r1.min(r2)).max(0.0));
-    let dy = 0f64.max((t1.max(t2) - b1.min(b2)).max(0.0));
+    let dx = (l1.max(l2) - r1.min(r2)).max(0.0);
+    let dy = (t1.max(t2) - b1.min(b2)).max(0.0);
 
     dx.hypot(dy)
 }
@@ -197,6 +229,21 @@ fn dist(k1: &PhysicalKey, k2: &PhysicalKey, f1: &Finger, f2: &Finger) -> f64 {
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn thing() {
+    fn print_key_info(layout: &crate::layout::Layout, c: char) {
+        let i = match layout.keys.iter().position(|k| k == &c) {
+            Some(i) => i,
+            None => {
+                println!("layout '{}' does not contain '{c}'", layout.name);
+                return;
+            }
+        };
+
+        let p = &layout.keyboard[i];
+        let f = &layout.fingers[i];
+
+        println!("{c} uses {f}\nkey: {p:?}")
+    }
+
     let k1 = "6.25 3 1 1"
         .parse::<PhysicalKey>()
         .expect("couldn't create k1");
@@ -211,6 +258,6 @@ fn thing() {
 
     let layout = crate::layout::Layout::load("../layouts/qwerty.dof").unwrap();
 
-    layout.print_key_info('b');
-    layout.print_key_info('␣');
+    print_key_info(&layout, 'b');
+    print_key_info(&layout, '␣');
 }

@@ -4,13 +4,15 @@ mod util;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod bench {
+    use super::util;
+
     use std::hint::black_box;
 
     use diol::prelude::*;
     use oxeylyzer_core::{optimization::*, prelude::*};
     use rand::{distributions::Alphanumeric, Rng};
 
-    fn main() -> std::io::Result<()> {
+    pub(super) fn main() -> std::io::Result<()> {
         let swaps = [PosPair(1, 4), PosPair(5, 28), PosPair(3, 13), PosPair(7, 7)];
 
         let mut bench = Bench::new(BenchConfig::from_args()?);

@@ -1,34 +1,85 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, path::PathBuf};
 
 use gloo_net::http::Request;
 use leptos::*;
-use oxeylyzer_core::prelude::{Data, Layout, Weights};
-use serde::Deserialize;
+use libdof::prelude::PhysicalKey;
+use oxeylyzer_core::prelude::Layout;
+use rust_embed::Embed;
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
-pub type JsonResource<T> = Resource<String, Result<T, String>>;
+#[derive(Debug, Clone, Error, Serialize, Deserialize, PartialEq)]
+pub struct RequestError(String);
 
-pub async fn load_json<T: for<'a> Deserialize<'a>>(url: String) -> Result<T, String> {
-    async fn load<T: for<'a> Deserialize<'a>>(url: String) -> Result<T, gloo_net::Error> {
-        Request::get(&url).send().await?.json::<T>().await
+impl std::fmt::Display for RequestError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
-
-    load(url).await.map_err(|e| e.to_string())
 }
 
-pub async fn load_text(url: &str) -> Result<String, gloo_net::Error> {
-    Request::get(url).send().await?.text().await
+impl From<gloo_net::Error> for RequestError {
+    fn from(value: gloo_net::Error) -> Self {
+        Self(value.to_string())
+    }
 }
 
-pub fn minmax_x(layout: &Layout) -> (f64, f64) {
-    let min = layout
-        .keyboard
+impl std::ops::Deref for RequestError {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+pub type JsonResource<T> = Resource<String, Result<T, RequestError>>;
+pub type TextResource = Resource<String, Result<String, RequestError>>;
+
+pub async fn load_json<T: for<'a> Deserialize<'a>>(url: String) -> Result<T, RequestError> {
+    let text = Request::get(&url).send().await?.json::<T>().await?;
+
+    Ok(text)
+}
+
+pub async fn load_text(url: String) -> Result<String, RequestError> {
+    let text = Request::get(&url).send().await?.text().await?;
+
+    Ok(text)
+}
+
+pub fn embedded_names<R: Embed>() -> impl Iterator<Item = String> {
+    R::iter()
+        .flat_map(|s| {
+            PathBuf::from(s.to_string())
+                .file_stem()
+                .map(ToOwned::to_owned)
+        })
+        .flat_map(|os| os.into_string())
+}
+
+pub fn font_mod(keys: &[PhysicalKey]) -> f64 {
+    let x = keys
+        .iter()
+        .map(|p| p.width())
+        .min_by(|a, b| a.total_cmp(b))
+        .unwrap_or_default();
+
+    let y = keys
+        .iter()
+        .map(|p| p.height())
+        .max_by(|a, b| a.total_cmp(b))
+        .unwrap_or_default();
+
+    x.min(y)
+}
+
+pub fn minmax_x(keys: &[PhysicalKey]) -> (f64, f64) {
+    let min = keys
         .iter()
         .map(|p| p.x())
         .min_by(|a, b| a.total_cmp(b))
         .unwrap_or_default();
 
-    let max = layout
-        .keyboard
+    let max = keys
         .iter()
         .map(|p| p.x() + p.width())
         .max_by(|a, b| a.total_cmp(b))
@@ -37,16 +88,14 @@ pub fn minmax_x(layout: &Layout) -> (f64, f64) {
     (min, max)
 }
 
-pub fn minmax_y(layout: &Layout) -> (f64, f64) {
-    let min = layout
-        .keyboard
+pub fn minmax_y(keys: &[PhysicalKey]) -> (f64, f64) {
+    let min = keys
         .iter()
         .map(|p| p.y())
         .min_by(|a, b| a.total_cmp(b))
         .unwrap_or_default();
 
-    let max = layout
-        .keyboard
+    let max = keys
         .iter()
         .map(|p| p.y() + p.height())
         .max_by(|a, b| a.total_cmp(b))

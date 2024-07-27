@@ -1,4 +1,7 @@
 #[cfg(not(target_arch = "wasm32"))]
+use oxeylyzer_core::prelude::{Analyzer, Layout};
+
+#[cfg(not(target_arch = "wasm32"))]
 pub fn analyzer_layout(corpus: &str, layout: &str) -> (Analyzer, Layout) {
     use oxeylyzer_core::{analyze::Analyzer, data::Data, layout::Layout};
 

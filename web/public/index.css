@@ -79,18 +79,6 @@
     /* background-color: red; */
 }
 
-.stat-finger-c99ca09 {
-    width: 5cqw;
-}
-
-.stat-table-header-c99ca09 {
-    font-size: 130%;
-    width: 100%;
-    margin: auto;
-    margin-top: 1cqw;
-    margin-bottom: 1cqw;
-}
-
 html {
     box-sizing: border-box;
 }
@@ -122,7 +110,31 @@ a:visited {
 }
 
 .nav-798f66a {
-    background-color: #333;
-    /* height: 4cqw; */
-    padding: 0.5cqw;
+    border-bottom: 0.1cqw solid #555;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.nav-elem-798f66a {
+    display: inline-block;
+    margin: -0.4cqw 0cqw -0.4cqw 2cqw;
+}
+
+.home-header-798f66a {
+    text-align: center;
+    font-size: 200%;
+}
+
+.post-wrapper-31d4b33 {
+    display: flex;
+    justify-content: center;
+}
+
+.post-31d4b33 {
+    padding: 2cqw;
+    border-radius: 0.5cqw;
+    width: 80%;
+    background-color: #111;
+    
 }
