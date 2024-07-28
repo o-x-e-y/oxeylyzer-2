@@ -1,6 +1,6 @@
 ---
 title: "How Oxeylyzer Works"
-date: 2024-28-7
+date: 2024-7-28
 description: "Taking a closer look at Oxeylyzer's internals"
 ---
 

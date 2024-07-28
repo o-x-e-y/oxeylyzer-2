@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = { version = "0.4.38", default-features = false }
 console_error_panic_hook = "0.1"
 fuzzy-matcher = "0.3.7"
 fxhash = "0.2.1"

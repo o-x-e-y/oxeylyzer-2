@@ -1,14 +1,14 @@
-use std::{collections::HashSet, path::PathBuf};
+use std::borrow::Borrow;
 
-use ev::{DragEvent, MouseEvent};
-use fxhash::FxHashMap;
+use chrono::NaiveDate;
 use leptos::*;
 use leptos_router::*;
 use leptos_meta::Link;
-use libdof::prelude::{Dof, Finger, PhysicalKey};
-use oxeylyzer_core::prelude::{Analyzer, Data, Layout, Weights};
 use rust_embed::Embed;
 use serde::{Deserialize, Serialize};
+use gray_matter::engine::YAML;
+use gray_matter::Matter;
+use pulldown_cmark::{html, Options, Parser};
 
 use crate::util::*;
 
@@ -30,27 +30,51 @@ pub struct Post {
 #[include = "*.md"]
 pub struct PostsFolder;
 
+fn thing() {
+    
+}
+
 #[component]
 pub fn RenderPostLinks() -> impl IntoView {
+    let mut posts = embedded_names::<PostsFolder>()
+        .zip(PostsFolder::iter())
+        .map(|(name, path)| {
+            let content = String::from_utf8_lossy(&PostsFolder::get(&path).unwrap().data).into_owned();
+            let (metadata, _) = parse_gray_matter(&content);
+            let date = NaiveDate::parse_from_str(&metadata.date, "%Y-%m-%d")
+                .unwrap_or_else(|e| panic!("Couldn't parse date {} for post '{}': {e}", metadata.date, name));
+
+            (name, metadata, date)
+        })
+        .collect::<Vec<_>>();
+
+    posts.sort_by(|(_, _, d1), (_, _, d2)| {
+        d2.cmp(&d1)
+    });
+
+    let post_links = posts
+        .into_iter()
+        .map(|(name, metadata, _)| {
+            view! { <RenderPostLink name metadata/> }
+        })
+        .collect::<Vec<_>>();
+
     view! {
         <div class="flex justify-center">
             <div class=" bg-darker p-4 w-full grid grid-cols-3">
-                {embedded_names::<PostsFolder>()
-                    .map(|name| {
-                        view! { <RenderPostLink name/> }
-                    })
-                    .collect_view()}
+                {post_links}
             </div>
         </div>
     }
 }
 
 #[component]
-pub fn RenderPostLink(name: String) -> impl IntoView {
+pub fn RenderPostLink(name: String, metadata: Metadata) -> impl IntoView {
     view! {
-        <div class="p-3 m-2 rounded-lg bg-black container-inline-size hover:bg-header">
+        <div class="p-4 m-2 rounded-lg bg-black container-inline-size hover:bg-header">
             <A href=format!("/posts/{name}")>
-                <p>{name.clone()}</p>
+                <p>{metadata.title}</p>
+                <p class="text-base text-[#aaa]">{metadata.date}</p>
                 // <div>
                 //     <RenderNamedDof name/>
                 // </div>
@@ -59,21 +83,21 @@ pub fn RenderPostLink(name: String) -> impl IntoView {
     }
 }
 
-pub fn parse_post(content: &str) -> Option<Post> {
-    use gray_matter::engine::YAML;
-    use gray_matter::Matter;
-    use pulldown_cmark::{html, Options, Parser};
-
-    let mut options = Options::empty();
-    options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
+pub fn parse_gray_matter(content: &str) -> (Metadata, String) {
     let matter = Matter::<YAML>::new();
 
-    let post_data = matter
+    let gray_matter = matter
         .parse_with_struct::<Metadata>(content)
         .expect("Unable to parse md frontmatter");
-    let metadata = post_data.data;
 
-    let content = post_data.content;
+    (gray_matter.data, gray_matter.content)
+}
+
+pub fn parse_post(content: &str) -> Option<Post> {
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
+
+    let (metadata, content) = parse_gray_matter(content);
 
     let parser = Parser::new_ext(&content, options);
 
