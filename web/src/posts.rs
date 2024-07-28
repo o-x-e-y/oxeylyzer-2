@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use chrono::NaiveDate;
 use leptos::*;
 use leptos_router::*;
@@ -30,10 +28,6 @@ pub struct Post {
 #[include = "*.md"]
 pub struct PostsFolder;
 
-fn thing() {
-    
-}
-
 #[component]
 pub fn RenderPostLinks() -> impl IntoView {
     let mut posts = embedded_names::<PostsFolder>()
@@ -60,8 +54,11 @@ pub fn RenderPostLinks() -> impl IntoView {
         .collect::<Vec<_>>();
 
     view! {
+        <div class="flex justify-center pt-5">
+            <h2 class="text-4xl">"Posts"</h2>
+        </div>
         <div class="flex justify-center">
-            <div class=" bg-darker p-4 w-full grid grid-cols-3">
+            <div class="p-4 w-full grid grid-cols-3">
                 {post_links}
             </div>
         </div>
@@ -75,9 +72,6 @@ pub fn RenderPostLink(name: String, metadata: Metadata) -> impl IntoView {
             <A href=format!("/posts/{name}")>
                 <p>{metadata.title}</p>
                 <p class="text-base text-[#aaa]">{metadata.date}</p>
-                // <div>
-                //     <RenderNamedDof name/>
-                // </div>
             </A>
         </div>
     }

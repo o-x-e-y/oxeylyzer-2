@@ -185,24 +185,24 @@ fn dist(k1: &PhysicalKey, k2: &PhysicalKey, f1: &Finger, f2: &Finger) -> f64 {
         Finger::LT | Finger::RT => -1.80,
     };
 
-    let x_factor = |f: &Finger| match f {
-        Finger::LP | Finger::RP => 1f64,
-        Finger::LR | Finger::RR => 1.0,
-        Finger::LM | Finger::RM => 1.0,
-        Finger::LI | Finger::RI => 1.0,
-        Finger::LT | Finger::RT => 1.4,
-    };
+    // let x_factor = |f: &Finger| match f {
+    //     Finger::LP | Finger::RP => 1f64,
+    //     Finger::LR | Finger::RR => 1.0,
+    //     Finger::LM | Finger::RM => 1.0,
+    //     Finger::LI | Finger::RI => 1.0,
+    //     Finger::LT | Finger::RT => 1.4,
+    // };
 
-    let y_factor = |f: &Finger| match f {
-        Finger::LP | Finger::RP => 1f64,
-        Finger::LR | Finger::RR => 1.0,
-        Finger::LM | Finger::RM => 1.0,
-        Finger::LI | Finger::RI => 1.0,
-        Finger::LT | Finger::RT => 0.6,
-    };
+    // let y_factor = |f: &Finger| match f {
+    //     Finger::LP | Finger::RP => 1f64,
+    //     Finger::LR | Finger::RR => 1.0,
+    //     Finger::LM | Finger::RM => 1.0,
+    //     Finger::LI | Finger::RI => 1.0,
+    //     Finger::LT | Finger::RT => 0.6,
+    // };
 
-    let x_factor = x_factor(f1).max(x_factor(f2));
-    let y_factor = y_factor(f1).max(y_factor(f2));
+    // let x_factor = x_factor(f1).max(x_factor(f2));
+    // let y_factor = y_factor(f1).max(y_factor(f2));
 
     // let x_thumb_offset = match (f1, f2) {
     //     (Finger::LT, _) => (k2.x()),

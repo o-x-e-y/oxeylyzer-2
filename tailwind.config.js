@@ -139,7 +139,7 @@ module.exports = {
                 },
                 DEFAULT: {
                     css: {
-                        maxWidth: '80%', // add required value here
+                        maxWidth: '80ch',
                         minWidth: '50%',
                     }
                 }
