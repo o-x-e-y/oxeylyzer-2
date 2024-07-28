@@ -65,10 +65,10 @@ fn Home() -> impl IntoView {
         <div class="flex content-center">
             <div class="px-16 py-32 my-auto text-1xl grid gap-16 grid-cols-homepage">
                 <div class="">
-                    <p class="animate-fadein-1 opacity-0">
+                    <p>
                         "An online keyboard layout analyzer and generator."
                     </p>
-                    <p class="animate-fadein-2 opacity-0">"Created by Oxey"</p>
+                    // <p class="animate-fadein-2 opacity-0">"Created by Oxey"</p>
                 </div>
                 <div>
                     <dof::RenderNamedDof name="noctum".to_string()></dof::RenderNamedDof>
