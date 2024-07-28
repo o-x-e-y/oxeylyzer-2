@@ -1,5 +1,9 @@
 use leptos::*;
-use leptos_router::*;
+// use leptos_router::*;
+
+// use crate::layouts::LayoutsFolder;
 
 #[component]
-fn search_bar() -> impl IntoView {}
+fn SearchBar() -> impl IntoView {
+    
+}

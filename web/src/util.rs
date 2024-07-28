@@ -56,21 +56,21 @@ pub fn embedded_names<R: Embed>() -> impl Iterator<Item = String> {
         .flat_map(|os| os.into_string())
 }
 
-pub fn font_mod(keys: &[PhysicalKey]) -> f64 {
-    let x = keys
-        .iter()
-        .map(|p| p.width())
-        .min_by(|a, b| a.total_cmp(b))
-        .unwrap_or_default();
+// pub fn font_mod(keys: &[PhysicalKey]) -> f64 {
+//     let x = keys
+//         .iter()
+//         .map(|p| p.width())
+//         .min_by(|a, b| a.total_cmp(b))
+//         .unwrap_or_default();
 
-    let y = keys
-        .iter()
-        .map(|p| p.height())
-        .max_by(|a, b| a.total_cmp(b))
-        .unwrap_or_default();
+//     let y = keys
+//         .iter()
+//         .map(|p| p.height())
+//         .max_by(|a, b| a.total_cmp(b))
+//         .unwrap_or_default();
 
-    x.min(y)
-}
+//     x.min(y)
+// }
 
 pub fn minmax_x(keys: &[PhysicalKey]) -> (f64, f64) {
     let min = keys
@@ -104,7 +104,7 @@ pub fn minmax_y(keys: &[PhysicalKey]) -> (f64, f64) {
     (min, max)
 }
 
-pub fn pin_positions(layout: &Layout, pin_chars: String) -> Vec<usize> {
+pub fn _pin_positions(layout: &Layout, pin_chars: String) -> Vec<usize> {
     match pin_chars.len() {
         0 => vec![],
         1 => {

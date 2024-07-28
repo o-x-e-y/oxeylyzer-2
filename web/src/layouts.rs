@@ -10,45 +10,32 @@ use rust_embed::Embed;
 #[derive(Embed)]
 #[folder = "../layouts"]
 #[include = "*.dof"]
-struct LayoutsFolder;
+pub struct LayoutsFolder;
 
 #[component]
-pub fn Layouts(base_url: &'static str) -> impl IntoView {
+pub fn LayoutsWrapper() -> impl IntoView {
+    view! { <Outlet/> }
+}
+
+#[component]
+pub fn RenderLayoutLinks(base_url: &'static str) -> impl IntoView {
     view! {
         <div class="flex justify-center">
-            <div class=" bg-darker p-4 -m-2 w-full grid grid-cols-3">
+            <div class=" bg-darker p-4 w-full grid grid-cols-3">
                 {embedded_names::<LayoutsFolder>()
                     .map(|name| {
-                        view! {
-                            <RenderLayoutLink base_url name />
-                        }
+                        view! { <RenderLayoutLink base_url name/> }
                     })
                     .collect_view()}
             </div>
         </div>
     }
-
-    // view! {
-    //     <div class="flex justify-center">
-    //         <menu class="w-4/5 mx-12 p-10 bg-darker rounded-2xl">
-    //             {embedded_names::<LayoutsFolder>()
-    //                 .map(|i| {
-    //                     view! {
-    //                         <li>
-    //                             <A href=url(&i)>{format!("• {i}")}</A>
-    //                         </li>
-    //                     }
-    //                 })
-    //                 .collect_view()}
-    //         </menu>
-    //     </div>
-    // }
 }
 
 #[component]
 pub fn RenderLayoutLink(base_url: &'static str, name: String) -> impl IntoView {
     view! {
-        <div class="p-3 m-2 rounded-lg bg-black container-inline-size hover:bg-background">
+        <div class="p-3 m-2 rounded-lg bg-black container-inline-size hover:bg-header">
             <A href=format!("/{base_url}/{name}")>
                 <p>{name.clone()}</p>
                 <div>

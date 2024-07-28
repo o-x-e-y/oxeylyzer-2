@@ -1,4 +1,4 @@
-use crate::{util::*, dof::*};
+use crate::util::*;
 
 use ev::{DragEvent, MouseEvent};
 use fxhash::FxHashSet;
@@ -226,7 +226,7 @@ fn Key(
 
     view! {
         <div
-            class="absolute flex border-[0.3cqw] border-darker items-center justify-center bg-[#111] text-[#111] rounded-[1cqw] container-inline-size"
+            class="absolute flex border-[0.3cqw] border-darker items-center justify-center bg-darker text-darker rounded-[1cqw] container-inline-size"
             style:left=format!("{}%", x)
             style:top=format!("{}%", y)
             style:width=format!("{}%", width)

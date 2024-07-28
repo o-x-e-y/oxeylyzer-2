@@ -1,16 +1,13 @@
 mod analyze;
 mod dof;
-mod keyboard;
 mod layouts;
 mod posts;
 mod search;
 mod util;
 
 use leptos::*;
+use leptos_meta::provide_meta_context;
 use leptos_router::*;
-use libdof::Dof;
-use rust_embed::Embed;
-use util::*;
 
 pub fn main() {
     console_error_panic_hook::set_once();
@@ -20,52 +17,52 @@ pub fn main() {
 
 #[component]
 fn App() -> impl IntoView {
+    provide_meta_context();
+
     view! {
         <Router trailing_slash=leptos_router::TrailingSlash::Redirect>
-            <main class="text-lg text-[#ddd]">
+            <main class="text-lg text-txt">
                 <Navigation/>
                 <Routes>
                     <Route path="/" view=Home/>
-                    <Route path="/layouts" view=LayoutsWrapper>
+                    <Route path="/layouts" view=layouts::LayoutsWrapper>
                         <Route
                             path=""
                             view=|| {
-                                view! { <layouts::Layouts base_url="layouts"></layouts::Layouts> }
+                                view! {
+                                    <layouts::RenderLayoutLinks base_url="layouts"></layouts::RenderLayoutLinks>
+                                }
                             }
                         />
 
                         <Route path=":name" view=layouts::RenderLayout/>
                     </Route>
-                    <Route path="/analyze" view=LayoutsWrapper>
+                    <Route path="/analyze" view=layouts::LayoutsWrapper>
                         <Route
                             path=""
                             view=|| {
-                                view! { <layouts::Layouts base_url="analyze"></layouts::Layouts> }
+                                view! {
+                                    <layouts::RenderLayoutLinks base_url="analyze"></layouts::RenderLayoutLinks>
+                                }
                             }
                         />
 
                         <Route path=":name" view=analyze::RenderAnalyzer/>
                     </Route>
-                // <Route path="/posts" view=LayoutsWrapper>
-                // <Route path="" view=Home/>
-                // <Route path=":name" view=posts::RenderPost/>
-                // </Route>
-                    </Routes>
+                    <Route path="/posts" view=|| view! { <Outlet /> }>
+                        <Route path="" view=posts::RenderPostLinks/>
+                        <Route path=":name" view=posts::RenderPost/>
+                    </Route>
+                </Routes>
             </main>
         </Router>
     }
 }
 
-#[derive(Embed)]
-#[folder = "./public/posts"]
-#[include = "*.md"]
-struct PostsFolder;
-
 #[component]
 fn Home() -> impl IntoView {
     view! {
-        <div class="absolute top-0 w-full h-full bg-darker -z-50"></div>
-        <div class="flex content-center bg-darker">
+        <div class="flex content-center">
             <div class="px-16 py-32 my-auto text-1xl grid gap-16 grid-cols-homepage">
                 <div class="">
                     <p class="animate-fadein-1 opacity-0">
@@ -84,7 +81,7 @@ fn Home() -> impl IntoView {
 #[component]
 fn Navigation() -> impl IntoView {
     view! {
-        <header class="w-full bg-background container-inline-size">
+        <header class="w-full bg-header container-inline-size">
             <div class="relative flex items-center p-4">
                 <A class="ml-16 visited:text-[#ddd]" href="/">
                     <h1 class="pl-5 text-4xl">"Oxeylyzer 2"</h1>
@@ -120,13 +117,5 @@ fn NavElem(text: &'static str, href: &'static str) -> impl IntoView {
                 <div class="p-1 hover:bg-[#ffffff10] rounded-lg">{text}</div>
             </div>
         </A>
-    }
-}
-
-#[component]
-fn LayoutsWrapper() -> impl IntoView {
-    view! {
-        <div style="margin-top: 1cqw"></div>
-        <Outlet/>
     }
 }

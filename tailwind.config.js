@@ -77,7 +77,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: {
-        files: ["./web/*.html", "./web/src/**/*.rs"],
+        files: ["./web/*.html", "./web/src/**/*.rs", "./web/public/posts/*.md"],
     },
     theme: {
         extend: {
@@ -93,16 +93,61 @@ module.exports = {
                 'fadein-3': 'fadein 1s ease-in-out 2.75s forwards',
             },
             colors: {
-                'background': '#242424',
-                'darker': '#1a1a1a'
+                'header': '#242424',
+                'darker': '#1a1a1a',
+                'txt': "#ddd",
             },
             gridTemplateColumns: {
                 'homepage': '1fr 2fr',
                 'metadata': '1fr 4fr',
-            }
+            },
+            typography: ({ theme }) => ({
+                blog: {
+                    css: {
+                        '--tw-prose-body': "#CED4DA",
+                        '--tw-prose-headings': "#F8F9FA",
+                        '--tw-prose-lead': "#F8F9FA",
+                        '--tw-prose-links': "#F8F9FA",
+                        '--tw-prose-bold': "#F8F9FA",
+                        '--tw-prose-counters': "#F8F9FA",
+                        '--tw-prose-bullets': "#F8F9FA",
+                        '--tw-prose-hr': "#CED4DA",
+                        '--tw-prose-quotes': "#F8F9FA",
+                        '--tw-prose-quote-borders': "#CED4DA",
+                        '--tw-prose-captions': "#CED4DA",
+                        '--tw-prose-code': "#F8F9FA",
+                        '--tw-prose-pre-bg': "#080808",
+                        '--tw-prose-th-borders': "#CED4DA",
+                        '--tw-prose-td-borders': "#F8F9FA",
+                        // '--tw-prose-invert-body': theme('colors.pink[200]'),
+                        // '--tw-prose-invert-headings': theme('colors.white'),
+                        // '--tw-prose-invert-lead': "#CED4DA",
+                        // '--tw-prose-invert-links': theme('colors.white'),
+                        // '--tw-prose-invert-bold': theme('colors.white'),
+                        // '--tw-prose-invert-counters': theme('colors.pink[400]'),
+                        // '--tw-prose-invert-bullets': theme('colors.pink[600]'),
+                        // '--tw-prose-invert-hr': "#CED4DA",
+                        // '--tw-prose-invert-quotes': theme('colors.pink[100]'),
+                        // '--tw-prose-invert-quote-borders': "#CED4DA",
+                        // '--tw-prose-invert-captions': theme('colors.pink[400]'),
+                        // '--tw-prose-invert-code': theme('colors.white'),
+                        // '--tw-prose-invert-pre-code': "#CED4DA",
+                        // '--tw-prose-invert-pre-bg': 'rgb(0 0 0 / 50%)',
+                        // '--tw-prose-invert-th-borders': theme('colors.pink[600]'),
+                        // '--tw-prose-invert-td-borders': "#CED4DA",
+                    },
+                },
+                DEFAULT: {
+                    css: {
+                        maxWidth: '80%', // add required value here
+                        minWidth: '50%',
+                    }
+                }
+            }),
         },
     },
     plugins: [
+        require("@tailwindcss/typography"),
         function ({ addUtilities }) {
             const newUtilities = {
                 '.container-inline-size': {
