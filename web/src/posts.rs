@@ -144,7 +144,11 @@ fn ViewPost(post: Post) -> impl IntoView {
         <script src="/public/highlighter/load_highlight.js"></script>
         <div class="flex justify-center my-6">
             <div
-                class="prose prose-blog overflow-auto mx-auto prose-pre:p-0 prose-pre:m-0 prose-pre:rounded-lg"
+                class="
+                    overflow-auto mx-auto prose prose-posts lg:text-lg sm:text-2xl md:text-2xl
+                    prose-pre:p-0 prose-pre:m-0 prose-pre:rounded-lg prose-code:sm:text-2xl
+                    prose-code:md:text-2xl prose-code:lg:text-base
+                "
                 inner_html=post.html
             />
         </div>
