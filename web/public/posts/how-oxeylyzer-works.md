@@ -13,7 +13,7 @@ Taking a closer look at a keyboard layout analyzer's internals.
 Oxeylyzer 2 is a keyboard layout analyzer written in Rust, and it's also the analyzer powering the
 stats on this website. It was made with strong error handling, wasm compliance and generation speed
 in mind, the former two version one lacks. My goal in this article is to explain what it takes to
-go from a corpus text and a `.dof` layout to different stats on the screen, and what goes into
+go from a corpus text and a layout to different stats on the screen, and what goes into
 optimizing layout generation.
 
 ## Processing corpus files
