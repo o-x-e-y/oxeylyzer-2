@@ -90,7 +90,7 @@ characters in some form.
 Now the real fun begins. With our data and a layout, we can go ahead and write some code that takes
 both of these and spits out a value.
 
-### Sfbs
+### Bigrams
 
 A very common stat to check is sfbs. Step one is actually the hardest part, where we have to take
 each column on the layout and get every combination of 2 key pairs. The `tuple_combinations`
@@ -197,12 +197,12 @@ pub const POS_FINGERS: [usize; 30] = [
 ];
 ```
 
-Now we have three fingers we want to get a corresponding trigram. Considering the fact we have
-three integers, the strategy here is to populate an array first to only have to index into it for
-every trigram. The way to do this is by going over each finger combinations, and writing some code
-to determine what trigram it is. Rolls will be the example here. Rolls are defined as trigrams where
-one key is one hand, and two are on the other. To check if something is a roll we can
-do something like this:
+We can also add this to the analysis struct. Now we have three fingers we want to get a
+corresponding trigram. Considering the fact we have three integers, the strategy here is to populate
+an array first to only have to index into it for every trigram. The way to do this is by going over
+each finger combinations, and writing some code to determine what trigram it is. Rolls will be the
+example here. Rolls are defined as trigrams where one key is one hand, and two are on the other. To
+check if something is a roll we can do something like this:
 
 ```rust
 fn is_roll([f1, f2, f3]: [usize; 3]) -> bool {

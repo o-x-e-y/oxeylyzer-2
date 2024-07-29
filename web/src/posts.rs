@@ -125,14 +125,20 @@ pub fn RenderPost() -> impl IntoView {
                         <ViewPost post/>
                     }
                 } else {
-                    "Nuh uh! nuh uh".into_view()
+                    view! {
+                        <div class="flex justify-center">
+                            <div class="mx-auto my-12">
+                                "Encountered an error while parsing post :("
+                            </div>
+                        </div>
+                    }.into_view()
                 }
             }
             Some(Err(_)) => {
                 redirect.dispatch(());
                 "Piece not found. Redirecting...".into_view()
             }
-            None => "Loading...".into_view(),
+            None => ().into_view(),
         }}
     }
 }
@@ -145,7 +151,7 @@ fn ViewPost(post: Post) -> impl IntoView {
         <div class="flex justify-center my-6">
             <div
                 class="
-                    overflow-auto mx-auto prose prose-posts lg:text-lg sm:text-2xl md:text-2xl
+                    overflow-auto mx-auto prose prose-posts sm:text-2xl md:text-2xl lg:text-base
                     prose-pre:p-0 prose-pre:m-0 prose-pre:rounded-lg prose-code:sm:text-2xl
                     prose-code:md:text-2xl prose-code:lg:text-base
                 "
