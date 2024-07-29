@@ -148,10 +148,15 @@ fn ViewPost(post: Post) -> impl IntoView {
     view! {
         <Link rel="stylesheet" href="/public/highlighter/styles/gruvbox-dark-medium.min.css"/>
         <script src="/public/highlighter/load_highlight.js"></script>
+        // <div class="absolute w-full flex justify-end">
+        //     <div class="m-6">
+        //         "WHAT"
+        //     </div>
+        // </div>
         <div class="flex justify-center my-6">
             <div
                 class="
-                    overflow-auto mx-auto prose prose-posts sm:text-2xl md:text-2xl lg:text-base
+                    overflow-auto mx-auto prose prose-posts sm:text-2xl text-2xl md:text-xl lg:text-base
                     prose-pre:p-0 prose-pre:m-0 prose-pre:rounded-lg prose-code:sm:text-2xl
                     prose-code:md:text-2xl prose-code:lg:text-base
                 "
