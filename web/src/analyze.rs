@@ -337,21 +337,19 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let sfs = create_memo(move |_| stats_memo.with(|s| s.sfs));
     let finger_use = create_memo(move |_| stats_memo.with(|s| s.finger_use));
     let finger_sfbs = create_memo(move |_| stats_memo.with(|s| s.finger_sfbs));
+
     let weighted_finger_distance =
         create_memo(move |_| stats_memo.with(|s| s.weighted_finger_distance));
+    
     let unweighted_finger_distance =
         create_memo(move |_| stats_memo.with(|s| s.unweighted_finger_distance));
+    
     let trigrams = create_memo(move |_| stats_memo.with(|s| s.trigrams.clone()));
-    // let score = create_memo(move |_| analyzer.with(|a| layout_memo.with(|l| a.score(l) as f64)));
 
     view! {
         <div class="w-full overflow-x-scroll">
-            <table>
+            <table class="w-full m-4">
                 <thead>
-                    // <tr class="grid">
-                    //     // <th class="text-left align-top px-3 py-1">"Stats"</th>
-                    //     <th></th>
-                    // </tr>
                 </thead>
                 <tbody class="grid">
                     <RenderStatRow stats=vec![("sfbs", sfbs), ("sfs", sfs)]/>
@@ -360,13 +358,6 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
                     <RenderFingerStatRow name="dist" stat=unweighted_finger_distance unit=""/>
                     <RenderFingerStatRow name="weighted dist" stat=weighted_finger_distance unit=""/>
                     <RenderTrigrams trigrams/>
-                // <Metadata name="Name" data=name/>
-                // <Metadata name="Authors" data=authors/>
-                // <Metadata name="Year" data=year/>
-                // <Metadata name="Description" data=description/>
-                // <Metadata name="Source" data=link/>
-                // <Metadata name="Languages" data=languages/>
-                // <Metadata name="Board" data=board />
                 </tbody>
             </table>
         </div>
