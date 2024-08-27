@@ -74,15 +74,18 @@ pub fn RenderLayout() -> impl IntoView {
     view! {
         {move || match dof.get() {
             Some(Ok(dof)) => {
-                view! { <RenderMetadataDof dof/> }
+                view! {
+                    <div class="w-full sm:w-3/4 mx-auto">
+                        <RenderMetadataDof dof/>
+                    </div>
+                }.into_view()
             }
             Some(Err(_)) => view! { <p>"Layout '" {name} "' doesn't exist :("</p> }.into_view(),
             None => {
                 view! {
                     // "Loading..."
-                    <div class="animate-pulse mx-auto mt-24"></div>
-                }
-                    .into_view()
+                    <div class="animate-pulse mx-auto mt-24"/>
+                }.into_view()
             }
         }}
     }
@@ -141,13 +144,13 @@ pub fn RenderMetadataDof(dof: Dof) -> impl IntoView {
             true => {
                 set_info('𝅏');
                 match link() {
-                    Some(_) => link.set(link_base.clone()),
-                    None => link.set(Some("Unknown".into_view())),
+                    None if link_base.is_none() => link.set(Some("Unknown".into_view())),
+                    _ => link.set(link_base.clone()),
                 }
             }
             false => {
                 set_info('𝅉');
-                if link().is_some() {
+                if link() == Some("Unknown".into_view()) {
                     link.set(None)
                 }
             }
@@ -164,38 +167,36 @@ pub fn RenderMetadataDof(dof: Dof) -> impl IntoView {
     };
 
     view! {
-        <div class="w-4/5 mx-auto min-w-max">
-            <div class="bg-darker p-4 mt-4 rounded-xl">
-                <RenderDof dof/>
-            </div>
-            <div class="bg-darker p-6 mt-6 rounded-xl w-full">
-                <table class="w-full rounded-3xl">
-                    <thead>
-                        <tr class="bg-[#292929]">
-                            <th class="text-left align-top px-3 py-1">
-                                <label name="collapse-metadata">
-                                    <button on:click=collapse>
-                                        <span>"Info"</span>
-                                        <span class="absolute -mt-3 opacity-70">
-                                            {move || info()}
-                                        </span>
-                                    </button>
-                                </label>
-                            </th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <Metadata name="Name" data=name/>
-                        <Metadata name="Authors" data=authors/>
-                        <Metadata name="Year" data=year/>
-                        <Metadata name="Description" data=description/>
-                        <Metadata name="Source" data=link/>
-                        <Metadata name="Languages" data=languages/>
-                    // <Metadata name="Board" data=board />
-                    </tbody>
-                </table>
-            </div>
+        <div class="m-4">
+            <RenderDof dof/>
+        </div>
+        <div class="flex justify-center">
+            <table class="w-full m-4">
+                <thead>
+                    <tr class="bg-[#292929]">
+                        <th class="text-left align-top px-2 py-1">
+                            <label name="collapse-metadata">
+                                <button on:click=collapse>
+                                    <span>"Info"</span>
+                                    <span class="absolute -mt-3 opacity-70">
+                                        {move || info()}
+                                    </span>
+                                </button>
+                            </label>
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <Metadata name="Name" data=name/>
+                    <Metadata name="Authors" data=authors/>
+                    <Metadata name="Year" data=year/>
+                    <Metadata name="Description" data=description/>
+                    <Metadata name="Source" data=link/>
+                    <Metadata name="Languages" data=languages/>
+                // <Metadata name="Board" data=board />
+                </tbody>
+            </table>
         </div>
     }
 }
@@ -210,9 +211,9 @@ fn Metadata(
             Some(data) => {
                 Some(
                     view! {
-                        <tr class="even:bg-[#292929] grid gap-x-5 grid-cols-metadata">
-                            <td class="text-left align-top px-2 py-1">{name}</td>
-                            <td class="text-left align-top px-2 py-1">{data}</td>
+                        <tr class="even:bg-[#292929] grid grid-cols-metadata px-2">
+                            <td class="text-left align-top py-1">{name}</td>
+                            <td class="text-left align-top py-1">{data}</td>
                         </tr>
                     },
                 )

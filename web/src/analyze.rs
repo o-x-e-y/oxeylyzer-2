@@ -5,7 +5,10 @@ use fxhash::FxHashSet;
 use leptos::*;
 use leptos_router::*;
 use libdof::prelude::{Dof, Finger, PhysicalKey, Shape};
-use oxeylyzer_core::{prelude::{Analyzer, Data, Layout, Weights}, stats::TrigramStats};
+use oxeylyzer_core::{
+    prelude::{Analyzer, Data, Layout, Weights},
+    stats::TrigramStats,
+};
 
 pub type Key = RwSignal<char>;
 
@@ -86,21 +89,19 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
     provide_context(create_rw_signal(Pins::default()));
 
     view! {
-        <div class="w-4/5 mx-auto">
-            // <div class="p-4 mt-4 grid grid-cols-[2fr_1fr]">
-            <div class="flex justify-center my-4">
-                <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
-                    <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
-                </div>
-                // <div class="sm:ml-[1%] md:ml-[2%] lg:ml-[3%]">
-                //     // <p>"Button uno"</p>
-                //     // <p>"Button dos"</p>
-                //     // <p>"Button tres"</p>
+        <div class="w-full sm:w-3/4 mx-auto">
+            // <div class="my-4 grid grid-cols-[2fr_1fr]">
+            // <div class="flex justify-center my-4">
+                // <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
+            <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
                 // </div>
-            </div>
-            <div class="rounded-xl">
-                <MaybeRenderAnalysis/>
-            </div>
+            // <div class="sm:ml-[1%] md:ml-[2%] lg:ml-[3%]">
+            // // <p>"Button uno"</p>
+            // // <p>"Button dos"</p>
+            // // <p>"Button tres"</p>
+            // </div>
+            // </div>
+            <MaybeRenderAnalysis/>
         </div>
     }
 }
@@ -179,7 +180,7 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
         .collect::<Vec<_>>();
 
     view! {
-        <div class="container-inline-size">
+        <div class="m-4 w-4/5 mx-auto container-inline-size">
             <div style=move || {
                 format!("width: {width}cqw; height: {height}cqw; font-size: {font_size}cqw")
             }>{key_views}</div>
@@ -259,14 +260,15 @@ fn Key(
             Finger::RM => "#66c2a5",
             Finger::RR => "#3288bd",
             Finger::RP => "#6b5ab8", //"#5e4fa2",
-        }.to_string(),
+        }
+        .to_string(),
     };
 
     view! {
         <div
             class="
-                absolute flex border-[0.3cqw] border-darker items-center justify-center
-                bg-darker text-darker rounded-[1cqw] container-inline-size
+            absolute flex border-[0.3cqw] border-darker items-center justify-center
+            bg-darker text-darker rounded-[1cqw] container-inline-size
             "
             style:left=format!("{}%", x)
             style:top=format!("{}%", y)
@@ -276,9 +278,9 @@ fn Key(
         >
             <div
                 class="
-                    absolute top-0 right-0 w-0 h-0
-                    border-l-[13cqw] border-l-transparent border-b-[13cqw] border-b-transparent
-                    border-r-[13cqw] border-r-darker border-t-[13cqw] border-t-darker
+                absolute top-0 right-0 w-0 h-0
+                border-l-[13cqw] border-l-transparent border-b-[13cqw] border-b-transparent
+                border-r-[13cqw] border-r-darker border-t-[13cqw] border-t-darker
                 "
                 style:opacity=op
             ></div>
@@ -343,29 +345,31 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
     // let score = create_memo(move |_| analyzer.with(|a| layout_memo.with(|l| a.score(l) as f64)));
 
     view! {
-        <table class="w-full rounded-3xl">
-            <thead>
-                <tr class="grid">
-                    // <th class="text-left align-top px-3 py-1">"Stats"</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody class="grid">
-                <RenderStatRow stats=vec![("sfbs", sfbs), ("sfs", sfs)]/>
-                <RenderFingerStatRow name="sfbs" stat=finger_sfbs unit="%"/>
-                <RenderFingerStatRow name="use" stat=finger_use unit="%"/>
-                <RenderFingerStatRow name="dist" stat=unweighted_finger_distance unit=""/>
-                <RenderFingerStatRow name="weighted dist" stat=weighted_finger_distance unit=""/>
-                <RenderTrigrams trigrams/>
-            // <Metadata name="Name" data=name/>
-            // <Metadata name="Authors" data=authors/>
-            // <Metadata name="Year" data=year/>
-            // <Metadata name="Description" data=description/>
-            // <Metadata name="Source" data=link/>
-            // <Metadata name="Languages" data=languages/>
-            // <Metadata name="Board" data=board />
-            </tbody>
-        </table>
+        <div class="w-full overflow-x-scroll">
+            <table>
+                <thead>
+                    // <tr class="grid">
+                    //     // <th class="text-left align-top px-3 py-1">"Stats"</th>
+                    //     <th></th>
+                    // </tr>
+                </thead>
+                <tbody class="grid">
+                    <RenderStatRow stats=vec![("sfbs", sfbs), ("sfs", sfs)]/>
+                    <RenderFingerStatRow name="sfbs" stat=finger_sfbs unit="%"/>
+                    <RenderFingerStatRow name="use" stat=finger_use unit="%"/>
+                    <RenderFingerStatRow name="dist" stat=unweighted_finger_distance unit=""/>
+                    <RenderFingerStatRow name="weighted dist" stat=weighted_finger_distance unit=""/>
+                    <RenderTrigrams trigrams/>
+                // <Metadata name="Name" data=name/>
+                // <Metadata name="Authors" data=authors/>
+                // <Metadata name="Year" data=year/>
+                // <Metadata name="Description" data=description/>
+                // <Metadata name="Source" data=link/>
+                // <Metadata name="Languages" data=languages/>
+                // <Metadata name="Board" data=board />
+                </tbody>
+            </table>
+        </div>
     }
 }
 
@@ -382,7 +386,7 @@ fn RenderStatRow(stats: Vec<(&'static str, impl Fn() -> f64 + 'static)>) -> impl
         })
         .collect::<Vec<_>>();
 
-    view! { <tr class="grid grid-flow-col">{rows}</tr> }
+    view! { <tr class="grid grid-flow-col even:bg-[#292929]">{rows}</tr> }
 }
 
 #[component]
@@ -398,7 +402,7 @@ fn RenderFingerStatRow(
     };
 
     view! {
-        <tr class="grid grid-flow-col">
+        <tr class="grid grid-flow-col even:bg-[#292929]">
             <td class="text-left align-top px-2 py-1">{name}</td>
             {rows}
         </tr>

@@ -48,7 +48,6 @@ fn App() -> impl IntoView {
                                 }
                             }
                         />
-
                         <Route path=":name" view=layouts::RenderLayout/>
                     </Route>
                     <Route path="/analyze" view=layouts::LayoutsWrapper>
@@ -63,7 +62,7 @@ fn App() -> impl IntoView {
 
                         <Route path=":name" view=analyze::RenderAnalyzer/>
                     </Route>
-                    <Route path="/posts" view=|| view! { <Outlet /> }>
+                    <Route path="/posts" view=|| view! { <Outlet/> }>
                         <Route path="" view=posts::RenderPostLinks/>
                         <Route path=":name" view=posts::RenderPost/>
                     </Route>
@@ -79,14 +78,12 @@ fn Home() -> impl IntoView {
         <div class="w-full h-1/2 my-auto flex content-center">
             <div class="w-11/12 h-1/2 mx-auto text-1xl sm:grid sm:gap-16 sm:grid-cols-homepage">
                 <div class="w-full mt-12">
-                    <p>
-                        "An online keyboard layout analyzer and generator."
-                    </p>
-                    // <div class="br md:w-2/3 flex">
-                    //     <div class="br my-10 mx-auto">
-                    //         "Get started"
-                    //     </div>
-                    // </div>
+                    <p>"An online keyboard layout analyzer and generator."</p>
+                // <div class="br md:w-2/3 flex">
+                // <div class="br my-10 mx-auto">
+                // "Get started"
+                // </div>
+                // </div>
                 </div>
                 <div class="w-full mt-12">
                     <dof::RenderNamedDof name="noctum".to_string()></dof::RenderNamedDof>
@@ -108,9 +105,8 @@ fn Navigation() -> impl IntoView {
                 </A>
                 <div class="hidden sm:flex sm:w-full justify-right">
                     <div class="
-                        w-full flex flex-col sm:gap-4 sm:flex-row sm:items-center
-                        sm:justify-end sm:mt-0 sm:pl-5"
-                    >
+                    w-full flex flex-col sm:gap-4 sm:flex-row sm:items-center
+                    sm:justify-end sm:mt-0 sm:pl-5">
                         <NavElem text="Layouts" href="/layouts"/>
                         <NavElem text="Posts" href="/posts"/>
                         <NavElem text="Analyze" href="/analyze"/>
@@ -119,25 +115,28 @@ fn Navigation() -> impl IntoView {
                     </div>
                 </div>
                 <div class="sm:hidden flex w-full justify-end my-auto max-h-fit">
-                    <button 
+                    <button
                         class="p-1 mr-1 hover:bg-hovered rounded-lg"
                         on:click=move |_| set_dots_clicked(true)
                     >
                         <img class="h-6 w-auto" src="../public/images/three-dots.svg" alt="Menu"/>
                     </button>
-                    <ToggleHeatmap />
+                    <ToggleHeatmap/>
                 </div>
-                <div class="fixed inset-0 bg-black/20 z-[9000] backdrop-blur-sm"
+                <div
+                    class="fixed inset-0 bg-black/20 z-[9000] backdrop-blur-sm"
                     hidden=move || !dots_clicked()
                     on:click=move |_| set_dots_clicked(false)
                 >
                     <div class="flex justify-end">
-                        <div class="bg-header rounded-xl m-4 px-5 py-4 w-5/12"
-                        >
+                        <div class="bg-header rounded-xl m-4 px-5 py-4 w-5/12">
                             <ThreeDotsElem text="Layouts" href="/layouts"/>
                             <ThreeDotsElem text="Posts" href="/posts"/>
                             <ThreeDotsElem text="Analyze" href="/analyze"/>
-                            <ThreeDotsElem text="Github" href="https://github.com/o-x-e-y/oxeylyzer-2"/>
+                            <ThreeDotsElem
+                                text="Github"
+                                href="https://github.com/o-x-e-y/oxeylyzer-2"
+                            />
                         </div>
                     </div>
                 </div>
@@ -186,10 +185,5 @@ fn ToggleHeatmap() -> impl IntoView {
 
     let style = move || format!("{} w-8 h-8 rounded-[0.25rem]", gradient());
 
-    view! {
-        <button class=style
-            on:click=move |_| enable_heatmap.update(|b| *b = !*b)
-        >
-        </button>
-    }
+    view! { <button class=style on:click=move |_| enable_heatmap.update(|b| *b = !*b)></button> }
 }

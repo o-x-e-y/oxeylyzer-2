@@ -1,6 +1,6 @@
 use oxeylyzer_core::prelude::Weights;
 use serde::{Deserialize, Serialize};
-use serde_with::{OneOrMany, serde_as};
+use serde_with::{serde_as, OneOrMany};
 use std::path::{Path, PathBuf};
 
 use crate::Result;
@@ -30,7 +30,7 @@ mod tests {
     #[derive(Debug, Clone, Serialize, Deserialize)]
     struct Layouts {
         #[serde_as(as = "OneOrMany<_>")]
-        layouts: Vec<PathBuf>
+        layouts: Vec<PathBuf>,
     }
 
     #[test]
