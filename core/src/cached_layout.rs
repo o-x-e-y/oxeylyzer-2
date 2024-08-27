@@ -16,7 +16,8 @@ pub struct CachedLayout {
     pub shape: Shape,
     pub char_mapping: Arc<CharMapping>,
     pub possible_swaps: Box<[PosPair]>,
-    pub sfb_indices: SfbIndices,
+    pub weighted_sfb_indices: SfbIndices,
+    pub unweighted_sfb_indices: SfbIndices,
     pub weighted_bigrams: BigramCache,
     pub stretch_indices: StretchIndices,
     // pub stretch_bigrams: StretchCache,
@@ -83,9 +84,7 @@ impl SfbIndices {
             "finger len is not the same as keyboard len: "
         );
 
-        let weights = finger_weights.normalized();
-
-        let fingers: Box<[Box<[BigramPair]>; 10]> = Finger::FINGERS
+        let fingers: Box<[_; 10]> = Finger::FINGERS
             .map(|finger| {
                 fingers
                     .iter()
@@ -95,9 +94,8 @@ impl SfbIndices {
                     .tuple_combinations::<(_, _)>()
                     .map(|((k1, i1), (k2, i2))| BigramPair {
                         pair: PosPair(i1, i2),
-                        dist: dist(k1, k2, &Finger::LP, &Finger::LP) as i64
-                            * 100
-                            * weights.get(finger),
+                        dist: (dist(k1, k2, &Finger::LP, &Finger::LP) * 100.0) as i64
+                            * finger_weights.get(finger),
                     })
                     .collect::<Box<_>>()
             })
@@ -125,7 +123,7 @@ pub struct StretchIndices {
 }
 
 impl StretchIndices {
-    pub fn new(fingers: &[Finger], keyboard: &[PhysicalKey], keys: &[char]) -> Self {
+    pub fn new(keys: &[char], fingers: &[Finger], keyboard: &[PhysicalKey]) -> Self {
         assert!(
             fingers.len() <= u8::MAX as usize,
             "Too many keys to index with u8, max is {}",
@@ -136,6 +134,9 @@ impl StretchIndices {
             keyboard.len(),
             "finger len is not the same as keyboard len: "
         );
+
+        #[cfg(target_arch = "wasm32")]
+        return Self::default();
 
         keyboard
             .iter()
@@ -166,10 +167,7 @@ impl StretchIndices {
 
         // Self { per_key }
 
-        #[cfg(not(target_arch = "wasm32"))]
         todo!();
-        #[cfg(target_arch = "wasm32")]
-        Self::default()
     }
 }
 

@@ -1,18 +1,26 @@
 corpus = "./data/shai.json"
-layouts = ["./layouts"]
+layouts = "./layouts" # can be an array of folders
 
 [weights]
 sfbs = -7
 sfs = -1
+sft = -12
+inroll = 5
+outroll = 4
+alternate = 4
+redirect = 1
+onehandin = 1
+onehandout = 0
+thumb = 0
 
 [weights.fingers]
-lp = 15
-lr = 36
-lm = 48
-li = 55
-lt = 25
-rt = 25
-ri = 55
-rm = 48
-rr = 36
-rp = 15
+lp = 77
+lr = 32
+lm = 24
+li = 21
+lt = 46
+rt = 46
+ri = 21
+rm = 24
+rr = 32
+rp = 77

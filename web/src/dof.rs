@@ -1,4 +1,7 @@
-use crate::{analyze::{LayoutKeys, PhysicalLayout, RenderAnalyzeLayout}, util::*};
+use crate::{
+    analyze::{LayoutKeys, PhysicalLayout, RenderAnalyzeLayout},
+    util::*,
+};
 
 use leptos::*;
 use libdof::Dof;
@@ -7,7 +10,7 @@ use oxeylyzer_core::layout::Layout;
 #[component]
 pub fn RenderNamedDof(name: String) -> impl IntoView {
     let (name, _) = create_signal(name);
-    
+
     let dof = create_resource(move || format!("/layouts/{}.dof", name()), load_json::<Dof>);
 
     view! {
@@ -34,7 +37,7 @@ pub fn RenderDof(dof: Dof) -> impl IntoView {
         keys,
         fingers,
         keyboard,
-        shape
+        shape,
     } = Layout::from(dof);
     let keys = keys
         .iter()
@@ -44,7 +47,7 @@ pub fn RenderDof(dof: Dof) -> impl IntoView {
         name,
         fingers,
         keyboard,
-        shape
+        shape,
     };
 
     view! { <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/> }

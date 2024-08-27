@@ -92,14 +92,21 @@ module.exports = {
                 'fadein-2': 'fadein 1s ease-in-out 1.5s forwards',
                 'fadein-3': 'fadein 1s ease-in-out 2.75s forwards',
             },
+            backgroundImage: {
+                'lapce-gradient': 'linear-gradient(to right top, #4264af, #4f70ba, #5b7dc4, #688acf, #7597d9, #6ca0e0, #63a9e6, #5ab2eb, #2eb9e7, #00bfdd, #00c3cd, #10c6ba)',
+                'fingermap-gradient': 'linear-gradient(to right top, #b4014b, #d53e4f, #f46d43, #fdae61, #fee08b, #e6f598, #abdda4, #66c2a5, #3288bd, #6b5ab8)',
+                'heatmap-gradient': 'linear-gradient(to right top, #427880, #ff2020)',
+            },
             colors: {
                 'header': '#242424',
                 'darker': '#1a1a1a',
+                'hovered': '#ffffff10',
                 'txt': "#eee",
             },
             gridTemplateColumns: {
                 'homepage': '1fr 2fr',
                 'metadata': '1fr 4fr',
+                'analyzer': '4fr 1fr',
             },
             typography: ({ theme }) => ({
                 posts: {

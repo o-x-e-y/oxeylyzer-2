@@ -1465,6 +1465,7 @@ dependencies = [
  "oxeylyzer-core",
  "rayon",
  "serde",
+ "serde_with",
  "shlex",
  "thiserror",
  "toml",

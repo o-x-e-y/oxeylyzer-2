@@ -1,12 +1,12 @@
 use chrono::NaiveDate;
-use leptos::*;
-use leptos_router::*;
-use leptos_meta::Link;
-use rust_embed::Embed;
-use serde::{Deserialize, Serialize};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
+use leptos::*;
+use leptos_meta::Link;
+use leptos_router::*;
 use pulldown_cmark::{html, Options, Parser};
+use rust_embed::Embed;
+use serde::{Deserialize, Serialize};
 
 use crate::util::*;
 
@@ -20,7 +20,7 @@ pub struct Metadata {
 #[derive(Clone, Debug)]
 pub struct Post {
     metadata: Metadata,
-    html: String
+    html: String,
 }
 
 #[derive(Embed)]
@@ -33,18 +33,21 @@ pub fn RenderPostLinks() -> impl IntoView {
     let mut posts = embedded_names::<PostsFolder>()
         .zip(PostsFolder::iter())
         .map(|(name, path)| {
-            let content = String::from_utf8_lossy(&PostsFolder::get(&path).unwrap().data).into_owned();
+            let content =
+                String::from_utf8_lossy(&PostsFolder::get(&path).unwrap().data).into_owned();
             let (metadata, _) = parse_gray_matter(&content);
-            let date = NaiveDate::parse_from_str(&metadata.date, "%Y-%m-%d")
-                .unwrap_or_else(|e| panic!("Couldn't parse date {} for post '{}': {e}", metadata.date, name));
+            let date = NaiveDate::parse_from_str(&metadata.date, "%Y-%m-%d").unwrap_or_else(|e| {
+                panic!(
+                    "Couldn't parse date {} for post '{}': {e}",
+                    metadata.date, name
+                )
+            });
 
             (name, metadata, date)
         })
         .collect::<Vec<_>>();
 
-    posts.sort_by(|(_, _, d1), (_, _, d2)| {
-        d2.cmp(&d1)
-    });
+    posts.sort_by(|(_, _, d1), (_, _, d2)| d2.cmp(&d1));
 
     let post_links = posts
         .into_iter()
@@ -58,7 +61,7 @@ pub fn RenderPostLinks() -> impl IntoView {
             <h2 class="text-4xl">"Posts"</h2>
         </div>
         <div class="flex justify-center">
-            <div class="p-4 w-full grid grid-cols-3">
+            <div class="p-4 w-full md:grid md:grid-cols-2 xl:grid-cols-3">
                 {post_links}
             </div>
         </div>
@@ -70,8 +73,8 @@ pub fn RenderPostLink(name: String, metadata: Metadata) -> impl IntoView {
     view! {
         <div class="p-4 m-2 rounded-lg bg-black container-inline-size hover:bg-header">
             <A href=format!("/posts/{name}")>
-                <p>{metadata.title}</p>
-                <p class="text-base text-[#aaa]">{metadata.date}</p>
+                <p class="text-lg md:text-base">{metadata.title}</p>
+                <p class="text-lg md:text-base text-[#aaa]">{metadata.date}</p>
             </A>
         </div>
     }
@@ -115,7 +118,7 @@ pub fn RenderPost() -> impl IntoView {
         async {}
     });
 
-    logging::log!("url: /public/posts/{}.md", name());
+    // logging::log!("url: /public/posts/{}.md", name());
 
     view! {
         {move || match posts_resource() {
@@ -123,7 +126,7 @@ pub fn RenderPost() -> impl IntoView {
                 if let Some(post) = parse_post(&post) {
                     view! {
                         <ViewPost post/>
-                    }
+                    }.into_view()
                 } else {
                     view! {
                         <div class="flex justify-center">

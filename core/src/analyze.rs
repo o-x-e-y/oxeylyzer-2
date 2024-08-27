@@ -2,26 +2,48 @@ use itertools::Itertools;
 use libdof::dofinitions::Finger;
 
 use crate::{
-    analyzer_data::AnalyzerData, cached_layout::*, char_mapping::CharMapping, data::Data,
-    layout::*, weights::Weights,
+    analyzer_data::AnalyzerData,
+    cached_layout::*,
+    char_mapping::CharMapping,
+    data::Data,
+    layout::*,
+    trigrams::TRIGRAMS,
+    weights::{FingerWeights, Weights},
 };
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct TrigramData {
+    pub sft: i64,
+    pub sfb: i64,
+    pub inroll: i64,
+    pub outroll: i64,
+    pub alternate: i64,
+    pub redirect: i64,
+    pub onehandin: i64,
+    pub onehandout: i64,
+    pub thumb: i64,
+    pub invalid: i64,
+}
 
 #[derive(Debug, Clone)]
 pub struct Analyzer {
     pub data: AnalyzerData,
     pub weights: Weights,
     pub analyze_bigrams: bool,
+    pub analyze_trigrams: bool,
 }
 
 impl Analyzer {
     pub fn new(data: Data, weights: Weights) -> Self {
         let data = AnalyzerData::new(data, &weights);
-        let analyze_bigrams = weights.sfbs != 0 || weights.sfs != 0;
+        let analyze_bigrams = weights.has_bigram_weights();
+        let analyze_trigrams = weights.has_trigram_weights();
 
         Self {
             data,
             weights,
             analyze_bigrams,
+            analyze_trigrams,
         }
     }
 
@@ -59,8 +81,10 @@ impl Analyzer {
             .map(Into::into)
             .collect();
 
-        let sfb_indices = SfbIndices::new(&fingers, &keyboard, &self.weights.fingers);
-        let stretch_indices = StretchIndices::new(&fingers, &keyboard, &layout.keys);
+        let unweighted_sfb_indices =
+            SfbIndices::new(&fingers, &keyboard, &FingerWeights::default());
+        let weighted_sfb_indices = SfbIndices::new(&fingers, &keyboard, &self.weights.fingers);
+        let stretch_indices = Default::default(); //StretchIndices::new(&layout.keys, &fingers, &keyboard);
 
         let mut cache = CachedLayout {
             name,
@@ -68,7 +92,8 @@ impl Analyzer {
             fingers,
             keyboard,
             possible_swaps,
-            sfb_indices,
+            weighted_sfb_indices,
+            unweighted_sfb_indices,
             stretch_indices,
             shape,
             char_mapping,
@@ -121,7 +146,28 @@ impl Analyzer {
 
     pub fn finger_weighted_bigrams(&self, cache: &CachedLayout, f: Finger) -> i64 {
         cache
-            .sfb_indices
+            .weighted_sfb_indices
+            .get_finger(f)
+            .iter()
+            .map(
+                |BigramPair {
+                     pair: PosPair(a, b),
+                     dist,
+                 }| {
+                    let u1 = cache.keys[*a as usize];
+                    let u2 = cache.keys[*b as usize];
+
+                    (self.data.get_weighted_bigram_u([u1, u2])
+                        + self.data.get_weighted_bigram_u([u2, u1]))
+                        * dist
+                },
+            )
+            .sum()
+    }
+
+    pub fn finger_unweighted_bigrams(&self, cache: &CachedLayout, f: Finger) -> i64 {
+        cache
+            .unweighted_sfb_indices
             .get_finger(f)
             .iter()
             .map(
@@ -208,7 +254,7 @@ impl Analyzer {
 
     pub fn sfbs(&self, cache: &CachedLayout) -> i64 {
         cache
-            .sfb_indices
+            .weighted_sfb_indices
             .all
             .iter()
             .map(
@@ -227,7 +273,7 @@ impl Analyzer {
 
     pub fn sfs(&self, cache: &CachedLayout) -> i64 {
         cache
-            .sfb_indices
+            .weighted_sfb_indices
             .all
             .iter()
             .map(
@@ -254,12 +300,16 @@ impl Analyzer {
         res
     }
 
-    pub fn finger_distance(&self, cache: &CachedLayout) -> [i64; 10] {
+    pub fn weighted_finger_distance(&self, cache: &CachedLayout) -> [i64; 10] {
         Finger::FINGERS.map(|f| self.finger_weighted_bigrams(cache, f))
     }
 
+    pub fn unweighted_finger_distance(&self, cache: &CachedLayout) -> [i64; 10] {
+        Finger::FINGERS.map(|f| self.finger_unweighted_bigrams(cache, f))
+    }
+
     pub fn finger_sfbs(&self, cache: &CachedLayout) -> [i64; 10] {
-        cache.sfb_indices.fingers.clone().map(|pairs| {
+        cache.weighted_sfb_indices.fingers.clone().map(|pairs| {
             pairs
                 .iter()
                 .map(
@@ -282,6 +332,36 @@ impl Analyzer {
             .into_iter()
             .map(|f| self.finger_weighted_bigrams(cache, f))
             .sum()
+    }
+
+    pub fn trigrams(&self, cache: &CachedLayout) -> TrigramData {
+        use crate::trigrams::TrigramType::*;
+
+        let mut trigrams = TrigramData::default();
+
+        for (&c1, &f1) in cache.keys.iter().zip(&cache.fingers) {
+            for (&c2, &f2) in cache.keys.iter().zip(&cache.fingers) {
+                for (&c3, &f3) in cache.keys.iter().zip(&cache.fingers) {
+                    let freq = self.data.get_trigram_u([c1, c2, c3]);
+                    let ttype = TRIGRAMS[f1 as usize * 100 + f2 as usize * 10 + f3 as usize];
+
+                    match ttype {
+                        Sft => trigrams.sft += freq,
+                        Sfb => trigrams.sfb += freq,
+                        Inroll => trigrams.inroll += freq,
+                        Outroll => trigrams.outroll += freq,
+                        Alternate => trigrams.alternate += freq,
+                        Redirect => trigrams.redirect += freq,
+                        OnehandIn => trigrams.onehandin += freq,
+                        OnehandOut => trigrams.onehandout += freq,
+                        Thumb => trigrams.thumb += freq,
+                        Invalid => trigrams.invalid += freq,
+                    }
+                }
+            }
+        }
+
+        trigrams
     }
 }
 

@@ -5,15 +5,32 @@ use serde::{Deserialize, Serialize};
 pub struct Weights {
     pub sfbs: i64,
     pub sfs: i64,
-    // pub sft: i64,
-    // pub inroll: i64,
-    // pub outroll: i64,
-    // pub alternate: i64,
-    // pub redirect: i64,
-    // pub onehandin: i64,
-    // pub onehandout: i64,
-    // pub thumb: i64,
+    pub sft: i64,
+    pub inroll: i64,
+    pub outroll: i64,
+    pub alternate: i64,
+    pub redirect: i64,
+    pub onehandin: i64,
+    pub onehandout: i64,
+    pub thumb: i64,
     pub fingers: FingerWeights,
+}
+
+impl Weights {
+    pub const fn has_bigram_weights(&self) -> bool {
+        self.sfbs != 0 || self.sfs != 0
+    }
+
+    pub const fn has_trigram_weights(&self) -> bool {
+        self.sft != 0
+            || self.inroll != 0
+            || self.outroll != 0
+            || self.alternate != 0
+            || self.redirect != 0
+            || self.onehandin != 0
+            || self.onehandout != 0
+            || self.thumb != 0
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -48,54 +65,48 @@ impl FingerWeights {
             RP => self.rp,
         }
     }
+}
 
-    #[inline]
-    pub fn normalized(&self) -> Self {
-        let max = [
-            self.lp, self.lr, self.lm, self.li, self.lt, self.rt, self.ri, self.rm, self.rr,
-            self.rp,
-        ]
-        .into_iter()
-        .max()
-        .unwrap_or_default();
-
-        FingerWeights {
-            lp: (max * 100) / self.lp,
-            lr: (max * 100) / self.lr,
-            lm: (max * 100) / self.lm,
-            li: (max * 100) / self.li,
-            lt: (max * 100) / self.lt,
-            rt: (max * 100) / self.rt,
-            ri: (max * 100) / self.ri,
-            rm: (max * 100) / self.rm,
-            rr: (max * 100) / self.rr,
-            rp: (max * 100) / self.rp,
+impl Default for FingerWeights {
+    fn default() -> Self {
+        Self {
+            lp: 1,
+            lr: 1,
+            lm: 1,
+            li: 1,
+            lt: 1,
+            rt: 1,
+            ri: 1,
+            rm: 1,
+            rr: 1,
+            rp: 1,
         }
     }
 }
 
 pub fn dummy_weights() -> Weights {
     Weights {
-        sfbs: -60000,
-        sfs: -8000,
+        sfbs: -7,
+        sfs: -1,
+        sft: -12,
+        inroll: 5,
+        outroll: 4,
+        alternate: 4,
+        redirect: -1,
+        onehandin: 1,
+        onehandout: 0,
+        thumb: 0,
         fingers: FingerWeights {
-            lp: 15,
-            lr: 36,
-            lm: 48,
-            li: 55,
-            lt: 25,
-            rt: 25,
-            ri: 55,
-            rm: 48,
-            rr: 36,
-            rp: 15,
-        }, // sft = -10000
-           // inroll = 12000
-           // outroll = 11000
-           // alternate = 9500
-           // redirect = -3500
-           // onehandin = 10
-           // onehandout = 0
-           // thumb = 0
+            lp: 77,
+            lr: 32,
+            lm: 24,
+            li: 21,
+            lt: 46,
+            rt: 46,
+            ri: 21,
+            rm: 24,
+            rr: 32,
+            rp: 77,
+        },
     }
 }

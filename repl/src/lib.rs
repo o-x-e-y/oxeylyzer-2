@@ -90,7 +90,7 @@ impl Repl {
         let finger_sfbs = stats.finger_sfbs.map(|f| format!("{f:.2}")).join(", ");
         let score = self.a.score(layout);
 
-        print!("{}\n{}", name, layout);
+        print!("{}", layout);
 
         println!(
             concat!(
@@ -103,7 +103,7 @@ impl Repl {
             score, stats.sfbs, stats.sfs, finger_use, finger_sfbs,
         );
 
-        Ok(())
+        self.trigrams(name)
     }
 
     fn rank(&self) {
@@ -160,7 +160,7 @@ impl Repl {
         let count = count.unwrap_or(10);
 
         cache
-            .sfb_indices
+            .weighted_sfb_indices
             .all
             .iter()
             .flat_map(
@@ -184,6 +184,44 @@ impl Repl {
             .sorted_by(|(_, f1), (_, f2)| f2.total_cmp(f1))
             .take(count)
             .for_each(|([c1, c2], f)| println!("{c1}{c2}: {f:.3}%"));
+
+        Ok(())
+    }
+
+    pub fn trigrams(&self, name: &str) -> Result<()> {
+        let layout = self.layout(name)?;
+        let trigram_stats = self.a.stats(&layout).trigrams;
+
+        if trigram_stats.sft != 0.0 {
+            println!("Sft:          {:.3}%", trigram_stats.sft);
+        }
+        if trigram_stats.sfb != 0.0 {
+            println!("Sfb:          {:.3}%", trigram_stats.sfb);
+        }
+        if trigram_stats.inroll != 0.0 {
+            println!("Inroll:       {:.3}%", trigram_stats.inroll);
+        }
+        if trigram_stats.outroll != 0.0 {
+            println!("Outroll:      {:.3}%", trigram_stats.outroll);
+        }
+        if trigram_stats.alternate != 0.0 {
+            println!("Alternate:    {:.3}%", trigram_stats.alternate);
+        }
+        if trigram_stats.redirect != 0.0 {
+            println!("Redirect:     {:.3}%", trigram_stats.redirect);
+        }
+        if trigram_stats.onehandin != 0.0 {
+            println!("Onehand In:   {:.3}%", trigram_stats.onehandin);
+        }
+        if trigram_stats.onehandout != 0.0 {
+            println!("Onehand Out:  {:.3}%", trigram_stats.onehandout);
+        }
+        if trigram_stats.thumb != 0.0 {
+            println!("Thumb:        {:.3}%", trigram_stats.thumb);
+        }
+        if trigram_stats.invalid != 0.0 {
+            println!("Invalid:      {:.3}%", trigram_stats.invalid);
+        }
 
         Ok(())
     }
@@ -213,6 +251,7 @@ impl Repl {
             OxeylyzerCmd::Rank(_) => self.rank(),
             OxeylyzerCmd::Gen(g) => self.generate(&g.name, g.count, g.pins)?,
             OxeylyzerCmd::Sfbs(s) => self.sfbs(&s.name, s.count)?,
+            OxeylyzerCmd::Trigrams(t) => self.trigrams(&t.name)?,
             OxeylyzerCmd::R(_) => self.reload()?,
             OxeylyzerCmd::Q(_) => return Ok(ReplStatus::Quit),
         }

@@ -71,6 +71,11 @@ pastel5 = [
 	"#d9d2e9",
 ]
 
+eve_theme = [
+    "#C99FB3",
+    "#570E4B"
+]
+
 def h(num: int) -> str:
     return f"{num:0{2}x}"
 
@@ -107,5 +112,15 @@ def with_reverse(colors: list[str]):
         fmt(c)
 
 
+def rgb(colors: list[str]):
+    for c in colors:
+        c = c.removeprefix("#")
+        r, g, b = c[0:2], c[2:4], c[4:6]
+        r, g, b = int(r, 16), int(g, 16), int(b, 16)
+
+        print(f"({float(r)}, {float(g)}, {float(b)})")
+
+
+
 if __name__ == "__main__":
-    p(pastel)
+    rgb(eve_theme)

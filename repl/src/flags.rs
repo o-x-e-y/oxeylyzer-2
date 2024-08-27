@@ -23,6 +23,10 @@ xflags::xflags! {
             /// Amount of sfbs to show. 10 by default.
             optional -c, --count count: usize
         }
+        /// Shows every trigram stat of a layout.
+        cmd trigrams t {
+            required name: String
+        }
         /// Reload the analyzer config file
         cmd r reload refresh {}
         /// Quit the analyzer

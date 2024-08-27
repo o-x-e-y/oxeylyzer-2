@@ -4,6 +4,4 @@ use leptos::*;
 // use crate::layouts::LayoutsFolder;
 
 #[component]
-fn SearchBar() -> impl IntoView {
-    
-}
+fn SearchBar() -> impl IntoView {}

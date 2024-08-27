@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::dof::{RenderDof, RenderNamedDof};
 use crate::util::*;
 
@@ -6,11 +8,27 @@ use leptos::*;
 use leptos_router::*;
 use libdof::Dof;
 use rust_embed::Embed;
+use serde::{Deserialize, Serialize};
 
 #[derive(Embed)]
 #[folder = "../layouts"]
 #[include = "*.dof"]
 pub struct LayoutsFolder;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct HeatmapData {
+    #[serde(flatten)]
+    corpora: HashMap<String, HashMap<char, f64>>,
+}
+
+impl HeatmapData {
+    pub fn get(&self, corpus: String, c: char) -> Option<f64> {
+        match self.corpora.get(&corpus) {
+            Some(data) => data.get(&c).copied(),
+            None => None,
+        }
+    }
+}
 
 #[component]
 pub fn LayoutsWrapper() -> impl IntoView {
@@ -21,7 +39,7 @@ pub fn LayoutsWrapper() -> impl IntoView {
 pub fn RenderLayoutLinks(base_url: &'static str) -> impl IntoView {
     view! {
         <div class="flex justify-center">
-            <div class=" bg-darker p-4 w-full grid grid-cols-3">
+            <div class=" bg-darker p-4 w-full md:grid md:grid-cols-2 xl:grid-cols-3">
                 {embedded_names::<LayoutsFolder>()
                     .map(|name| {
                         view! { <RenderLayoutLink base_url name/> }

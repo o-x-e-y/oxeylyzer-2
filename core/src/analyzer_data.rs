@@ -15,7 +15,6 @@ pub struct AnalyzerData {
     pub skipgram_total: f64,
     pub trigram_total: f64,
     pub mapping: Arc<CharMapping>,
-    len: usize,
 }
 
 impl AnalyzerData {
@@ -97,8 +96,15 @@ impl AnalyzerData {
             trigram_total,
 
             mapping,
-            len,
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.chars.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.chars.is_empty()
     }
 
     pub fn name(&self) -> &str {
@@ -114,7 +120,7 @@ impl AnalyzerData {
         let u1 = self.mapping.get_u(c1) as usize;
         let u2 = self.mapping.get_u(c2) as usize;
 
-        let i = u1 * self.len + u2;
+        let i = u1 * self.len() + u2;
         self.bigrams[i]
     }
 
@@ -122,7 +128,7 @@ impl AnalyzerData {
         let u1 = self.mapping.get_u(c1) as usize;
         let u2 = self.mapping.get_u(c2) as usize;
 
-        let i = u1 * self.len + u2;
+        let i = u1 * self.len() + u2;
         self.skipgrams[i]
     }
 
@@ -131,7 +137,7 @@ impl AnalyzerData {
         let u2 = self.mapping.get_u(c2) as usize;
         let u3 = self.mapping.get_u(c3) as usize;
 
-        let i = u1 * self.len.pow(2) + u2 * self.len + u3;
+        let i = u1 * self.len().pow(2) + u2 * self.len() + u3;
         self.trigrams[i]
     }
 
@@ -139,7 +145,7 @@ impl AnalyzerData {
         let u1 = self.mapping.get_u(c1) as usize;
         let u2 = self.mapping.get_u(c2) as usize;
 
-        let i = u1 * self.len + u2;
+        let i = u1 * self.len() + u2;
         self.weighted_bigrams[i]
     }
 
@@ -153,7 +159,7 @@ impl AnalyzerData {
         let u1 = c1 as usize;
         let u2 = c2 as usize;
 
-        let i = u1 * self.len + u2;
+        let i = u1 * self.len() + u2;
         self.bigrams[i]
     }
 
@@ -162,7 +168,7 @@ impl AnalyzerData {
         let u1 = c1 as usize;
         let u2 = c2 as usize;
 
-        let i = u1 * self.len + u2;
+        let i = u1 * self.len() + u2;
         self.skipgrams[i]
     }
 
@@ -172,7 +178,7 @@ impl AnalyzerData {
         let u2 = c2 as usize;
         let u3 = c3 as usize;
 
-        let i = u1 * self.len.pow(2) + u2 * self.len + u3;
+        let i = u1 * self.len().pow(2) + u2 * self.len() + u3;
         self.trigrams[i]
     }
 
@@ -181,7 +187,7 @@ impl AnalyzerData {
         let u1 = c1 as usize;
         let u2 = c2 as usize;
 
-        let i = u1 * self.len + u2;
+        let i = u1 * self.len() + u2;
         self.weighted_bigrams[i]
     }
 }

@@ -1,11 +1,11 @@
-use crate::util::*;
+use crate::{layouts::HeatmapData, util::*, EnableHeatmap};
 
 use ev::{DragEvent, MouseEvent};
 use fxhash::FxHashSet;
 use leptos::*;
 use leptos_router::*;
 use libdof::prelude::{Dof, Finger, PhysicalKey, Shape};
-use oxeylyzer_core::prelude::{Analyzer, Data, Layout, Weights};
+use oxeylyzer_core::{prelude::{Analyzer, Data, Layout, Weights}, stats::TrigramStats};
 
 pub type Key = RwSignal<char>;
 
@@ -68,7 +68,7 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
         keys,
         fingers,
         keyboard,
-        shape
+        shape,
     } = Layout::from(dof);
     let keys = keys
         .iter()
@@ -78,7 +78,7 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
         name,
         fingers,
         keyboard,
-        shape
+        shape,
     };
 
     provide_context(phys.clone());
@@ -86,13 +86,19 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
     provide_context(create_rw_signal(Pins::default()));
 
     view! {
-        <div class="w-4/5 mx-auto min-w-max">
-            <div class="bg-darker p-4 mt-4 rounded-xl">
-                <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
+        <div class="w-4/5 mx-auto">
+            // <div class="p-4 mt-4 grid grid-cols-[2fr_1fr]">
+            <div class="flex justify-center my-4">
+                <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
+                    <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
+                </div>
+                // <div class="sm:ml-[1%] md:ml-[2%] lg:ml-[3%]">
+                //     // <p>"Button uno"</p>
+                //     // <p>"Button dos"</p>
+                //     // <p>"Button tres"</p>
+                // </div>
             </div>
-        </div>
-        <div class="w-4/5 mx-auto min-w-max">
-            <div class="bg-darker p-4 mt-4 rounded-xl">
+            <div class="rounded-xl">
                 <MaybeRenderAnalysis/>
             </div>
         </div>
@@ -112,7 +118,7 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
     let height = dy * kw;
     let ym = dx / dy;
 
-    let font_size = 2.8;//(font_mod(&phys.keyboard) * 2.8);
+    let font_size = 2.8;
 
     let (dragged_sig, set_dragged_sig) = create_signal::<Option<Key>>(None);
 
@@ -146,7 +152,7 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
 
     let draggable = match pins {
         Some(_) => "true",
-        None => "false"
+        None => "false",
     };
 
     let key_views = keys
@@ -181,6 +187,20 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
     }
 }
 
+fn heatmap_gradient(freq: f64, curve: f64, max: f64) -> String {
+    let freq = freq.powf(curve).min(max).max(0.0);
+
+    let factor = freq / max;
+    let start = (66.0, 120.0, 128.0);
+    let end = (255.0, 32.0, 32.0);
+
+    let r = (start.0 + factor * (end.0 - start.0)) as u16;
+    let g = (start.1 + factor * (end.1 - start.1)) as u16;
+    let b = (start.2 + factor * (end.2 - start.2)) as u16;
+
+    format!("rgb({r}, {g}, {b})")
+}
+
 #[component]
 fn Key(
     k: Key,
@@ -201,32 +221,53 @@ fn Key(
     let width = width - 0.3;
     let height = height - 0.3 * ym;
 
-    let op = move || {
-        match use_context::<RwSignal<Pins>>() {
-            Some(pins) => match pins().0.contains(&i) {
-                true => 1,
-                false => 0,
-            },
-            None => 0
-        }
+    let op = move || match use_context::<RwSignal<Pins>>() {
+        Some(pins) => match pins().0.contains(&i) {
+            true => 1,
+            false => 0,
+        },
+        None => 0,
     };
 
-    let bg = match f {
-        Finger::LP => "#b4014b", //"#9e0142",
-        Finger::LR => "#d53e4f",
-        Finger::LM => "#f46d43",
-        Finger::LI => "#fdae61",
-        Finger::LT => "#fee08b",
-        Finger::RT => "#e6f598",
-        Finger::RI => "#abdda4",
-        Finger::RM => "#66c2a5",
-        Finger::RR => "#3288bd",
-        Finger::RP => "#6b5ab8", //"#5e4fa2",
+    let freq = move || {
+        expect_context::<JsonResource<HeatmapData>>().with(|data| match data {
+            Some(Ok(data)) => {
+                let corpus = "shai".to_owned();
+                let c = k.get_untracked();
+                let freq = data.get(corpus, c).unwrap_or_default();
+                freq
+            }
+            Some(Err(e)) => {
+                logging::log!("{e}");
+                0.0
+            }
+            None => 0.0,
+        })
+    };
+
+    let enable_heatmap = expect_context::<EnableHeatmap>().0;
+    let bg = move || match enable_heatmap() {
+        true => heatmap_gradient(freq(), 1.2, 12.0),
+        false => match f {
+            Finger::LP => "#b4014b", //"#9e0142",
+            Finger::LR => "#d53e4f",
+            Finger::LM => "#f46d43",
+            Finger::LI => "#fdae61",
+            Finger::LT => "#fee08b",
+            Finger::RT => "#e6f598",
+            Finger::RI => "#abdda4",
+            Finger::RM => "#66c2a5",
+            Finger::RR => "#3288bd",
+            Finger::RP => "#6b5ab8", //"#5e4fa2",
+        }.to_string(),
     };
 
     view! {
         <div
-            class="absolute flex border-[0.3cqw] border-darker items-center justify-center bg-darker text-darker rounded-[1cqw] container-inline-size"
+            class="
+                absolute flex border-[0.3cqw] border-darker items-center justify-center
+                bg-darker text-darker rounded-[1cqw] container-inline-size
+            "
             style:left=format!("{}%", x)
             style:top=format!("{}%", y)
             style:width=format!("{}%", width)
@@ -235,9 +276,9 @@ fn Key(
         >
             <div
                 class="
-                absolute top-0 right-0 w-0 h-0
-                border-l-[13cqw] border-l-transparent border-b-[13cqw] border-b-transparent
-                border-r-[13cqw] border-r-darker border-t-[13cqw] border-t-darker
+                    absolute top-0 right-0 w-0 h-0
+                    border-l-[13cqw] border-l-transparent border-b-[13cqw] border-b-transparent
+                    border-r-[13cqw] border-r-darker border-t-[13cqw] border-t-darker
                 "
                 style:opacity=op
             ></div>
@@ -280,32 +321,32 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
     // let pins = use_context::<RwSignal<Pins>>();
 
     let (analyzer, _) = create_signal(Analyzer::new(data, weights));
-    let layout_memo = create_memo(move |_| {
-        Layout {
-            name: phys.name.clone(),
-            keys: keys.0.iter().map(|s| s()).collect(),
-            fingers: phys.fingers.clone(),
-            keyboard: phys.keyboard.clone(),
-            shape: phys.shape.clone(),
-        }
+    let layout_memo = create_memo(move |_| Layout {
+        name: phys.name.clone(),
+        keys: keys.0.iter().map(|s| s()).collect(),
+        fingers: phys.fingers.clone(),
+        keyboard: phys.keyboard.clone(),
+        shape: phys.shape.clone(),
     });
 
-    let stats_memo = create_memo(move |_| {
-        analyzer.with(|a| layout_memo.with(|l| a.stats(l)))
-    });
+    let stats_memo = create_memo(move |_| analyzer.with(|a| layout_memo.with(|l| a.stats(l))));
 
     let sfbs = create_memo(move |_| stats_memo.with(|s| s.sfbs));
     let sfs = create_memo(move |_| stats_memo.with(|s| s.sfs));
     let finger_use = create_memo(move |_| stats_memo.with(|s| s.finger_use));
     let finger_sfbs = create_memo(move |_| stats_memo.with(|s| s.finger_sfbs));
-    let finger_distance = create_memo(move |_| stats_memo.with(|s| s.finger_distance));
+    let weighted_finger_distance =
+        create_memo(move |_| stats_memo.with(|s| s.weighted_finger_distance));
+    let unweighted_finger_distance =
+        create_memo(move |_| stats_memo.with(|s| s.unweighted_finger_distance));
+    let trigrams = create_memo(move |_| stats_memo.with(|s| s.trigrams.clone()));
     // let score = create_memo(move |_| analyzer.with(|a| layout_memo.with(|l| a.score(l) as f64)));
 
     view! {
         <table class="w-full rounded-3xl">
             <thead>
                 <tr class="grid">
-                    <th class="text-left align-top px-3 py-1">"Stats"</th>
+                    // <th class="text-left align-top px-3 py-1">"Stats"</th>
                     <th></th>
                 </tr>
             </thead>
@@ -313,7 +354,9 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
                 <RenderStatRow stats=vec![("sfbs", sfbs), ("sfs", sfs)]/>
                 <RenderFingerStatRow name="sfbs" stat=finger_sfbs unit="%"/>
                 <RenderFingerStatRow name="use" stat=finger_use unit="%"/>
-                <RenderFingerStatRow name="dist" stat=finger_distance unit=""/>
+                <RenderFingerStatRow name="dist" stat=unweighted_finger_distance unit=""/>
+                <RenderFingerStatRow name="weighted dist" stat=weighted_finger_distance unit=""/>
+                <RenderTrigrams trigrams/>
             // <Metadata name="Name" data=name/>
             // <Metadata name="Authors" data=authors/>
             // <Metadata name="Year" data=year/>
@@ -328,23 +371,32 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
 
 #[component]
 fn RenderStatRow(stats: Vec<(&'static str, impl Fn() -> f64 + 'static)>) -> impl IntoView {
-    let rows = stats.into_iter().map(|(name, stat)| {
-        view! {
-            <td class="text-left align-top px-2 py-1">
-                {name} ": " {move || format!("{:.3}%", stat())}
-            </td>
-        }
-    }).collect::<Vec<_>>();
+    let rows = stats
+        .into_iter()
+        .map(|(name, stat)| {
+            view! {
+                <td class="text-left align-top px-2 py-1">
+                    {name} ": " {move || format!("{:.3}%", stat())}
+                </td>
+            }
+        })
+        .collect::<Vec<_>>();
 
     view! { <tr class="grid grid-flow-col">{rows}</tr> }
 }
 
 #[component]
-fn RenderFingerStatRow(name: &'static str, stat: impl Fn() -> [f64; 10] + 'static, unit: &'static str) -> impl IntoView {
-    let rows = move || stat().into_iter().map(|v| {
+fn RenderFingerStatRow(
+    name: &'static str,
+    stat: impl Fn() -> [f64; 10] + 'static,
+    unit: &'static str,
+) -> impl IntoView {
+    let rows = move || {
+        stat().into_iter().map(|v| {
         view! { <td class="text-left align-top px-2 py-1">{move || format!("{v:.3}{unit}")}</td> }
-    }).collect::<Vec<_>>();
-    
+    }).collect::<Vec<_>>()
+    };
+
     view! {
         <tr class="grid grid-flow-col">
             <td class="text-left align-top px-2 py-1">{name}</td>
@@ -353,3 +405,18 @@ fn RenderFingerStatRow(name: &'static str, stat: impl Fn() -> [f64; 10] + 'stati
     }
 }
 
+#[component]
+fn RenderTrigrams(trigrams: Memo<TrigramStats>) -> impl IntoView {
+    view! {
+        <RenderStatRow stats=vec![("sft", move || trigrams.with(|s| s.sft))]/>
+        <RenderStatRow stats=vec![("sfb", move || trigrams.with(|s| s.sfb))]/>
+        <RenderStatRow stats=vec![("inroll", move || trigrams.with(|s| s.inroll))]/>
+        <RenderStatRow stats=vec![("outroll", move || trigrams.with(|s| s.outroll))]/>
+        <RenderStatRow stats=vec![("alternate", move || trigrams.with(|s| s.alternate))]/>
+        <RenderStatRow stats=vec![("redirect", move || trigrams.with(|s| s.redirect))]/>
+        <RenderStatRow stats=vec![("onehandin", move || trigrams.with(|s| s.onehandin))]/>
+        <RenderStatRow stats=vec![("onehandout", move || trigrams.with(|s| s.onehandout))]/>
+        <RenderStatRow stats=vec![("thumb", move || trigrams.with(|s| s.thumb))]/>
+        <RenderStatRow stats=vec![("invalid", move || trigrams.with(|s| s.invalid))]/>
+    }
+}
