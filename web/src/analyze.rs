@@ -233,10 +233,7 @@ fn Key(
     let freq = move || {
         expect_context::<JsonResource<HeatmapData>>().with(|data| match data {
             Some(Ok(data)) => {
-                let corpus = "shai".to_owned();
-                let c = k.get_untracked();
-                let freq = data.get(corpus, c).unwrap_or_default();
-                freq
+                data.get("shai".to_owned(), k()).unwrap_or_default()
             }
             Some(Err(e)) => {
                 logging::log!("{e}");
