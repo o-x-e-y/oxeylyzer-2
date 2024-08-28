@@ -78,14 +78,16 @@ pub fn RenderLayout() -> impl IntoView {
                     <div class="w-full sm:w-3/4 mx-auto">
                         <RenderMetadataDof dof/>
                     </div>
-                }.into_view()
+                }
+                    .into_view()
             }
             Some(Err(_)) => view! { <p>"Layout '" {name} "' doesn't exist :("</p> }.into_view(),
             None => {
                 view! {
                     // "Loading..."
-                    <div class="animate-pulse mx-auto mt-24"/>
-                }.into_view()
+                    <div class="animate-pulse mx-auto mt-24"></div>
+                }
+                    .into_view()
             }
         }}
     }
@@ -178,9 +180,7 @@ pub fn RenderMetadataDof(dof: Dof) -> impl IntoView {
                             <label name="collapse-metadata">
                                 <button on:click=collapse>
                                     <span>"Info"</span>
-                                    <span class="absolute -mt-3 opacity-70">
-                                        {move || info()}
-                                    </span>
+                                    <span class="absolute -mt-3 opacity-70">{move || info()}</span>
                                 </button>
                             </label>
                         </th>

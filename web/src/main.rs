@@ -48,6 +48,7 @@ fn App() -> impl IntoView {
                                 }
                             }
                         />
+
                         <Route path=":name" view=layouts::RenderLayout/>
                     </Route>
                     <Route path="/analyze" view=layouts::LayoutsWrapper>
