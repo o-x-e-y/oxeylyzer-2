@@ -246,19 +246,7 @@ fn Key(
     let enable_heatmap = expect_context::<EnableHeatmap>().0;
     let bg = move || match enable_heatmap() {
         true => heatmap_gradient(freq(), 1.2, 12.0),
-        false => match f {
-            Finger::LP => "#b4014b", //"#9e0142",
-            Finger::LR => "#d53e4f",
-            Finger::LM => "#f46d43",
-            Finger::LI => "#fdae61",
-            Finger::LT => "#fee08b",
-            Finger::RT => "#e6f598",
-            Finger::RI => "#abdda4",
-            Finger::RM => "#66c2a5",
-            Finger::RR => "#3288bd",
-            Finger::RP => "#6b5ab8", //"#5e4fa2",
-        }
-        .to_string(),
+        false => fingermap_colors(f).to_owned(),
     };
 
     view! {

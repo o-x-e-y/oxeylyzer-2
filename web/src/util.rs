@@ -2,7 +2,7 @@ use std::{collections::HashSet, path::PathBuf};
 
 use gloo_net::http::Request;
 use leptos::*;
-use libdof::prelude::PhysicalKey;
+use libdof::prelude::{Finger, PhysicalKey};
 use oxeylyzer_core::prelude::Layout;
 use rust_embed::Embed;
 use serde::{Deserialize, Serialize};
@@ -56,21 +56,20 @@ pub fn embedded_names<R: Embed>() -> impl Iterator<Item = String> {
         .flat_map(|os| os.into_string())
 }
 
-// pub fn font_mod(keys: &[PhysicalKey]) -> f64 {
-//     let x = keys
-//         .iter()
-//         .map(|p| p.width())
-//         .min_by(|a, b| a.total_cmp(b))
-//         .unwrap_or_default();
-
-//     let y = keys
-//         .iter()
-//         .map(|p| p.height())
-//         .max_by(|a, b| a.total_cmp(b))
-//         .unwrap_or_default();
-
-//     x.min(y)
-// }
+pub fn fingermap_colors(f: Finger) -> &'static str {
+    match f {
+        Finger::LP => "#b4014b", //"#9e0142",
+        Finger::LR => "#d53e4f",
+        Finger::LM => "#f46d43",
+        Finger::LI => "#fdae61",
+        Finger::LT => "#fee08b",
+        Finger::RT => "#e6f598",
+        Finger::RI => "#abdda4",
+        Finger::RM => "#66c2a5",
+        Finger::RR => "#3288bd",
+        Finger::RP => "#6b5ab8", //"#5e4fa2",
+    }
+}
 
 pub fn minmax_x(keys: &[PhysicalKey]) -> (f64, f64) {
     let min = keys
