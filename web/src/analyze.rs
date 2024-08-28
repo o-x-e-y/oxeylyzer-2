@@ -108,6 +108,7 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
 
 #[component]
 pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoView {
+    let keys = keys.0;
     let pins = use_context::<RwSignal<Pins>>();
 
     let (lx, hx) = minmax_x(&phys.keyboard);
@@ -157,7 +158,6 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
     };
 
     let key_views = keys
-        .0
         .iter()
         .copied()
         .zip(phys.keyboard)
@@ -319,13 +319,13 @@ fn MaybeRenderAnalysis() -> impl IntoView {
 #[component]
 fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let phys = expect_context::<PhysicalLayout>();
-    let keys = expect_context::<LayoutKeys>();
+    let keys = expect_context::<LayoutKeys>().0;
     // let pins = use_context::<RwSignal<Pins>>();
 
     let (analyzer, _) = create_signal(Analyzer::new(data, weights));
     let layout_memo = create_memo(move |_| Layout {
         name: phys.name.clone(),
-        keys: keys.0.iter().map(|s| s()).collect(),
+        keys: keys.iter().map(|s| s()).collect(),
         fingers: phys.fingers.clone(),
         keyboard: phys.keyboard.clone(),
         shape: phys.shape.clone(),

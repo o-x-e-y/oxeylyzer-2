@@ -32,7 +32,7 @@ impl std::ops::Deref for RequestError {
 }
 
 pub type JsonResource<T> = Resource<String, Result<T, RequestError>>;
-pub type TextResource = Resource<String, Result<String, RequestError>>;
+// pub type TextResource = Resource<String, Result<String, RequestError>>;
 
 pub async fn load_json<T: for<'a> Deserialize<'a>>(url: String) -> Result<T, RequestError> {
     let text = Request::get(&url).send().await?.json::<T>().await?;
