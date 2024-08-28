@@ -187,20 +187,6 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
     }
 }
 
-fn heatmap_gradient(freq: f64, curve: f64, max: f64) -> String {
-    let freq = freq.powf(curve).min(max).max(0.0);
-
-    let factor = freq / max;
-    let start = (66.0, 120.0, 128.0);
-    let end = (255.0, 32.0, 32.0);
-
-    let r = (start.0 + factor * (end.0 - start.0)) as u16;
-    let g = (start.1 + factor * (end.1 - start.1)) as u16;
-    let b = (start.2 + factor * (end.2 - start.2)) as u16;
-
-    format!("rgb({r}, {g}, {b})")
-}
-
 #[component]
 fn Key(
     k: Key,
@@ -242,9 +228,10 @@ fn Key(
 
     let enable_heatmap = expect_context::<EnableHeatmap>().0;
     let bg = move || match enable_heatmap() {
-        true => heatmap_gradient(freq(), 1.2, 12.0),
+        true => heatmap_gradient(freq(), 1.14, 12.0),
         false => fingermap_colors(f).to_owned(),
     };
+    let title = move || format!("Key usage: {:.2}%", freq());
 
     view! {
         <div
@@ -257,6 +244,7 @@ fn Key(
             style:width=format!("{}%", width)
             style:height=format!("{}%", height)
             style:background-color=bg
+            title=title
         >
             <div
                 class="
@@ -353,12 +341,12 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
             <div class="p-4 bg-header rounded-b-xl sm:rounded-t-xl overflow-x-scroll">
                 <table class="w-full text-left border-y border-y-hovered">
                     <tr class="text-darker">
-                        <th></th>
+                        <th class="border border-hovered"></th>
                         {Finger::FINGERS
                             .map(|f| {
                                 let bg = fingermap_colors(f);
                                 view! {
-                                    <th class="border-l border-l-hovered" style:background-color=bg>
+                                    <th class="border border-hovered" style:background-color=bg>
                                         {f.to_string()}
                                     </th>
                                 }
@@ -397,14 +385,14 @@ fn RenderFingerStat(name: &'static str, stat: impl Fn() -> [f64; 10] + 'static) 
             // .zip(Finger::FINGERS)
             .map(|v| {
                 // let bg = fingermap_colors(f);
-                view! { <td class="p-1 w-[8.5%] border-l border-l-hovered">{move || format!("{v:.2}")}</td> }
+                view! { <td class="p-1 w-[8.5%] border border-hovered">{move || format!("{v:.2}")}</td> }
             })
             .collect::<Vec<_>>()
     };
 
     view! {
         <tr>
-            <th>{name}</th>
+            <th class="p-1 border border-hovered">{name}</th>
             {rows}
         </tr>
     }

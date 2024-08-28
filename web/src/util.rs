@@ -71,6 +71,40 @@ pub fn fingermap_colors(f: Finger) -> &'static str {
     }
 }
 
+pub fn heatmap_gradient(freq: f64, curve: f64, max: f64) -> String {
+    let freq = freq.powf(curve).min(max).max(0.0);
+
+    // #90ccca
+    // #72d7f1 to #e04546
+    // #9890e3 to #b1f4cf
+
+    let factor = freq / max;
+    let start = (66.0 * 1.05, 120.0 * 1.05, 128.0 * 1.05);
+    let end = (255.0, 16.0, 16.0);
+
+    // let start = (114.0, 215.0, 241.0);
+    // let end = (224.0, 69.0, 70.0);
+
+    // let end = (255.0, 32.0, 32.0);
+    // let start = (end.0 / 2.4, end.1 / 2.4, end.2 / 2.4);
+
+    // let start = (201.0, 159.0, 179.0);
+    // let end = (87.0, 14.0, 75.0);
+
+    // let start = (152.0 / 1.2, 144.0 / 1.2, 227.0 / 1.2);
+    // let end = (177.0 / 1.2, 244.0 / 1.2, 207.0 / 1.2);
+
+    // let start = (160.0, 160.0, 160.0);
+    // let end = (255.0, 0.0, 0.0);
+    // let end = (177.0 * 1.1, 244.0 * 1.1, 207.0 * 1.1);
+
+    let r = (start.0 + factor * (end.0 - start.0)) as u16;
+    let g = (start.1 + factor * (end.1 - start.1)) as u16;
+    let b = (start.2 + factor * (end.2 - start.2)) as u16;
+
+    format!("rgb({r}, {g}, {b})")
+}
+
 pub fn minmax_x(keys: &[PhysicalKey]) -> (f64, f64) {
     let min = keys
         .iter()

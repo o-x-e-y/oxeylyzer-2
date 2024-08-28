@@ -76,6 +76,11 @@ eve_theme = [
     "#570E4B"
 ]
 
+asya_theme = [
+    '#9890e3',
+    '#b1f4cf'
+]
+
 def h(num: int) -> str:
     return f"{num:0{2}x}"
 
@@ -123,4 +128,4 @@ def rgb(colors: list[str]):
 
 
 if __name__ == "__main__":
-    rgb(eve_theme)
+    rgb(asya_theme)
