@@ -5,10 +5,7 @@ use fxhash::FxHashSet;
 use leptos::*;
 use leptos_router::*;
 use libdof::prelude::{Dof, Finger, PhysicalKey, Shape};
-use oxeylyzer_core::{
-    prelude::{Analyzer, Data, Layout, Weights},
-    stats::TrigramStats,
-};
+use oxeylyzer_core::prelude::{Analyzer, Data, Layout, Weights};
 
 pub type Key = RwSignal<char>;
 
@@ -89,12 +86,12 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
     provide_context(create_rw_signal(Pins::default()));
 
     view! {
-        <div class="w-full sm:w-3/4 mx-auto">
+        <div class="w-full">
             // <div class="my-4 grid grid-cols-[2fr_1fr]">
             // <div class="flex justify-center my-4">
-                // <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
+            // <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
             <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
-                // </div>
+            // </div>
             // <div class="sm:ml-[1%] md:ml-[2%] lg:ml-[3%]">
             // // <p>"Button uno"</p>
             // // <p>"Button dos"</p>
@@ -180,10 +177,12 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
         .collect::<Vec<_>>();
 
     view! {
-        <div class="m-4 w-4/5 mx-auto container-inline-size">
-            <div style=move || {
-                format!("width: {width}cqw; height: {height}cqw; font-size: {font_size}cqw")
-            }>{key_views}</div>
+        <div class="p-4 xl:w-7/12 lg:w-2/3 md:w-3/4 sm:w-5/6 mx-auto">
+            <div class="container-inline-size">
+                <div style=move || {
+                    format!("width: {width}cqw; height: {height}cqw; font-size: {font_size}cqw")
+                }>{key_views}</div>
+            </div>
         </div>
     }
 }
@@ -232,9 +231,7 @@ fn Key(
 
     let freq = move || {
         expect_context::<JsonResource<HeatmapData>>().with(|data| match data {
-            Some(Ok(data)) => {
-                data.get("shai".to_owned(), k()).unwrap_or_default()
-            }
+            Some(Ok(data)) => data.get("shai".to_owned(), k()).unwrap_or_default(),
             Some(Err(e)) => {
                 logging::log!("{e}");
                 0.0
@@ -325,27 +322,91 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
 
     let weighted_finger_distance =
         create_memo(move |_| stats_memo.with(|s| s.weighted_finger_distance));
-    
+
     let unweighted_finger_distance =
         create_memo(move |_| stats_memo.with(|s| s.unweighted_finger_distance));
-    
+
     let trigrams = create_memo(move |_| stats_memo.with(|s| s.trigrams.clone()));
 
     view! {
-        <div class="w-full overflow-x-scroll">
-            <table class="w-full m-4">
-                <thead>
-                </thead>
-                <tbody class="grid">
-                    <RenderStatRow stats=vec![("sfbs", sfbs), ("sfs", sfs)]/>
-                    <RenderFingerStatRow name="sfbs" stat=finger_sfbs unit="%"/>
-                    <RenderFingerStatRow name="use" stat=finger_use unit="%"/>
-                    <RenderFingerStatRow name="dist" stat=unweighted_finger_distance unit=""/>
-                    <RenderFingerStatRow name="weighted dist" stat=weighted_finger_distance unit=""/>
-                    <RenderTrigrams trigrams/>
-                </tbody>
-            </table>
+        <div class="px-6 mx-auto text-sm sm:text-base sm:grid sm:grid-cols-[1fr_2.5fr] sm:gap-2">
+            <div class="p-4 bg-header rounded-t-xl sm:rounded-b-xl">
+                <p class="font-bold text-lg">"Bigrams"</p>
+                <RenderStat name="sfbs" stat=sfbs unit="%"/>
+                <RenderStat name="sfs" stat=sfs unit="%"/>
+                <p class="mt-2 font-bold text-lg">"Trigrams"</p>
+                <RenderStat name="sft" stat=move || trigrams.with(|s| s.sft) unit="%"/>
+                <RenderStat name="sfb" stat=move || trigrams.with(|s| s.sfb) unit="%"/>
+                <RenderStat name="inroll" stat=move || trigrams.with(|s| s.inroll) unit="%"/>
+                <RenderStat name="outroll" stat=move || trigrams.with(|s| s.outroll) unit="%"/>
+                <RenderStat name="alternate" stat=move || trigrams.with(|s| s.alternate) unit="%"/>
+                <RenderStat name="redirect" stat=move || trigrams.with(|s| s.redirect) unit="%"/>
+                <RenderStat name="onehandin" stat=move || trigrams.with(|s| s.onehandin) unit="%"/>
+                <RenderStat
+                    name="onehandout"
+                    stat=move || trigrams.with(|s| s.onehandout)
+                    unit="%"
+                />
+                <RenderStat name="thumb" stat=move || trigrams.with(|s| s.thumb) unit="%"/>
+                <RenderStat name="invalid" stat=move || trigrams.with(|s| s.invalid) unit="%"/>
+            </div>
+            <div class="p-4 bg-header rounded-b-xl sm:rounded-t-xl overflow-x-scroll">
+                <table class="w-full text-left border-y border-y-hovered">
+                    <tr class="text-darker">
+                        <th></th>
+                        {Finger::FINGERS
+                            .map(|f| {
+                                let bg = fingermap_colors(f);
+                                view! {
+                                    <th class="border-l border-l-hovered" style:background-color=bg>
+                                        {f.to_string()}
+                                    </th>
+                                }
+                            })}
+
+                    </tr>
+                    <RenderFingerStat name="Finger usage" stat=finger_use/>
+                    <RenderFingerStat name="Finger sfbs" stat=finger_sfbs/>
+                    <RenderFingerStat name="Finger distance" stat=weighted_finger_distance/>
+                    <RenderFingerStat
+                        name="Unweighted finger distance"
+                        stat=unweighted_finger_distance
+                    />
+                </table>
+            </div>
         </div>
+    }
+}
+
+#[component]
+fn RenderStat(
+    name: &'static str,
+    stat: impl Fn() -> f64 + 'static,
+    unit: &'static str,
+) -> impl IntoView {
+    let rendered = move || format!("{:.3}{unit}", stat());
+
+    view! { <p>{name} : {rendered}</p> }
+}
+
+#[component]
+fn RenderFingerStat(name: &'static str, stat: impl Fn() -> [f64; 10] + 'static) -> impl IntoView {
+    let rows = move || {
+        stat()
+            .into_iter()
+            // .zip(Finger::FINGERS)
+            .map(|v| {
+                // let bg = fingermap_colors(f);
+                view! { <td class="p-1 w-[8.5%] border-l border-l-hovered">{move || format!("{v:.2}")}</td> }
+            })
+            .collect::<Vec<_>>()
+    };
+
+    view! {
+        <tr>
+            <th>{name}</th>
+            {rows}
+        </tr>
     }
 }
 
@@ -363,40 +424,4 @@ fn RenderStatRow(stats: Vec<(&'static str, impl Fn() -> f64 + 'static)>) -> impl
         .collect::<Vec<_>>();
 
     view! { <tr class="grid grid-flow-col even:bg-[#292929]">{rows}</tr> }
-}
-
-#[component]
-fn RenderFingerStatRow(
-    name: &'static str,
-    stat: impl Fn() -> [f64; 10] + 'static,
-    unit: &'static str,
-) -> impl IntoView {
-    let rows = move || {
-        stat().into_iter().map(|v| {
-        view! { <td class="text-left align-top px-2 py-1">{move || format!("{v:.3}{unit}")}</td> }
-    }).collect::<Vec<_>>()
-    };
-
-    view! {
-        <tr class="grid grid-flow-col even:bg-[#292929]">
-            <td class="text-left align-top px-2 py-1">{name}</td>
-            {rows}
-        </tr>
-    }
-}
-
-#[component]
-fn RenderTrigrams(trigrams: Memo<TrigramStats>) -> impl IntoView {
-    view! {
-        <RenderStatRow stats=vec![("sft", move || trigrams.with(|s| s.sft))]/>
-        <RenderStatRow stats=vec![("sfb", move || trigrams.with(|s| s.sfb))]/>
-        <RenderStatRow stats=vec![("inroll", move || trigrams.with(|s| s.inroll))]/>
-        <RenderStatRow stats=vec![("outroll", move || trigrams.with(|s| s.outroll))]/>
-        <RenderStatRow stats=vec![("alternate", move || trigrams.with(|s| s.alternate))]/>
-        <RenderStatRow stats=vec![("redirect", move || trigrams.with(|s| s.redirect))]/>
-        <RenderStatRow stats=vec![("onehandin", move || trigrams.with(|s| s.onehandin))]/>
-        <RenderStatRow stats=vec![("onehandout", move || trigrams.with(|s| s.onehandout))]/>
-        <RenderStatRow stats=vec![("thumb", move || trigrams.with(|s| s.thumb))]/>
-        <RenderStatRow stats=vec![("invalid", move || trigrams.with(|s| s.invalid))]/>
-    }
 }
