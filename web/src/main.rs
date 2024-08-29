@@ -104,7 +104,7 @@ fn Home() -> impl IntoView {
 fn Navigation() -> impl IntoView {
     view! {
         <header class="w-full bg-header">
-            <nav class="flex px-8 py-4">
+            <nav class="flex p-4 pr-5 sm:pl-8">
                 <A class="visited:text-txt text-nowrap" href="/">
                     <h1 class="text-4xl">"Oxeylyzer\u{00A0}2"</h1>
                 </A>
@@ -209,6 +209,21 @@ fn SearchBar(possible_results: Vec<String>) -> impl IntoView {
             <SmallSearchBar possible_results width="80%"/>
         </div>
     }
+}
+
+fn search<'a>(
+    possible_results: &'a [String],
+    search: &'a str,
+) -> impl Iterator<Item = String> + 'a {
+    let mut results = possible_results
+        .into_iter()
+        .map(|s| (jaro_winkler(&s, search), s))
+        .filter(|(d, _)| *d >= 0.3)
+        .collect::<Vec<_>>();
+
+    results.sort_by(|(d, _), (d2, _)| d2.total_cmp(d));
+
+    results.into_iter().take(10).map(|(_, s)| s.to_owned())
 }
 
 #[component]
@@ -317,21 +332,6 @@ fn SmallSearchBar(possible_results: Vec<String>, width: &'static str) -> impl In
             </div>
         </div>
     }
-}
-
-fn search<'a>(
-    possible_results: &'a [String],
-    search: &'a str,
-) -> impl Iterator<Item = String> + 'a {
-    let mut results = possible_results
-        .into_iter()
-        .map(|s| (jaro_winkler(&s, search), s))
-        .filter(|(d, _)| *d >= 0.3)
-        .collect::<Vec<_>>();
-
-    results.sort_by(|(d, _), (d2, _)| d2.total_cmp(d));
-
-    results.into_iter().take(10).map(|(_, s)| s.to_owned())
 }
 
 #[component]
