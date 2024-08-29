@@ -249,8 +249,8 @@ fn Key(
             <div
                 class="
                 absolute top-0 right-0 w-0 h-0
-                border-l-[13cqw] border-l-transparent border-b-[13cqw] border-b-transparent
-                border-r-[13cqw] border-r-darker border-t-[13cqw] border-t-darker
+                border-l-[0.8ch] border-l-transparent border-b-[0.8ch] border-b-transparent
+                border-r-[0.8ch] border-r-darker border-t-[0.8ch] border-t-darker
                 "
                 style:opacity=op
             ></div>
