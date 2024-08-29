@@ -76,19 +76,17 @@ fn App() -> impl IntoView {
 #[component]
 fn Home() -> impl IntoView {
     view! {
-        <div class="w-full h-1/2 my-auto flex content-center">
-            <div class="w-11/12 h-1/2 mx-auto text-1xl sm:grid sm:gap-16 sm:grid-cols-homepage">
-                <div class="w-full mt-12">
-                    <p>"An online keyboard layout analyzer and generator."</p>
-                // <div class="br md:w-2/3 flex">
-                // <div class="br my-10 mx-auto">
-                // "Get started"
-                // </div>
-                // </div>
-                </div>
-                <div class="w-full mt-12">
-                    <dof::RenderNamedDof name="noctum".to_string()></dof::RenderNamedDof>
-                </div>
+        <div class="w-11/12 mx-auto text-1xl sm:py-12 sm:grid sm:grid-cols-homepage sm:gap-6">
+            <p class="max-sm:py-8">
+                "An online keyboard layout analyzer and generator."
+            // <div class="br md:w-2/3 flex">
+            // <div class="br my-10 mx-auto">
+            // "Get started"
+            // </div>
+            // </div>
+            </p>
+            <div class="">
+                <dof::RenderNamedDof name="noctum".to_string()></dof::RenderNamedDof>
             </div>
         </div>
     }
@@ -96,82 +94,81 @@ fn Home() -> impl IntoView {
 
 #[component]
 fn Navigation() -> impl IntoView {
-    let (dots_clicked, set_dots_clicked) = create_signal(false);
-
     view! {
-        <header class="w-full bg-header p-4">
-            <nav class="w-[97%] m-auto flex">
+        <header class="w-full bg-header">
+            <nav class="flex px-8 py-4">
                 <A class="visited:text-txt" href="/">
-                    <h1 class="text-4xl min-w-[11ch] text-center">"Oxeylyzer 2"</h1>
+                    <h1 class="text-4xl text-nowrap">"Oxeylyzer 2"</h1>
                 </A>
-                <div class="hidden sm:flex sm:w-full justify-right">
-                    <div class="
-                    w-full flex flex-col sm:gap-4 sm:flex-row sm:items-center
-                    sm:justify-end sm:mt-0 sm:pl-5">
-                        <NavElem text="Layouts" href="/layouts"/>
-                        <NavElem text="Posts" href="/posts"/>
-                        <NavElem text="Analyze" href="/analyze"/>
-                        <Github/>
-                        <ToggleHeatmap/>
-                    </div>
-                </div>
-                <div class="sm:hidden flex w-full justify-end my-auto max-h-fit">
-                    <button
-                        class="p-1 mr-1 hover:bg-hovered rounded-lg"
-                        on:click=move |_| set_dots_clicked(true)
-                    >
-                        <img class="h-6 w-auto" src="../public/images/three-dots.svg" alt="Menu"/>
-                    </button>
-                    <ToggleHeatmap/>
-                </div>
-                <div
-                    class="fixed inset-0 bg-black/20 z-[9000] backdrop-blur-sm"
-                    hidden=move || !dots_clicked()
-                    on:click=move |_| set_dots_clicked(false)
-                >
-                    <div class="flex justify-end">
-                        <div class="bg-header rounded-xl m-4 px-5 py-4 w-5/12">
-                            <ThreeDotsElem text="Layouts" href="/layouts"/>
-                            <ThreeDotsElem text="Posts" href="/posts"/>
-                            <ThreeDotsElem text="Analyze" href="/analyze"/>
-                            <ThreeDotsElem
-                                text="Github"
-                                href="https://github.com/o-x-e-y/oxeylyzer-2"
-                            />
-                        </div>
-                    </div>
-                </div>
+                <NormalNav/>
+                <SmallNav/>
             </nav>
         </header>
     }
 }
 
 #[component]
-fn Github() -> impl IntoView {
+fn NormalNav() -> impl IntoView {
     view! {
-        <a class="flex" href="https://github.com/o-x-e-y/oxeylyzer-2">
-            <div class="p-1 hover:bg-hovered rounded-full my-auto">
-                <img class="h-6 w-auto" src="../public/images/github-logo.svg" alt="Github"/>
+        <ul class="hidden w-full justify-end list-none sm:flex sm:gap-5">
+            <NavElem text="Layouts" href="/layouts"/>
+            <NavElem text="Posts" href="/posts"/>
+            <NavElem text="Analyze" href="/analyze"/>
+            <GithubImage/>
+            <ToggleHeatmap/>
+        </ul>
+    }
+}
+
+#[component]
+fn SmallNav() -> impl IntoView {
+    let (dots_clicked, set_dots_clicked) = create_signal(false);
+
+    view! {
+        <div class="flex gap-3 w-full justify-end sm:hidden">
+            <button
+                class="hover:bg-hovered py-1 rounded-lg"
+                on:click=move |_| set_dots_clicked(true)
+            >
+                <img class="h-6 w-auto text-lg" src="../public/images/three-dots.svg" alt="Menu"/>
+            </button>
+            <ToggleHeatmap/>
+        </div>
+        <div
+            class="fixed inset-0 bg-black/20 z-[9001] backdrop-blur-sm"
+            hidden=move || !dots_clicked()
+            on:click=move |_| set_dots_clicked(false)
+        >
+            <div class="flex justify-end">
+                <ul class="m-4 p-4 pr-16 bg-header rounded-xl list-none">
+                    <NavElem text="Layouts" href="/layouts"/>
+                    <NavElem text="Posts" href="/posts"/>
+                    <NavElem text="Analyze" href="/analyze"/>
+                    <NavElem text="Github" href="https://github.com/o-x-e-y/oxeylyzer-2"/>
+                </ul>
             </div>
-        </a>
+        </div>
     }
 }
 
 #[component]
 fn NavElem(text: &'static str, href: &'static str) -> impl IntoView {
     view! {
-        <A class="text-xl text-[#ccc] visited:text-[#ccc]" href>
-            <div class="hover:bg-hovered rounded-lg">{text}</div>
+        <A class="my-auto text-xl text-[#ccc] visited:text-[#ccc] hover:text-txt" href>
+            <ul>{text}</ul>
         </A>
     }
 }
 
 #[component]
-fn ThreeDotsElem(text: &'static str, href: &'static str) -> impl IntoView {
+fn GithubImage() -> impl IntoView {
     view! {
-        <A class="text-xl text-txt visited:text-txt" href>
-            <div class="hover:bg-hovered rounded-md">{text}</div>
-        </A>
+        <a
+            class="my-auto hover:bg-hovered rounded-full"
+            href="https://github.com/o-x-e-y/oxeylyzer-2"
+        >
+            <img class="h-7 w-auto" src="../public/images/github-logo.svg" alt="Github"/>
+        </a>
     }
 }
 
@@ -184,7 +181,7 @@ fn ToggleHeatmap() -> impl IntoView {
         false => "bg-fingermap-gradient",
     };
 
-    let style = move || format!("{} w-8 h-8 rounded-[0.25rem]", gradient());
+    let style = move || format!("{} my-auto w-8 h-8 rounded-[0.25rem]", gradient());
 
     view! { <button class=style on:click=move |_| enable_heatmap.update(|b| *b = !*b)></button> }
 }
