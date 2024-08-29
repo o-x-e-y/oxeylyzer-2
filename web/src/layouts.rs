@@ -125,7 +125,7 @@ pub fn RenderMetadataDof(dof: Dof) -> impl IntoView {
     let languages = Some(langs_str.join(", "));
     let link_base = dof.link().map(move |l| {
         let link = l.to_owned();
-        view! { <A href=link.clone()>{link}</A> }
+        view! { <a href=link.clone()>{link}</a> }.into_view()
     });
 
     let (info, set_info) = create_signal('𝅉');
