@@ -262,18 +262,19 @@ fn SmallSearchBar(possible_results: Vec<String>, width: &'static str) -> impl In
 
     view! {
         <button
-            class="hover:bg-hovered -mr-1 p-1 rounded-lg"
             on:click=move |_| {
                 set_display_search(true);
                 if let Some(node) = input_ref() {
                     let _ = node.focus();
                 }
             }
-        >
 
+            class="hover:bg-hovered -mr-1 p-1 rounded-lg"
+        >
             <img class="h-6 w-auto text-lg" src="../public/images/search.svg" alt="Search"/>
         </button>
-        <div hidden=move || !display_search() class="fixed inset-0 w-screen h-screen z-[9001]">
+
+        <div hidden=move || !display_search() class="fixed inset-0 w-screen z-[9001]">
             <div class="h-[4.5rem] bg-header flex justify-center align-middle">
                 <div style:width=width class="my-auto">
                     <label name="search layouts">
