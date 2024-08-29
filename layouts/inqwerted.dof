@@ -1,0 +1,16 @@
+{
+	"name": "inqwerted",
+	"authors": [
+		"Herat"
+	],
+	"board": "ansi",
+	"link": "https://discord.gg/dvorak",
+	"layers": {
+		"main": [
+			"t r e w q  p o i u y",
+			"g f d s a  ; l k j h '",
+			"b v c x z  / . , m n"
+		]
+	},
+	"fingering": "traditional"
+}
