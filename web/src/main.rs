@@ -97,8 +97,8 @@ fn Navigation() -> impl IntoView {
     view! {
         <header class="w-full bg-header">
             <nav class="flex px-8 py-4">
-                <A class="visited:text-txt" href="/">
-                    <h1 class="text-4xl text-nowrap">"Oxeylyzer 2"</h1>
+                <A class="visited:text-txt text-nowrap" href="/">
+                    <h1 class="text-4xl">"Oxeylyzer\u{00A0}2"</h1>
                 </A>
                 <NormalNav/>
                 <SmallNav/>
