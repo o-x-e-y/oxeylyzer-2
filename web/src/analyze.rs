@@ -90,7 +90,9 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
             // <div class="my-4 grid grid-cols-[2fr_1fr]">
             // <div class="flex justify-center my-4">
             // <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
-            <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
+            <div class="p-4 xl:w-7/12 lg:w-2/3 md:w-3/4 sm:w-5/6 mx-auto">
+                <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
+            </div>
             // </div>
             // <div class="sm:ml-[1%] md:ml-[2%] lg:ml-[3%]">
             // // <p>"Button uno"</p>
@@ -177,12 +179,10 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
         .collect::<Vec<_>>();
 
     view! {
-        <div class="p-4 xl:w-7/12 lg:w-2/3 md:w-3/4 sm:w-5/6 mx-auto">
-            <div class="container-inline-size">
-                <div style=move || {
-                    format!("width: {width}cqw; height: {height}cqw; font-size: {font_size}cqw")
-                }>{key_views}</div>
-            </div>
+        <div class="container-inline-size">
+            <div style=move || {
+                format!("width: {width}cqw; height: {height}cqw; font-size: {font_size}cqw")
+            }>{key_views}</div>
         </div>
     }
 }

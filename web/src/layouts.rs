@@ -56,7 +56,7 @@ pub fn RenderLayoutLink(base_url: &'static str, name: String) -> impl IntoView {
         <div class="p-3 m-2 rounded-lg bg-black container-inline-size hover:bg-header">
             <A href=format!("/{base_url}/{name}")>
                 <p>{name.clone()}</p>
-                <div>
+                <div class="p-2">
                     <RenderNamedDof name/>
                 </div>
             </A>
@@ -169,7 +169,7 @@ pub fn RenderMetadataDof(dof: Dof) -> impl IntoView {
     };
 
     view! {
-        <div class="m-4">
+        <div class="p-4">
             <RenderDof dof/>
         </div>
         <div class="flex justify-center">
