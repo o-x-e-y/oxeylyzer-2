@@ -1,5 +1,6 @@
 /target
 /corpora/*
-.venv
 /web/dist
 /node_modules
+.venv
+.direnv
