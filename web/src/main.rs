@@ -148,7 +148,7 @@ fn SmallNav() -> impl IntoView {
             <ToggleHeatmap/>
         </div>
         <div
-            class="fixed inset-0 bg-black/20 z-[9001] backdrop-blur-sm"
+            class="fixed inset-0 w-screen h-screen bg-black/20 z-[9001] backdrop-blur-sm"
             hidden=move || !dots_clicked()
             on:click=move |_| set_dots_clicked(false)
         >
@@ -273,7 +273,7 @@ fn SmallSearchBar(possible_results: Vec<String>, width: &'static str) -> impl In
 
             <img class="h-6 w-auto text-lg" src="../public/images/search.svg" alt="Search"/>
         </button>
-        <div hidden=move || !display_search() class="fixed inset-0 w-full z-[9001]">
+        <div hidden=move || !display_search() class="fixed inset-0 w-screen h-screen z-[9001]">
             <div class="h-[4.5rem] bg-header flex justify-center align-middle">
                 <div style:width=width class="my-auto">
                     <label name="search layouts">
