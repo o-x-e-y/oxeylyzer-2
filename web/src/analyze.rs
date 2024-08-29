@@ -69,7 +69,7 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
         fingers,
         keyboard,
         shape,
-    } = Layout::from(dof);
+    } = Layout::from(dof.clone());
     let keys = keys
         .iter()
         .map(|c| create_rw_signal(*c))
@@ -100,7 +100,14 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
             // // <p>"Button tres"</p>
             // </div>
             // </div>
-            <MaybeRenderAnalysis/>
+            <div class="mx-4">
+                <div class="mb-2">
+                    <MaybeRenderAnalysis/>
+                </div>
+                <div class="mb-4">
+                    <DofMetadata dof/>
+                </div>
+            </div>
         </div>
     }
 }
@@ -317,7 +324,7 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let trigrams = create_memo(move |_| stats_memo.with(|s| s.trigrams.clone()));
 
     view! {
-        <div class="px-6 mx-auto text-sm sm:text-base sm:grid sm:grid-cols-[1fr_2.5fr] sm:gap-2">
+        <div class="mx-auto text-sm sm:text-base sm:grid sm:grid-cols-[1fr_2.5fr] sm:gap-2">
             <div class="p-4 bg-header rounded-t-xl sm:rounded-b-xl">
                 <p class="font-bold text-lg">"Bigrams"</p>
                 <RenderStat name="sfbs" stat=sfbs unit="%"/>
@@ -412,4 +419,124 @@ fn RenderStatRow(stats: Vec<(&'static str, impl Fn() -> f64 + 'static)>) -> impl
         .collect::<Vec<_>>();
 
     view! { <tr class="grid grid-flow-col even:bg-[#292929]">{rows}</tr> }
+}
+
+fn collapse_data(data: RwSignal<Option<String>>, collapsed: ReadSignal<bool>) {
+    if collapsed() {
+        match data() {
+            None => data.set(Some("Unknown".to_owned())),
+            _ => {}
+        };
+    } else {
+        match data().as_deref() {
+            Some("Unknown") => data.set(None),
+            _ => {}
+        }
+    }
+}
+
+#[component]
+pub fn DofMetadata(dof: Dof) -> impl IntoView {
+    let name = Some(dof.name().to_owned());
+    let authors = dof.authors().map(|v| v.join(", "));
+    let description = dof.description().map(ToOwned::to_owned);
+    let year = dof.year().map(|y| y.to_string());
+    let langs_str = dof
+        .languages()
+        .iter()
+        .map(|l| format!("{l:?}"))
+        .collect::<Vec<_>>();
+    let languages = Some(langs_str.join(", "));
+    let link_base = dof.link().map(move |l| {
+        let link = l.to_owned();
+        view! { <a href=link.clone()>{link}</a> }.into_view()
+    });
+
+    let (info, set_info) = create_signal('𝅉');
+
+    let name = create_rw_signal(name);
+    let authors = create_rw_signal(authors);
+    let description = create_rw_signal(description);
+    let year = create_rw_signal(year);
+    let languages = create_rw_signal(languages);
+    let link = create_rw_signal(link_base.clone());
+
+    let (collapsed, set_collapsed) = create_signal(true);
+
+    let collapse = move |_: MouseEvent| {
+        match collapsed() {
+            true => {
+                set_info('𝅏');
+                match link() {
+                    None if link_base.is_none() => link.set(Some("Unknown".into_view())),
+                    _ => link.set(link_base.clone()),
+                }
+            }
+            false => {
+                set_info('𝅉');
+                if link() == Some("Unknown".into_view()) {
+                    link.set(None)
+                }
+            }
+        }
+
+        collapse_data(name, collapsed);
+        collapse_data(authors, collapsed);
+        collapse_data(description, collapsed);
+        collapse_data(year, collapsed);
+        collapse_data(languages, collapsed);
+
+        set_collapsed.update(|b| *b = !*b);
+    };
+
+    view! {
+        <div class="sm:p-4 border border-hovered rounded-lg">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-header">
+                        <th class="text-left align-top px-2 py-1">
+                            <label name="collapse-metadata">
+                                <button on:click=collapse>
+                                    <span>"Info"</span>
+                                    <span class="absolute -mt-3 opacity-70">{move || info()}</span>
+                                </button>
+                            </label>
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <Metadata name="Name" data=name/>
+                    <Metadata name="Authors" data=authors/>
+                    <Metadata name="Year" data=year/>
+                    <Metadata name="Description" data=description/>
+                    <Metadata name="Source" data=link/>
+                    <Metadata name="Languages" data=languages/>
+                // <Metadata name="Board" data=board />
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+#[component]
+fn Metadata(
+    name: &'static str,
+    data: RwSignal<Option<impl IntoView + Clone + 'static>>,
+) -> impl IntoView {
+    view! {
+        {move || match data() {
+            Some(data) => {
+                Some(
+                    view! {
+                        <tr class="even:bg-header px-2">
+                            <th class="text-left align-top py-1 pr-3">{name}</th>
+                            <td class="text-left align-top py-1 pl-3">{data}</td>
+                        </tr>
+                    },
+                )
+            }
+            None => None,
+        }}
+    }
 }

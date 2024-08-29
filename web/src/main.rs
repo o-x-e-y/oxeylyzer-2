@@ -1,5 +1,4 @@
 mod analyze;
-mod dof;
 mod layouts;
 mod posts;
 mod search;
@@ -50,18 +49,6 @@ fn App() -> impl IntoView {
                             }
                         />
 
-                        <Route path=":name" view=layouts::RenderLayout/>
-                    </Route>
-                    <Route path="/analyze" view=layouts::LayoutsWrapper>
-                        <Route
-                            path=""
-                            view=|| {
-                                view! {
-                                    <layouts::RenderLayoutLinks base_url="analyze"></layouts::RenderLayoutLinks>
-                                }
-                            }
-                        />
-
                         <Route path=":name" view=analyze::RenderAnalyzer/>
                     </Route>
                     <Route path="/posts" view=|| view! { <Outlet/> }>
@@ -94,7 +81,7 @@ fn Home() -> impl IntoView {
             // </p>
             </div>
             <div class="w-full">
-                <dof::RenderNamedDof name="noctum".to_string()></dof::RenderNamedDof>
+                <layouts::RenderNamedDof name="noctum".to_string()></layouts::RenderNamedDof>
             </div>
         </div>
     }
@@ -121,12 +108,11 @@ fn NormalNav() -> impl IntoView {
 
     view! {
         <ul class="hidden w-full justify-end list-none sm:flex sm:gap-5">
-            <NavElem text="Layouts" href="/layouts"/>
             <NavElem text="Posts" href="/posts"/>
-            <NavElem text="Analyze" href="/analyze"/>
+            <NavElem text="Layouts" href="/layouts"/>
             <SearchBar possible_results/>
+            // <GithubImage/>
             <ToggleHeatmap/>
-        // <GithubImage/>
         </ul>
     }
 }
