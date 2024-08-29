@@ -1,0 +1,6 @@
+[build]
+target = "web/index.html"
+dist = "web/dist"
+
+[clean]
+dist = "web/dist"

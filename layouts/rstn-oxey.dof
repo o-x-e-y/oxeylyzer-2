@@ -1,17 +1,12 @@
 {
     "name": "rstn-oxey",
     "board": "ansi",
+    "fingering": "traditional",
     "layers": {
         "main": [
             "z f d l q  j g o u ,",
             "r s t n k  y c a e i",
             "x v b h m  p w ' ; ."
         ]
-    },
-    "fingering": "traditional",
-    "heatmap": [
-        "300 240 200 220 240  330 220 200 240 300",
-        "180 130 110 100 260  260 100 110 130 180",
-        "350 300 270 230 370  220 180 240 280 330"
-    ]
+    }
 }

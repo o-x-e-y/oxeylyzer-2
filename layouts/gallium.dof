@@ -1,0 +1,16 @@
+{
+	"name": "gallium",
+	"authors": [
+		"GalileoBlues"
+	],
+	"board": "ortho",
+	"link": "https://github.com/GalileoBlues/Gallium",
+	"layers": {
+		"main": [
+			"b l d c v j y o u ,",
+			"n r t s g p h a e i",
+			"x q m w z k f ' ; ."
+		]
+	},
+	"fingering": "traditional"
+}

@@ -1,0 +1,15 @@
+{
+	"name": "kuntum",
+	"authors": [
+		"lelazsq"
+	],
+	"board": "ansi",
+	"layers": {
+		"main": [
+			"v l n d k j w o u ,",
+			"t s r h f g c a e i",
+			"z x p b ' m y q / ."
+		]
+	},
+	"fingering": "angle"
+}

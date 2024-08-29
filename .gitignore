@@ -1,6 +1,6 @@
 /target
 /corpora/*
+/web/dist
+/node_modules
 .venv
-/messing-with-data
 .direnv
-

@@ -8,24 +8,28 @@ name = "benchmarks"
 harness = false
 
 [workspace]
-members = [ "oxeylyzer-core" ]
+members = [ "core", "web", "repl" ]
 
 [workspace.dependencies]
 thiserror = "1.0"
 itertools = "0.13"
-libdof = "0.16.3" #{ path = "../libdof" }
+libdof = "0.19.0" #{ path = "../libdof" }
+oxeylyzer-core = { path = "./core" }
 rayon = "1.10.0"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
+serde_with = "3.8"
+toml = "0.8"
 
 [dependencies]
-oxeylyzer-core = { path = "./oxeylyzer-core" }
-oxeylyzer-cli = { path = "./oxeylyzer-cli" }
+oxeylyzer-core = { path = "./core" }
+oxeylyzer-repl = { path = "./repl" }
+oxeylyzer-web = { path = "./web" }
 
 [dev-dependencies]
 diol = { version = "0.8.3", default-features = false }
 rand = "0.8.5"
 
 [[bin]]
-name = "oxeylyzer"
-path = "./oxeylyzer-cli/src/bin/main.rs"
+name = "repl"
+path = "./repl/src/bin/main.rs"

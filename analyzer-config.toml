@@ -1,7 +1,26 @@
-corpus = "./data/italian.json"
-layouts = "./layouts"
+corpus = "./data/shai.json"
+layouts = "./layouts" # can be an array of folders
 
 [weights]
-heatmap = -1
-sfbs = -60000
-sfs = -12000
+sfbs = -7
+sfs = -1
+sft = -12
+inroll = 5
+outroll = 4
+alternate = 4
+redirect = 1
+onehandin = 1
+onehandout = 0
+thumb = 0
+
+[weights.fingers]
+lp = 77
+lr = 32
+lm = 24
+li = 21
+lt = 46
+rt = 46
+ri = 21
+rm = 24
+rr = 32
+rp = 77
