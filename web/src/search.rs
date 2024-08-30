@@ -90,7 +90,7 @@ pub fn search(possible_results: &[String], search: &str, max_results: usize) -> 
         .collect::<Vec<_>>();
 
     results.sort_by(|(d, _), (d2, _)| d2.total_cmp(d));
-    
+
     results
         .into_iter()
         .take(max_results)
@@ -203,6 +203,7 @@ fn SearchBar(
                     if let Some(input) = input_ref() {
                         let _ = input.blur();
                         let query = input.value();
+                        input.set_value("");
                         let navigate = use_navigate();
                         navigate(&format!("/search/{query}"), NavigateOptions::default());
                     }
