@@ -38,27 +38,28 @@ pub fn LayoutsWrapper() -> impl IntoView {
 }
 
 #[component]
-pub fn RenderLayoutLinks(base_url: &'static str) -> impl IntoView {
+pub fn RenderLayoutLinks(names: impl Fn() -> Vec<String> + 'static) -> impl IntoView {
     view! {
-        <div class="flex justify-center">
-            <div class=" bg-darker p-4 w-full md:grid md:grid-cols-2 xl:grid-cols-3">
-                {embedded_names::<LayoutsFolder>()
-                    .map(|name| {
-                        view! { <RenderLayoutLink base_url name/> }
-                    })
-                    .collect_view()}
-            </div>
+        <div class="w-full md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3">
+            {move || names()
+                .into_iter()
+                .map(|name| {
+                    view! {
+                        <RenderLayoutLink name/>
+                    }
+                })
+                .collect_view()}
         </div>
     }
 }
 
 #[component]
-pub fn RenderLayoutLink(base_url: &'static str, name: String) -> impl IntoView {
+pub fn RenderLayoutLink(name: String) -> impl IntoView {
     view! {
-        <div class="p-3 m-2 rounded-lg bg-black container-inline-size hover:bg-header">
-            <A href=format!("/{base_url}/{name}")>
+        <div class="p-4 rounded-lg bg-black container-inline-size hover:bg-header">
+            <A href=format!("/layouts/{name}")>
                 <p>{name.clone()}</p>
-                <div class="p-2">
+                <div class="pt-2">
                     <RenderNamedDof name/>
                 </div>
             </A>
