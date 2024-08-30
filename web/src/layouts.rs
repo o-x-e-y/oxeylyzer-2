@@ -41,14 +41,14 @@ pub fn LayoutsWrapper() -> impl IntoView {
 pub fn RenderLayoutLinks(names: impl Fn() -> Vec<String> + 'static) -> impl IntoView {
     view! {
         <div class="w-full md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3">
-            {move || names()
-                .into_iter()
-                .map(|name| {
-                    view! {
-                        <RenderLayoutLink name/>
-                    }
-                })
-                .collect_view()}
+            {move || {
+                names()
+                    .into_iter()
+                    .map(|name| {
+                        view! { <RenderLayoutLink name/> }
+                    })
+                    .collect_view()
+            }}
         </div>
     }
 }

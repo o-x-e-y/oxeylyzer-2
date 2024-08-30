@@ -2,7 +2,11 @@ use leptos::*;
 use leptos_router::*;
 use strsim::jaro_winkler;
 
-use crate::{layouts::{LayoutsFolder, RenderLayoutLinks}, util::embedded_names, LayoutNames};
+use crate::{
+    layouts::{LayoutsFolder, RenderLayoutLinks},
+    util::embedded_names,
+    LayoutNames,
+};
 
 #[derive(Debug, Clone, Copy)]
 struct DisplaySearch(RwSignal<bool>);
@@ -49,7 +53,7 @@ pub fn QuerySearch() -> impl IntoView {
 
     let possible_results = move || match use_context::<LayoutNames>() {
         Some(names) => names.0,
-        None => embedded_names::<LayoutsFolder>().collect::<Vec<_>>()
+        None => embedded_names::<LayoutsFolder>().collect::<Vec<_>>(),
     };
 
     let names = move || search(&possible_results(), &query(), 24);
@@ -57,28 +61,26 @@ pub fn QuerySearch() -> impl IntoView {
     view! {
         <div class="mx-4">
             {move || match names().is_empty() {
-                false => view! {
-                    <p class="text-2xl text-center py-4">
-                        "Layouts matching '" {query} "'"
-                    </p>
-                    <RenderLayoutLinks names/>
-                }.into_view(),
-                true => view! {
-                    <p class="text-2xl text-center py-4">
-                        "No matches for '" {query} "' :("
-                    </p>
-                }.into_view()
+                false => {
+                    view! {
+                        <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
+                        <RenderLayoutLinks names/>
+                    }
+                        .into_view()
+                }
+                true => {
+                    view! {
+                        <p class="text-2xl text-center py-4">"No matches for '" {query} "' :("</p>
+                    }
+                        .into_view()
+                }
             }}
-            
+
         </div>
     }
 }
 
-pub fn search(
-    possible_results: &[String],
-    search: &str,
-    max_results: usize,
-) -> Vec<String> {
+pub fn search(possible_results: &[String], search: &str, max_results: usize) -> Vec<String> {
     let search = search.to_lowercase();
 
     let mut results = possible_results
@@ -88,11 +90,20 @@ pub fn search(
         .collect::<Vec<_>>();
 
     results.sort_by(|(d, _), (d2, _)| d2.total_cmp(d));
-    results.into_iter().take(max_results).map(|(_, s)| s.to_owned()).collect()
+    
+    results
+        .into_iter()
+        .take(max_results)
+        .map(|(_, s)| s.to_owned())
+        .collect()
 }
 
 #[component]
-fn SearchBar(possible_results: Vec<String>, width: &'static str, input_ref: Option<NodeRef<html::Input>>) -> impl IntoView {
+fn SearchBar(
+    possible_results: Vec<String>,
+    width: &'static str,
+    input_ref: Option<NodeRef<html::Input>>,
+) -> impl IntoView {
     let mut next_search_id = 0;
 
     let (search_results, set_search_results) = create_signal(Vec::new());
@@ -103,7 +114,7 @@ fn SearchBar(possible_results: Vec<String>, width: &'static str, input_ref: Opti
 
     let input_ref = match input_ref {
         Some(node) => node,
-        None => create_node_ref::<html::Input>()
+        None => create_node_ref::<html::Input>(),
     };
 
     let mut new_search_result = move |r: String| {
@@ -130,11 +141,9 @@ fn SearchBar(possible_results: Vec<String>, width: &'static str, input_ref: Opti
         }
     };
 
-    let border_focus_color = move || {
-        match focused() {
-            true => "rgb(100, 160, 240)",
-            false => "#ccc"
-        }
+    let border_focus_color = move || match focused() {
+        true => "rgb(100, 160, 240)",
+        false => "#ccc",
     };
 
     view! {
@@ -167,16 +176,17 @@ fn SearchBar(possible_results: Vec<String>, width: &'static str, input_ref: Opti
                             match (ev.key().as_str(), input_ref()) {
                                 ("Escape", Some(input)) => {
                                     let _ = input.blur();
-                                },
+                                }
                                 ("Enter", Some(input)) => {
                                     let _ = input.blur();
                                     let query = input.value();
-                                    
                                     input.set_value("");
-
                                     let navigate = use_navigate();
-                                    navigate(&format!("/search/{query}"), NavigateOptions::default());
-                                },
+                                    navigate(
+                                        &format!("/search/{query}"),
+                                        NavigateOptions::default(),
+                                    );
+                                }
                                 _ => {}
                             }
                         }
@@ -189,13 +199,15 @@ fn SearchBar(possible_results: Vec<String>, width: &'static str, input_ref: Opti
             </div>
             <button
                 on:mousedown=move |ev| ev.prevent_default()
-                on:click=move |_| if let Some(input) = input_ref() {
-                    let _ = input.blur();
-                    let query = input.value();
-                    let navigate = use_navigate();
-                    navigate(&format!("/search/{query}"), NavigateOptions::default());
+                on:click=move |_| {
+                    if let Some(input) = input_ref() {
+                        let _ = input.blur();
+                        let query = input.value();
+                        let navigate = use_navigate();
+                        navigate(&format!("/search/{query}"), NavigateOptions::default());
+                    }
                 }
-    
+
                 class="min-w-fit hover:bg-hovered pl-2 rounded-r-full border-l border-l-hovered"
             >
                 <img class="h-6 w-auto" src="../public/images/search.svg" alt="Search"/>
@@ -234,4 +246,3 @@ fn SearchResult(result: String) -> impl IntoView {
         </A>
     }
 }
-
