@@ -112,18 +112,25 @@ fn SearchBar(
 
     let display_search = use_context::<DisplaySearch>().map(|s| s.0);
 
+    let border_focus_color = move || match focused() {
+        true => "rgb(100, 160, 240)",
+        false => "#ccc",
+    };
+
     let input_ref = match input_ref {
         Some(node) => node,
         None => create_node_ref::<html::Input>(),
     };
 
+    // generate a search result with a unique ID
     let mut new_search_result = move |r: String| {
         let res = (next_search_id, r);
         next_search_id += 1;
         res
     };
 
-    let on_input_search = move |ev: ev::Event| {
+    // Generates new search suggestions when the user is typing
+    let on_input_searchbox = move |ev: ev::Event| {
         let current_search = event_target_value(&ev);
         if current_search.is_empty() {
             set_display_results(false);
@@ -141,55 +148,59 @@ fn SearchBar(
         }
     };
 
-    let border_focus_color = move || match focused() {
-        true => "rgb(100, 160, 240)",
-        false => "#ccc",
+    // Shows search results when searchbox is in focus
+    let on_focus_searchbox = move |_| {
+        if !search_results().is_empty() {
+            set_display_results(true)
+        }
+        set_focused(true);
+    };
+
+    // Hides search results after searchbox loses focus
+    let on_blur_searchbox = move |_| {
+        if let Some(display_search) = display_search {
+            display_search.set(false);
+        }
+        set_display_results(false);
+        set_focused(false);
+    };
+
+    // redirect to `search/<query>` based on the contents of the search box
+    let nav_to_search = move || {
+        if let Some(input) = input_ref() {
+            let _ = input.blur();
+            let query = input.value();
+            input.set_value("");
+
+            let navigate = use_navigate();
+            navigate(&format!("/search/{query}"), NavigateOptions::default());
+        }
+    };
+
+    // Navigate to a search page when pressing enter or blur the search box when pressing esc
+    let on_keydown_searchbox = move |ev: ev::KeyboardEvent| match (ev.key().as_str(), input_ref()) {
+        ("Escape", Some(input)) => {
+            let _ = input.blur();
+        }
+        ("Enter", Some(_)) => nav_to_search(),
+        _ => {}
     };
 
     view! {
         <div
             style:width=width
             style:border-color=border_focus_color
-            class="grid grid-cols-[1fr_2.5rem] bg-darker border-2 rounded-full"
+            class="grid grid-cols-[1fr_2.4rem] bg-darker border-2 rounded-full"
         >
             <div class="ml-4">
                 <label name="search layouts">
                     <input
                         node_ref=input_ref
-                        on:input=on_input_search
-                        on:focus=move |_| {
-                            if !search_results().is_empty() {
-                                set_display_results(true)
-                            }
-                            set_focused(true);
-                        }
 
-                        on:blur=move |_| {
-                            if let Some(display_search) = display_search {
-                                display_search.set(false);
-                            }
-                            set_display_results(false);
-                            set_focused(false);
-                        }
-
-                        on:keydown=move |ev| {
-                            match (ev.key().as_str(), input_ref()) {
-                                ("Escape", Some(input)) => {
-                                    let _ = input.blur();
-                                }
-                                ("Enter", Some(input)) => {
-                                    let _ = input.blur();
-                                    let query = input.value();
-                                    input.set_value("");
-                                    let navigate = use_navigate();
-                                    navigate(
-                                        &format!("/search/{query}"),
-                                        NavigateOptions::default(),
-                                    );
-                                }
-                                _ => {}
-                            }
-                        }
+                        on:input=on_input_searchbox
+                        on:focus=on_focus_searchbox
+                        on:blur=on_blur_searchbox
+                        on:keydown=on_keydown_searchbox
 
                         type="text"
                         placeholder="Search layouts..."
@@ -199,17 +210,9 @@ fn SearchBar(
             </div>
             <button
                 on:mousedown=move |ev| ev.prevent_default()
-                on:click=move |_| {
-                    if let Some(input) = input_ref() {
-                        let _ = input.blur();
-                        let query = input.value();
-                        input.set_value("");
-                        let navigate = use_navigate();
-                        navigate(&format!("/search/{query}"), NavigateOptions::default());
-                    }
-                }
+                on:click=move |_| nav_to_search()
 
-                class="min-w-fit hover:bg-hovered pl-2 rounded-r-full border-l border-l-hovered"
+                class="min-w-fit hover:bg-hovered pl-[0.4rem] rounded-r-full"
             >
                 <img class="h-6 w-auto" src="../public/images/search.svg" alt="Search"/>
             </button>
@@ -230,11 +233,8 @@ fn SearchBar(
             <For
                 each=search_results
                 key=|result| result.0
-                children=move |(_, result)| {
-                    view! { <SearchResult result/> }
-                }
+                children=move |(_, result)| view! { <SearchResult result/> }
             />
-
         </ul>
     }
 }
