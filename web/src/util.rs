@@ -8,6 +8,8 @@ use rust_embed::Embed;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::HeatmapTheme;
+
 #[derive(Debug, Clone, Error, Serialize, Deserialize, PartialEq)]
 pub struct RequestError(String);
 
@@ -71,16 +73,16 @@ pub fn fingermap_colors(f: Finger) -> &'static str {
     }
 }
 
-pub fn heatmap_gradient(freq: f64, curve: f64, max: f64) -> String {
-    let freq = freq.powf(curve).min(max).max(0.0);
+pub fn heatmap_gradient(freq: f64, theme: HeatmapTheme) -> String {
+    let freq = freq.powf(theme.curve.get()).min(theme.max_freq.get()).max(0.0);
 
     // #90ccca
     // #72d7f1 to #e04546
     // #9890e3 to #b1f4cf
 
-    let factor = freq / max;
-    let start = (66.0 * 1.05, 120.0 * 1.05, 128.0 * 1.05);
-    let end = (255.0, 16.0, 16.0);
+    let factor = freq.powf(theme.curve.get()) / theme.max_freq.get().powf(theme.curve.get());
+    let start = theme.low.get(); //(66.0 * 1.05, 120.0 * 1.05, 128.0 * 1.05);
+    let end = theme.high.get(); //(255.0, 16.0, 16.0);
 
     // let start = (114.0, 215.0, 241.0);
     // let end = (224.0, 69.0, 70.0);

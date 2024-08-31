@@ -1,4 +1,4 @@
-use crate::{layouts::HeatmapData, util::*, EnableHeatmap};
+use crate::{layouts::HeatmapData, util::*, EnableHeatmap, HeatmapTheme};
 
 use ev::{DragEvent, MouseEvent};
 use fxhash::FxHashSet;
@@ -235,7 +235,10 @@ fn Key(
 
     let enable_heatmap = expect_context::<EnableHeatmap>().0;
     let bg = move || match enable_heatmap() {
-        true => heatmap_gradient(freq(), 1.14, 12.0),
+        true => {
+            let theme = use_context::<HeatmapTheme>().unwrap_or_default();
+            heatmap_gradient(freq(), theme)
+        },
         false => fingermap_colors(f).to_owned(),
     };
     let title = move || format!("Key usage: {:.2}%", freq());

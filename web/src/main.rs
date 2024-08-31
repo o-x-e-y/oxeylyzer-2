@@ -23,6 +23,26 @@ struct EnableHeatmap(RwSignal<bool>);
 #[derive(Clone, Debug)]
 struct LayoutNames(Vec<String>);
 
+#[derive(Clone, Debug)]
+struct HeatmapTheme {
+    pub low: RwSignal<(f64, f64, f64)>,
+    pub high: RwSignal<(f64, f64, f64)>,
+    pub curve: RwSignal<f64>,
+    pub max_freq: RwSignal<f64>,
+
+}
+
+impl Default for HeatmapTheme {
+    fn default() -> Self {
+        Self {
+            low: create_rw_signal((140.0, 140.0, 140.0)),
+            high: create_rw_signal((255.0, 0.0, 0.0)),
+            max_freq: create_rw_signal(12.0),
+            curve: create_rw_signal(1.1),
+        }
+    }
+}
+
 #[component]
 fn App() -> impl IntoView {
     provide_meta_context();
@@ -32,11 +52,14 @@ fn App() -> impl IntoView {
         util::load_json::<HeatmapData>,
     );
 
+    let heatmap_theme = HeatmapTheme::default();
+
     let enable_heatmap = EnableHeatmap(create_rw_signal(true));
 
     let layout_names = LayoutNames(util::embedded_names::<LayoutsFolder>().collect::<Vec<_>>());
 
     provide_context(heatmap_data);
+    provide_context(heatmap_theme);
     provide_context(enable_heatmap);
     provide_context(layout_names);
 
@@ -114,6 +137,57 @@ fn Navigation() -> impl IntoView {
 }
 
 #[component]
+fn GithubImage() -> impl IntoView {
+    view! {
+        <a
+            class="my-auto hover:bg-hovered rounded-full"
+            href="https://github.com/o-x-e-y/oxeylyzer-2"
+        >
+            <img class="h-7 w-auto" src="../public/images/github-logo.svg" alt="Github"/>
+        </a>
+    }
+}
+
+#[component]
+fn NavSettings() -> impl IntoView {
+    view! {
+        <A class="my-auto -mx-2 p-1 hover:bg-hovered rounded-full" href="/settings">
+            <img
+                class="h-9 w-auto -ml-[0.04rem] leading-9 text-lg"
+                src="../public/images/settings.svg"
+                alt="Settings"
+            />
+        </A>
+    }
+}
+
+#[component]
+fn ToggleHeatmap() -> impl IntoView {
+    let enable_heatmap = expect_context::<EnableHeatmap>().0;
+    let theme = use_context::<HeatmapTheme>().unwrap_or_default();
+
+    let gradient = move || match enable_heatmap() {
+        true => {
+            let low = theme.low.get();
+            let high = theme.high.get();
+            format!("linear-gradient(to right top, rgb{:?}, rgb{:?})", high, low)
+        },
+        false => r#"
+            linear-gradient(to right top, #b4014b, #d53e4f, #f46d43, #fdae61,
+            #fee08b, #e6f598, #abdda4, #66c2a5, #3288bd, #6b5ab8)"#.to_owned(),
+    };
+
+    view! {
+        <button
+            on:click=move |_| enable_heatmap.update(|b| *b = !*b)
+            class="my-auto p-1 -mx-1 rounded-md hover:bg-hovered"
+        >
+            <div style:background-image=gradient class="w-8 h-8 rounded-[0.25rem]"></div>
+        </button>
+    }
+}
+
+#[component]
 fn NormalNav() -> impl IntoView {
     let possible_results = expect_context::<LayoutNames>().0;
 
@@ -124,6 +198,7 @@ fn NormalNav() -> impl IntoView {
             <NavSearch possible_results/>
             // <GithubImage/>
             <ToggleHeatmap/>
+        // <GithubImage/>
         </ul>
     }
 }
@@ -134,10 +209,10 @@ fn SmallNav() -> impl IntoView {
     let (dots_clicked, set_dots_clicked) = create_signal(false);
 
     view! {
-        <div class="flex gap-3 w-full justify-end sm:hidden">
+        <div class="flex gap-5 w-full justify-end sm:hidden">
             <NavSearch possible_results/>
             <button
-                class="hover:bg-hovered py-1 rounded-lg"
+                class="hover:bg-hovered py-1 -mx-2 rounded-lg"
                 on:click=move |_| set_dots_clicked(true)
             >
                 <img class="h-6 w-auto text-lg" src="../public/images/three-dots.svg" alt="Menu"/>
@@ -168,30 +243,4 @@ fn NavElem(text: &'static str, href: &'static str) -> impl IntoView {
             <ul>{text}</ul>
         </A>
     }
-}
-
-#[component]
-fn GithubImage() -> impl IntoView {
-    view! {
-        <a
-            class="my-auto hover:bg-hovered rounded-full"
-            href="https://github.com/o-x-e-y/oxeylyzer-2"
-        >
-            <img class="h-7 w-auto" src="../public/images/github-logo.svg" alt="Github"/>
-        </a>
-    }
-}
-
-#[component]
-fn ToggleHeatmap() -> impl IntoView {
-    let enable_heatmap = expect_context::<EnableHeatmap>().0;
-
-    let gradient = move || match enable_heatmap() {
-        true => "bg-heatmap-gradient",
-        false => "bg-fingermap-gradient",
-    };
-
-    let style = move || format!("{} my-auto w-8 h-8 rounded-[0.25rem]", gradient());
-
-    view! { <button class=style on:click=move |_| enable_heatmap.update(|b| *b = !*b)></button> }
 }

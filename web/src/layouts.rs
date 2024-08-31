@@ -49,6 +49,7 @@ pub fn RenderLayoutLinks(names: impl Fn() -> Vec<String> + 'static) -> impl Into
                     })
                     .collect_view()
             }}
+
         </div>
     }
 }
