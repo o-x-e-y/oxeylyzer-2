@@ -73,6 +73,28 @@ pub fn fingermap_colors(f: Finger) -> &'static str {
     }
 }
 
+pub fn hex_to_rgb(hex: &str) -> Option<(f64, f64, f64)> {
+    let hex = hex.trim().trim_start_matches('#');
+
+    match (hex.get(..2), hex.get(2..4), hex.get(4..)) {
+        (Some(s1), Some(s2), Some(s3)) => {
+            match (u8::from_str_radix(s1, 16), u8::from_str_radix(s2, 16), u8::from_str_radix(s3, 16), ) {
+                (Ok(n1), Ok(n2), Ok(n3)) => Some((n1 as f64, n2 as f64, n3 as f64)),
+            _ => None
+            }
+        }
+        _ => None
+    }
+}
+
+pub fn rgb_to_hex((r, g, b): (f64, f64, f64)) -> String {
+    let n1 = r.clamp(0.0, 255.0) as u8;
+    let n2 = g.clamp(0.0, 255.0) as u8;
+    let n3 = b.clamp(0.0, 255.0) as u8;
+
+    format!("#{n1:02x}{n2:02x}{n3:02x}")
+}
+
 pub fn heatmap_gradient(freq: f64, theme: HeatmapTheme) -> String {
     let freq = freq.powf(theme.curve.get()).min(theme.max_freq.get()).max(0.0);
 

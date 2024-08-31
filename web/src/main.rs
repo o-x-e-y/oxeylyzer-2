@@ -2,6 +2,7 @@ mod analyze;
 mod layouts;
 mod posts;
 mod search;
+mod settings;
 mod util;
 
 use search::*;
@@ -89,6 +90,7 @@ fn App() -> impl IntoView {
                         <Route path=":name" view=posts::RenderPost/>
                     </Route>
                     <Route path="/search/:query" view=search::QuerySearch/>
+                    <Route path="/settings" view=settings::Settings/>
                 </Routes>
             </main>
         </Router>
@@ -196,7 +198,7 @@ fn NormalNav() -> impl IntoView {
             <NavElem text="Posts" href="/posts"/>
             <NavElem text="Layouts" href="/layouts"/>
             <NavSearch possible_results/>
-            // <GithubImage/>
+            <NavSettings/>
             <ToggleHeatmap/>
         // <GithubImage/>
         </ul>
@@ -217,6 +219,7 @@ fn SmallNav() -> impl IntoView {
             >
                 <img class="h-6 w-auto text-lg" src="../public/images/three-dots.svg" alt="Menu"/>
             </button>
+            <NavSettings/>
             <ToggleHeatmap/>
         </div>
         <div
