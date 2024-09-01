@@ -31,6 +31,7 @@ pub struct PostsFolder;
 #[component]
 pub fn RenderPostLinks() -> impl IntoView {
     let mut posts = embedded_names::<PostsFolder>()
+        .into_iter()
         .zip(PostsFolder::iter())
         .map(|(name, path)| {
             let content =

@@ -161,14 +161,22 @@ pub async fn load_text(url: String) -> Result<String, RequestError> {
     Ok(text)
 }
 
-pub fn embedded_names<R: Embed>() -> impl Iterator<Item = String> {
-    R::iter()
+pub fn embedded_names<R: Embed>() -> Vec<String> {
+    let mut names = R::iter()
         .flat_map(|s| {
             PathBuf::from(s.to_string())
                 .file_stem()
                 .map(ToOwned::to_owned)
         })
         .flat_map(|os| os.into_string())
+        .map(|s| (s.to_lowercase(), s))
+        .collect::<Vec<_>>();
+
+    names.sort_by(|(l1, _), (l2, _)| l1.cmp(l2));
+
+    names.into_iter()
+        .map(|(_, s)| s)
+        .collect()
 }
 
 pub fn fingermap_colors(f: Finger) -> &'static str {
@@ -218,29 +226,9 @@ pub fn heatmap_gradient(freq: f64, theme: HeatmapTheme) -> String {
         .min(theme.max_freq.get())
         .max(0.0);
 
-    // #90ccca
-    // #72d7f1 to #e04546
-    // #9890e3 to #b1f4cf
-
     let factor = freq / theme.max_freq.get();
-    let start = theme.low.get(); //(66.0 * 1.05, 120.0 * 1.05, 128.0 * 1.05);
-    let end = theme.high.get(); //(255.0, 16.0, 16.0);
-
-    // let start = (114.0, 215.0, 241.0);
-    // let end = (224.0, 69.0, 70.0);
-
-    // let end = (255.0, 32.0, 32.0);
-    // let start = (end.0 / 2.4, end.1 / 2.4, end.2 / 2.4);
-
-    // let start = (201.0, 159.0, 179.0);
-    // let end = (87.0, 14.0, 75.0);
-
-    // let start = (152.0 / 1.2, 144.0 / 1.2, 227.0 / 1.2);
-    // let end = (177.0 / 1.2, 244.0 / 1.2, 207.0 / 1.2);
-
-    // let start = (160.0, 160.0, 160.0);
-    // let end = (255.0, 0.0, 0.0);
-    // let end = (177.0 * 1.1, 244.0 * 1.1, 207.0 * 1.1);
+    let start = theme.low.get();
+    let end = theme.high.get();
 
     let r = (start.0 + factor * (end.0 - start.0)) as u16;
     let g = (start.1 + factor * (end.1 - start.1)) as u16;

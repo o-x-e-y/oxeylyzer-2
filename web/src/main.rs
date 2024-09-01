@@ -32,7 +32,7 @@ fn App() -> impl IntoView {
 
     let enable_heatmap = EnableHeatmap(create_rw_signal(true));
 
-    let layout_names = LayoutNames(util::embedded_names::<LayoutsFolder>().collect::<Vec<_>>());
+    let layout_names = LayoutNames(embedded_names::<LayoutsFolder>());
 
     let weights = GlobalWeights::default();
 

@@ -18,7 +18,7 @@ pub fn QuerySearch() -> impl IntoView {
 
     let possible_results = move || match use_context::<LayoutNames>() {
         Some(names) => names.0,
-        None => embedded_names::<LayoutsFolder>().collect::<Vec<_>>(),
+        None => embedded_names::<LayoutsFolder>(),
     };
 
     let names = move || search(&possible_results(), &query(), 24);
