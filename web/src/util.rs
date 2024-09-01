@@ -174,9 +174,7 @@ pub fn embedded_names<R: Embed>() -> Vec<String> {
 
     names.sort_by(|(l1, _), (l2, _)| l1.cmp(l2));
 
-    names.into_iter()
-        .map(|(_, s)| s)
-        .collect()
+    names.into_iter().map(|(_, s)| s).collect()
 }
 
 pub fn fingermap_colors(f: Finger) -> &'static str {

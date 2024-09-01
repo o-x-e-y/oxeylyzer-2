@@ -38,18 +38,62 @@ pub fn LayoutsWrapper() -> impl IntoView {
 }
 
 #[component]
-pub fn RenderLayoutLinks(names: impl Fn() -> Vec<String> + 'static) -> impl IntoView {
-    view! {
-        <div class="w-full md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3">
-            {move || {
-                names()
-                    .into_iter()
-                    .map(|name| {
-                        view! { <RenderLayoutLink name/> }
-                    })
-                    .collect_view()
-            }}
+pub fn LayoutLinks(names: impl Fn() -> Vec<String> + 'static) -> impl IntoView {
+    let page = create_rw_signal(0);
+    let max_per_page = 12;
 
+    view! {
+        <div>
+            <PaginateSearch page/>
+            <div class="w-full md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3">
+                <Paginate page max_per_page names/>
+            </div>
+            <PaginateSearch page/>
+        </div>
+    }
+}
+
+#[component]
+fn Paginate(
+    page: RwSignal<usize>,
+    max_per_page: usize,
+    names: impl Fn() -> Vec<String> + 'static,
+) -> impl IntoView {
+    view! {
+        {move || {
+            names()
+                .into_iter()
+                .skip(page() * max_per_page)
+                .map(|name| {
+                    view! { <RenderLayoutLink name/> }
+                })
+                .take(max_per_page)
+                .collect_view()
+        }}
+    }
+}
+
+#[component]
+fn PaginateSearch(page: RwSignal<usize>) -> impl IntoView {
+    view! {
+        <div class="my-3 p-4 bg-black rounded-lg flex justify-center">
+            <button
+                on:click=move |_| page.update(|v| *v = v.saturating_sub(1))
+                class="w-20 mx-2 p-2 text-center border-2 border-[#ccc] rounded-lg"
+            >
+                "<- "
+                {move || page().saturating_sub(1)}
+            </button>
+            <div class="mx-2 py-2 px-4 text-center border-2 border-[#ccc] rounded-lg">
+                Page {move || page()}
+            </div>
+            <button
+                on:click=move |_| page.update(|v| *v += 1)
+                class="w-20 mx-2 p-2 text-center border-2 border-[#ccc] rounded-lg"
+            >
+                {move || page() + 1}
+                " ->"
+            </button>
         </div>
     }
 }

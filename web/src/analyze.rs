@@ -361,19 +361,19 @@ fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> 
                 <Stat name="score:" stat=move || score().to_string()/>
             </div>
             // {move || {
-            //     if is_window_lg() {
-            //         view! {
-            //             <div class="hidden lg:block">
-            //                 <HorizontalFingerStats stats=finger_stats/>
-            //             </div>
-            //         }
-            //     } else {
-            //         view! {
-            //             <div class="lg:hidden">
-            //                 <VerticalFingerStats stats=finger_stats/>
-            //             </div>
-            //         }
-            //     }
+            // if is_window_lg() {
+            // view! {
+            // <div class="hidden lg:block">
+            // <HorizontalFingerStats stats=finger_stats/>
+            // </div>
+            // }
+            // } else {
+            // view! {
+            // <div class="lg:hidden">
+            // <VerticalFingerStats stats=finger_stats/>
+            // </div>
+            // }
+            // }
             // }}
             <VerticalFingerStats stats=finger_stats/>
         </div>
@@ -512,6 +512,7 @@ fn VerticalFingerStats(stats: FingerStats) -> impl IntoView {
                         })
                         .collect_view()
                 }}
+
             </table>
         </div>
     }

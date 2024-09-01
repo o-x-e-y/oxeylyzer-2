@@ -55,7 +55,7 @@ fn App() -> impl IntoView {
                                 let names = move || expect_context::<LayoutNames>().0;
                                 view! {
                                     <div class="m-6">
-                                        <layouts::RenderLayoutLinks names></layouts::RenderLayoutLinks>
+                                        <layouts::LayoutLinks names></layouts::LayoutLinks>
                                     </div>
                                 }
                             }
@@ -111,11 +111,14 @@ fn Navigation() -> impl IntoView {
                 <A class="visited:text-txt text-nowrap" href="/">
                     <h1 class="text-4xl">"Oxeylyzer\u{00A0}2"</h1>
                 </A>
-                {move || if is_window_sm() {view! {
-                    <SmallNav/>
-                }} else {view! {
-                    <NormalNav/>
-                }}}
+                {move || {
+                    if is_window_sm() {
+                        view! { <SmallNav/> }
+                    } else {
+                        view! { <NormalNav/> }
+                    }
+                }}
+
             </nav>
         </header>
     }
@@ -176,7 +179,7 @@ fn ToggleHeatmap() -> impl IntoView {
 #[component]
 fn NormalNav() -> impl IntoView {
     let possible_results = expect_context::<LayoutNames>().0;
-        
+
     view! {
         <ul class="hidden w-full justify-end list-none sm:flex sm:gap-5">
             <NavElem text="Posts" href="/posts"/>

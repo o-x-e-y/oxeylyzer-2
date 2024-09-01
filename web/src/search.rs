@@ -3,7 +3,7 @@ use leptos_router::*;
 use strsim::jaro_winkler;
 
 use crate::{
-    layouts::{LayoutsFolder, RenderLayoutLinks},
+    layouts::{LayoutLinks, LayoutsFolder},
     util::embedded_names,
     LayoutNames,
 };
@@ -29,7 +29,7 @@ pub fn QuerySearch() -> impl IntoView {
                 false => {
                     view! {
                         <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
-                        <RenderLayoutLinks names/>
+                        <LayoutLinks names/>
                     }
                         .into_view()
                 }
@@ -74,6 +74,7 @@ pub fn NavSearch(possible_results: Vec<String>) -> impl IntoView {
                     }
                 }
             }}
+
         </div>
     }
 }
@@ -94,16 +95,9 @@ fn SmallSearchBar(possible_results: Vec<String>) -> impl IntoView {
 
             class="hover:bg-hovered -mr-1 p-1 rounded-lg"
         >
-            <img
-                class="h-6 w-auto text-lg"
-                src="../public/images/search.svg"
-                alt="Search"
-            />
+            <img class="h-6 w-auto text-lg" src="../public/images/search.svg" alt="Search"/>
         </button>
-        <div
-            hidden=move || !display_search()
-            class="fixed inset-0 w-screen z-[9001]"
-        >
+        <div hidden=move || !display_search() class="fixed inset-0 w-screen z-[9001]">
             <div class="w-full h-[4.5rem] bg-header flex justify-center">
                 <div class="my-auto">
                     <SearchBar
