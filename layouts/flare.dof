@@ -1,0 +1,15 @@
+{
+	"name": "flare",
+	"authors": [
+		"ec0vid"
+	],
+	"board": "ansi",
+	"layers": {
+		"main": [
+			"f b r c p q m o u ,",
+			"s t n d y j h a e i",
+			"v x g w z k l ' \" ."
+		]
+	},
+	"fingering": "angle"
+}

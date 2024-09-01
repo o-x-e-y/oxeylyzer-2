@@ -1,0 +1,16 @@
+{
+	"name": "Semimak JQC",
+	"authors": [
+		"Hertz"
+	],
+	"board": "ansi",
+	"year": 2022,
+	"layers": {
+		"main": [
+			"f l h v z ' w u o y",
+			"s r n t k g d e a i",
+			"x j b m q p c , . /"
+		]
+	},
+	"fingering": "traditional"
+}

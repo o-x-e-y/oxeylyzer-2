@@ -1,0 +1,23 @@
+{
+	"name": "Bone",
+	"authors": [
+		"Effchen and Darnos"
+	],
+	"board": "ansi",
+	"year": 2014,
+	"languages": [
+		{
+			"language": "German",
+			"weight": 100
+		}
+	],
+	"link": "neo-layout.org/Layouts/",
+	"layers": {
+		"main": [
+			"j d u a x p h l m w ß",
+			"c t i e o b n r s g q",
+			"f v ü ä ö y z , . k"
+		]
+	},
+	"fingering": "traditional"
+}

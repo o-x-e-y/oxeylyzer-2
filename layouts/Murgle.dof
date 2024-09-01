@@ -1,0 +1,17 @@
+{
+	"name": "Murgle",
+	"authors": [
+		"Murgle"
+	],
+	"board": "ansi",
+	"year": 2021,
+	"link": "discord.com/channels/807843650717483049/807843651304161342/987593390201921536",
+	"layers": {
+		"main": [
+			"m l d f k b p u , '",
+			"n r t h v g y e i a /",
+			"q j ( ) x z w d s ; ."
+		]
+	},
+	"fingering": "traditional"
+}

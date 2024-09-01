@@ -1,0 +1,20 @@
+{
+	"name": "zwou",
+	"authors": [
+		"Flarefin"
+	],
+	"board": "ansi",
+	"year": 2022,
+	"layers": {
+		"main": [
+			"p l d f k z w o u ,",
+			"n r t h y v s a e i /",
+			"q j m c g x b ' ; ."
+		]
+	},
+	"fingering": [
+		"LP LR LM LI LI RI RI RM RR RP",
+		"LP LR LM LI LI RI RI RM RR RP RP",
+		"LP LR LM LT LT RI RI RM RR RP"
+	]
+}

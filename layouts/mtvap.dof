@@ -1,0 +1,15 @@
+{
+	"name": "mtvap",
+	"authors": [
+		"stronglytyped"
+	],
+	"board": "ansi",
+	"layers": {
+		"main": [
+			"y p o u ; k d l c w z =",
+			"i n e a , m h t s r q",
+			"- / ' . x b f v g j"
+		]
+	},
+	"fingering": "traditional"
+}

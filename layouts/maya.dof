@@ -1,0 +1,15 @@
+{
+	"name": "maya",
+	"authors": [
+		"lelazsq"
+	],
+	"board": "ansi",
+	"layers": {
+		"main": [
+			"b l d g q j f o u ,",
+			"n r t s v k h a e i",
+			"x m c w z p y ' / ."
+		]
+	},
+	"fingering": "angle"
+}

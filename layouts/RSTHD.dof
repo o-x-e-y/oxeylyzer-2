@@ -1,0 +1,18 @@
+{
+	"name": "RSTHD",
+	"authors": [
+		"xsznix"
+	],
+	"board": "ortho",
+	"year": 2016,
+	"link": "xsznix.wordpress.com/2016/05/16/introducing-the-rsthd-layout/",
+	"layers": {
+		"main": [
+			"j c y f k z l , u q =",
+			"r s t h d m n a i o '",
+			"/ v g p b x w . ; -",
+			"~ ~ e"
+		]
+	},
+	"fingering": "traditional"
+}

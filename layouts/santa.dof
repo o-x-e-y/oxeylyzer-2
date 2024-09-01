@@ -1,0 +1,15 @@
+{
+	"name": "santa",
+	"authors": [
+		"Oxey"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			"v p d l q j f o u ,",
+			"s n t r k y c a e i",
+			"z b m h x g w ' ; ."
+		]
+	},
+	"fingering": "traditional"
+}

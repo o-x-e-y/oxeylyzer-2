@@ -1,0 +1,15 @@
+{
+	"name": "io",
+	"authors": [
+		"GalileoBlues"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			", . p u t s l g ' ;",
+			"x w m n o h a d b q",
+			"z v f y e i r c j k"
+		]
+	},
+	"fingering": "traditional"
+}

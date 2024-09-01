@@ -1,0 +1,15 @@
+{
+	"name": "pine-v1",
+	"authors": [
+		"ClemenPine"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			"y r d w p k l o u ,",
+			"s n t c g m h a e i",
+			"x z v f b j q ' / ."
+		]
+	},
+	"fingering": "traditional"
+}

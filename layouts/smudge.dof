@@ -1,0 +1,15 @@
+{
+	"name": "smudge",
+	"authors": [
+		"Oxey"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			"~ ~ ~ ~ ~ ~ ~ ~ ~ ~",
+			"~ s m o о g i e ~ ~",
+			"~ ~ ~ ~ ~ ~ ~ ~ ~ ~"
+		]
+	},
+	"fingering": "traditional"
+}

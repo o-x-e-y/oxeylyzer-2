@@ -1,0 +1,15 @@
+{
+	"name": "kharlamak",
+	"authors": [
+		"Kharlee (she/they)"
+	],
+	"board": "ansi",
+	"layers": {
+		"main": [
+			"э ь у к ю ш п р д г ц ф",
+			"и а о е я м т н с в щ",
+			"ъ й ы х ё з б л ч ж"
+		]
+	},
+	"fingering": "traditional"
+}

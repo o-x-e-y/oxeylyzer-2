@@ -1,0 +1,15 @@
+{
+	"name": "rstn-apsu",
+	"authors": [
+		"Eve"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			"w c d l ; ' u o y b",
+			"r s t n , . a e i h",
+			"v f g m q z k j x p"
+		]
+	},
+	"fingering": "traditional"
+}

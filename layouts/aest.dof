@@ -1,0 +1,19 @@
+{
+	"name": "aest",
+	"authors": [
+		"Flarefin"
+	],
+	"board": "ansi",
+	"layers": {
+		"main": [
+			". , ; i r h w g p q",
+			"' a y e s n t m v j /",
+			"x o u b l d c f k z"
+		]
+	},
+	"fingering": [
+		"LP LP LR LR LM LM LI LI LI LI",
+		"LP LP LR LR LM LM LI LI LI LI LI",
+		"LP LP LR LM LM LI LI LI LI LI"
+	]
+}

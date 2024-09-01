@@ -1,0 +1,15 @@
+{
+	"name": "mir",
+	"authors": [
+		"RusDoomer"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			"j o u r q f d l b g",
+			"e a i n x y h t s c '",
+			"/ . , z ; k p m v w"
+		]
+	},
+	"fingering": "traditional"
+}

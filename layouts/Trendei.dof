@@ -1,0 +1,16 @@
+{
+	"name": "Trendei",
+	"authors": [
+		"ec0vid"
+	],
+	"board": "ansi",
+	"year": 2021,
+	"layers": {
+		"main": [
+			"k l h w b z f o u ;",
+			"t r n d c y s e i a",
+			"q j m g p x v ' , ."
+		]
+	},
+	"fingering": "traditional"
+}

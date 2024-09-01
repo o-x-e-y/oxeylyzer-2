@@ -1,0 +1,16 @@
+{
+	"name": "TAHAN",
+	"authors": [
+		"hughlaurie1959"
+	],
+	"board": "ansi",
+	"year": 2021,
+	"layers": {
+		"main": [
+			"t a h z y x u i o p",
+			"q v g r s n k b l w",
+			"m f e c d j ' ; / -"
+		]
+	},
+	"fingering": "traditional"
+}

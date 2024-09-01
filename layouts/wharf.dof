@@ -1,0 +1,15 @@
+{
+	"name": "wharf",
+	"authors": [
+		"whorf"
+	],
+	"board": "ansi",
+	"layers": {
+		"main": [
+			". u o c f q k n l ,",
+			"i e a y g v t h r s",
+			"; ' w p z m d b j x"
+		]
+	},
+	"fingering": "angle"
+}

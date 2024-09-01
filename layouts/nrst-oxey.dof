@@ -1,0 +1,15 @@
+{
+	"name": "nrst-oxey",
+	"authors": [
+		"Oxey"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			"x l c d g j f o u ,",
+			"n r s t w y h a e i",
+			"z q v m b k p ' ; ."
+		]
+	},
+	"fingering": "traditional"
+}

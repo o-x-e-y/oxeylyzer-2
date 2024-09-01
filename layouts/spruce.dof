@@ -1,0 +1,15 @@
+{
+	"name": "spruce",
+	"authors": [
+		"Oxey"
+	],
+	"board": "ortho",
+	"layers": {
+		"main": [
+			"q l d g v z f o u .",
+			"r n t s w y h a e i",
+			"x j m c b k p ' ; ,"
+		]
+	},
+	"fingering": "traditional"
+}
