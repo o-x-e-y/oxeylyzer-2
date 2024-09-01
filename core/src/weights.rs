@@ -1,7 +1,7 @@
 use libdof::dofinitions::Finger;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Weights {
     pub sfbs: i64,
     pub sfs: i64,
@@ -33,18 +33,18 @@ impl Weights {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FingerWeights {
-    lp: i64,
-    lr: i64,
-    lm: i64,
-    li: i64,
-    lt: i64,
-    rt: i64,
-    ri: i64,
-    rm: i64,
-    rr: i64,
-    rp: i64,
+    pub lp: i64,
+    pub lr: i64,
+    pub lm: i64,
+    pub li: i64,
+    pub lt: i64,
+    pub rt: i64,
+    pub ri: i64,
+    pub rm: i64,
+    pub rr: i64,
+    pub rp: i64,
 }
 
 impl FingerWeights {

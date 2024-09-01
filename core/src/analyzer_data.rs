@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{char_mapping::CharMapping, data::Data, weights::Weights};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct AnalyzerData {
     name: String,
     chars: Box<[i64]>,

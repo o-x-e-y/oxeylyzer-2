@@ -1,11 +1,11 @@
-use crate::{layouts::HeatmapData, util::*, EnableHeatmap, HeatmapTheme};
+use crate::{layouts::HeatmapData, util::*};
 
 use ev::{DragEvent, MouseEvent};
 use fxhash::FxHashSet;
 use leptos::*;
 use leptos_router::*;
 use libdof::prelude::{Dof, Finger, PhysicalKey, Shape};
-use oxeylyzer_core::prelude::{Analyzer, Data, Layout, Weights};
+use oxeylyzer_core::prelude::{Analyzer, Data, Layout};
 
 pub type Key = RwSignal<char>;
 
@@ -274,21 +274,12 @@ fn MaybeRenderAnalysis() -> impl IntoView {
     let err = move |e: &str| format!("Analysis failed: {}", e);
 
     let data = create_resource(move || format!("/data/shai.json"), load_json::<Data>);
-    let weights = create_resource(
-        move || format!("/public/weights/default.json"),
-        load_json::<Weights>,
-    );
+    let weights = move || use_context::<GlobalWeights>().unwrap_or_default();
 
     view! {
         {move || {
             match data() {
-                Some(Ok(data)) => {
-                    match weights() {
-                        Some(Ok(weights)) => view! { <RenderAnalysis data weights/> }.into_view(),
-                        Some(Err(e)) => err(&e).into_view(),
-                        None => "Loading weights...".into_view(),
-                    }
-                }
+                Some(Ok(data)) => view! { <RenderAnalysis data weights/> }.into_view(),
                 Some(Err(e)) => err(&e).into_view(),
                 None => "Loading data...".into_view(),
             }
@@ -297,12 +288,12 @@ fn MaybeRenderAnalysis() -> impl IntoView {
 }
 
 #[component]
-fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
+fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> impl IntoView {
     let phys = expect_context::<PhysicalLayout>();
     let keys = expect_context::<LayoutKeys>().0;
     // let pins = use_context::<RwSignal<Pins>>();
 
-    let (analyzer, _) = create_signal(Analyzer::new(data, weights));
+    let analyzer = create_memo(move |_| Analyzer::new(data.clone(), weights().into()));
     let layout_memo = create_memo(move |_| Layout {
         name: phys.name.clone(),
         keys: keys.iter().map(|s| s()).collect(),
@@ -317,6 +308,7 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
     let sfs = create_memo(move |_| stats_memo.with(|s| s.sfs));
     let finger_use = create_memo(move |_| stats_memo.with(|s| s.finger_use));
     let finger_sfbs = create_memo(move |_| stats_memo.with(|s| s.finger_sfbs));
+    let score = create_memo(move |_| analyzer.with(|a| layout_memo.with(|l| a.score(l))));
 
     let weighted_finger_distance =
         create_memo(move |_| stats_memo.with(|s| s.weighted_finger_distance));
@@ -347,6 +339,7 @@ fn RenderAnalysis(data: Data, weights: Weights) -> impl IntoView {
                 />
                 <RenderStat name="thumb" stat=move || trigrams.with(|s| s.thumb) unit="%"/>
                 <RenderStat name="invalid" stat=move || trigrams.with(|s| s.invalid) unit="%"/>
+                <RenderStat name="score" stat=move || (score() as f64).round() unit=""/>
             </div>
             <div class="p-4 bg-header rounded-b-xl sm:rounded-t-xl overflow-x-scroll">
                 <table class="w-full text-left border-y border-y-hovered">

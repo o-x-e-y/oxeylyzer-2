@@ -6,6 +6,7 @@ mod settings;
 mod util;
 
 use search::*;
+use util::*;
 
 use layouts::{HeatmapData, LayoutsFolder};
 use leptos::*;
@@ -16,31 +17,6 @@ pub fn main() {
     console_error_panic_hook::set_once();
 
     mount_to_body(App)
-}
-
-#[derive(Clone, Copy, Debug)]
-struct EnableHeatmap(RwSignal<bool>);
-
-#[derive(Clone, Debug)]
-struct LayoutNames(Vec<String>);
-
-#[derive(Clone, Debug)]
-struct HeatmapTheme {
-    pub low: RwSignal<(f64, f64, f64)>,
-    pub high: RwSignal<(f64, f64, f64)>,
-    pub curve: RwSignal<f64>,
-    pub max_freq: RwSignal<f64>,
-}
-
-impl Default for HeatmapTheme {
-    fn default() -> Self {
-        Self {
-            low: create_rw_signal((140.0, 140.0, 140.0)),
-            high: create_rw_signal((255.0, 0.0, 0.0)),
-            max_freq: create_rw_signal(14.0),
-            curve: create_rw_signal(1.0),
-        }
-    }
 }
 
 #[component]
@@ -58,10 +34,13 @@ fn App() -> impl IntoView {
 
     let layout_names = LayoutNames(util::embedded_names::<LayoutsFolder>().collect::<Vec<_>>());
 
+    let weights = GlobalWeights::default();
+
     provide_context(heatmap_data);
     provide_context(heatmap_theme);
     provide_context(enable_heatmap);
     provide_context(layout_names);
+    provide_context(weights);
 
     view! {
         <Router trailing_slash=leptos_router::TrailingSlash::Redirect>

@@ -25,7 +25,7 @@ pub struct TrigramData {
     pub invalid: i64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Analyzer {
     pub data: AnalyzerData,
     pub weights: Weights,
