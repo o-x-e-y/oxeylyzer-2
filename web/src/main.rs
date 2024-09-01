@@ -103,14 +103,19 @@ fn Home() -> impl IntoView {
 
 #[component]
 fn Navigation() -> impl IntoView {
+    let is_window_sm = leptos_use::use_media_query("(max-width: 560px)");
+
     view! {
         <header class="w-full bg-header">
             <nav class="flex p-4 pr-5 sm:pl-8">
                 <A class="visited:text-txt text-nowrap" href="/">
                     <h1 class="text-4xl">"Oxeylyzer\u{00A0}2"</h1>
                 </A>
-                <NormalNav/>
-                <SmallNav/>
+                {move || if is_window_sm() {view! {
+                    <SmallNav/>
+                }} else {view! {
+                    <NormalNav/>
+                }}}
             </nav>
         </header>
     }
@@ -171,7 +176,7 @@ fn ToggleHeatmap() -> impl IntoView {
 #[component]
 fn NormalNav() -> impl IntoView {
     let possible_results = expect_context::<LayoutNames>().0;
-
+        
     view! {
         <ul class="hidden w-full justify-end list-none sm:flex sm:gap-5">
             <NavElem text="Posts" href="/posts"/>
@@ -186,8 +191,8 @@ fn NormalNav() -> impl IntoView {
 
 #[component]
 fn SmallNav() -> impl IntoView {
-    let possible_results = expect_context::<LayoutNames>().0;
     let (dots_clicked, set_dots_clicked) = create_signal(false);
+    let possible_results = expect_context::<LayoutNames>().0;
 
     view! {
         <div class="flex gap-5 w-full justify-end sm:hidden">

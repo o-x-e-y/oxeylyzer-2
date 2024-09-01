@@ -12,41 +12,6 @@ use crate::{
 struct DisplaySearch(RwSignal<bool>);
 
 #[component]
-pub fn NavSearch(possible_results: Vec<String>) -> impl IntoView {
-    let display_search = create_rw_signal(false);
-    let input_ref = create_node_ref::<html::Input>();
-
-    provide_context(DisplaySearch(display_search));
-
-    view! {
-        <div class="my-auto hidden md:block">
-            <SearchBar possible_results=possible_results.clone() width="25ch" input_ref=None/>
-        </div>
-        <div class="my-auto md:hidden">
-            <button
-                on:click=move |_| {
-                    display_search.set(true);
-                    if let Some(node) = input_ref() {
-                        let _ = node.focus();
-                    }
-                }
-
-                class="hover:bg-hovered -mr-1 p-1 rounded-lg"
-            >
-                <img class="h-6 w-auto text-lg" src="../public/images/search.svg" alt="Search"/>
-            </button>
-            <div hidden=move || !display_search() class="fixed inset-0 w-screen z-[9001]">
-                <div class="w-full h-[4.5rem] bg-header flex justify-center">
-                    <div class="my-auto">
-                        <SearchBar possible_results width="80vw" input_ref=Some(input_ref)/>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-}
-
-#[component]
 pub fn QuerySearch() -> impl IntoView {
     let params = use_params_map();
     let query = move || params.with(|p| p.get("query").cloned().unwrap_or_default());
@@ -76,6 +41,78 @@ pub fn QuerySearch() -> impl IntoView {
                 }
             }}
 
+        </div>
+    }
+}
+
+#[component]
+pub fn NavSearch(possible_results: Vec<String>) -> impl IntoView {
+    let display_search = create_rw_signal(false);
+
+    provide_context(DisplaySearch(display_search));
+
+    let is_window_md = leptos_use::use_media_query("(min-width: 768px)");
+
+    view! {
+        <div class="my-auto">
+            {move || {
+                if is_window_md() {
+                    view! {
+                        <div class="hidden md:block">
+                            <SearchBar
+                                possible_results=possible_results.clone()
+                                width="25ch"
+                                input_ref=None
+                            />
+                        </div>
+                    }
+                } else {
+                    view! {
+                        <div class="md:hidden">
+                            <SmallSearchBar possible_results=possible_results.clone()/>
+                        </div>
+                    }
+                }
+            }}
+        </div>
+    }
+}
+
+#[component]
+fn SmallSearchBar(possible_results: Vec<String>) -> impl IntoView {
+    let display_search = expect_context::<DisplaySearch>().0;
+    let input_ref = create_node_ref::<html::Input>();
+
+    view! {
+        <button
+            on:click=move |_| {
+                display_search.set(true);
+                if let Some(node) = input_ref() {
+                    let _ = node.focus();
+                }
+            }
+
+            class="hover:bg-hovered -mr-1 p-1 rounded-lg"
+        >
+            <img
+                class="h-6 w-auto text-lg"
+                src="../public/images/search.svg"
+                alt="Search"
+            />
+        </button>
+        <div
+            hidden=move || !display_search()
+            class="fixed inset-0 w-screen z-[9001]"
+        >
+            <div class="w-full h-[4.5rem] bg-header flex justify-center">
+                <div class="my-auto">
+                    <SearchBar
+                        possible_results=possible_results.clone()
+                        width="80vw"
+                        input_ref=Some(input_ref)
+                    />
+                </div>
+            </div>
         </div>
     }
 }
