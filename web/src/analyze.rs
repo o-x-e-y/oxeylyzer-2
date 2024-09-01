@@ -23,6 +23,16 @@ pub struct PhysicalLayout {
 #[derive(Debug, Clone, PartialEq)]
 pub struct LayoutKeys(pub Box<[Key]>);
 
+pub type FingerStat = Memo<[Memo<f64>; 10]>;
+
+#[derive(Debug, Copy, Clone)]
+pub struct FingerStats {
+    finger_use: FingerStat,
+    finger_sfbs: FingerStat,
+    weighted_finger_distance: FingerStat,
+    unweighted_finger_distance: FingerStat,
+}
+
 #[component]
 pub fn RenderAnalyzer() -> impl IntoView {
     let params = use_params_map();
@@ -160,6 +170,14 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
         .zip(phys.fingers)
         .enumerate()
         .map(|(i, ((k, pos), f))| {
+            let x = (pos.x() - lx) * kw + 0.15;
+            let y = (pos.y() - ly) * kw * ym + 0.15 * ym;
+
+            let width = (pos.width()) * kw - 0.3;
+            let height = ((pos.height()) * kw - 0.3) * ym;
+
+            let pos = PhysicalKey::xywh(x, y, width, height);
+
             view! {
                 <div
                     class="select-none"
@@ -169,7 +187,7 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
                     on:dragover=on_drag_over
                     on:contextmenu=move |ev| on_contextmenu(ev, i)
                 >
-                    <Key k pos lx ly kw ym f i/>
+                    <Key k f pos i/>
                 </div>
             }
         })
@@ -185,25 +203,7 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
 }
 
 #[component]
-fn Key(
-    k: Key,
-    pos: PhysicalKey,
-    lx: f64,
-    ly: f64,
-    kw: f64,
-    ym: f64,
-    f: Finger,
-    i: usize,
-) -> impl IntoView {
-    let width = (pos.width()) * kw;
-    let height = (pos.height()) * kw * ym;
-
-    let x = (pos.x() - lx) * kw + 0.15;
-    let y = (pos.y() - ly) * kw * ym + 0.15 * ym;
-
-    let width = width - 0.3;
-    let height = height - 0.3 * ym;
-
+fn Key(k: Key, f: Finger, pos: PhysicalKey, i: usize) -> impl IntoView {
     let op = move || match use_context::<RwSignal<Pins>>() {
         Some(pins) => match pins().0.contains(&i) {
             true => 1,
@@ -239,10 +239,10 @@ fn Key(
             absolute flex border-[0.3cqw] border-darker items-center justify-center
             bg-darker text-darker rounded-[1cqw] container-inline-size
             "
-            style:left=format!("{}%", x)
-            style:top=format!("{}%", y)
-            style:width=format!("{}%", width)
-            style:height=format!("{}%", height)
+            style:left=format!("{}%", pos.x())
+            style:top=format!("{}%", pos.y())
+            style:width=format!("{}%", pos.width())
+            style:height=format!("{}%", pos.height())
             style:background-color=bg
             title=title
         >
