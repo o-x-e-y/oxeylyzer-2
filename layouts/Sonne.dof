@@ -3,7 +3,7 @@
 	"authors": [
 		"Sagittarius"
 	],
-	"board": "ortho",
+	"board": "ansi",
 	"layers": {
 		"main": [
 			"ä u o m , p d c l q '",

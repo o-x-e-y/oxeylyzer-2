@@ -3,7 +3,7 @@
 	"authors": [
 		"RusDoomer"
 	],
-	"board": "ortho",
+	"board": "ansi",
 	"layers": {
 		"main": [
 			"j o u r q f d l b g",
