@@ -100,10 +100,13 @@ pub fn RenderDof(dof: Dof) -> impl IntoView {
         keyboard,
         shape,
     } = Layout::from(dof);
-    let keys = keys
-        .iter()
-        .map(|c| create_rw_signal(*c))
-        .collect::<Box<_>>();
+
+    let keys = LayoutKeys(
+        keys.iter()
+            .map(|c| create_rw_signal(*c))
+            .collect::<Box<_>>(),
+    );
+
     let phys = PhysicalLayout {
         name,
         fingers,
@@ -111,5 +114,5 @@ pub fn RenderDof(dof: Dof) -> impl IntoView {
         shape,
     };
 
-    view! { <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/> }
+    view! { <RenderAnalyzeLayout phys keys/> }
 }

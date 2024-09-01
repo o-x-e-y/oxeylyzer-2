@@ -23,20 +23,6 @@ pub struct PhysicalLayout {
 #[derive(Debug, Clone, PartialEq)]
 pub struct LayoutKeys(pub Box<[Key]>);
 
-impl LayoutKeys {
-    pub fn swap(&self, i1: usize, i2: usize) {
-        let k1 = self.0.get(i1);
-        let k2 = self.0.get(i2);
-
-        if let (Some(sig1), Some(sig2)) = (k1, k2) {
-            let help = sig1.get();
-
-            sig1.set(sig2.get());
-            sig2.set(help);
-        }
-    }
-}
-
 #[component]
 pub fn RenderAnalyzer() -> impl IntoView {
     let params = use_params_map();
@@ -70,10 +56,12 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
         keyboard,
         shape,
     } = Layout::from(dof.clone());
+
     let keys = keys
         .iter()
         .map(|c| create_rw_signal(*c))
         .collect::<Box<_>>();
+
     let phys = PhysicalLayout {
         name,
         fingers,
@@ -134,9 +122,11 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
 
     let on_drop = move |_: DragEvent, target_key: Key| {
         if let Some(source_key) = dragged_sig.get() {
-            let help = source_key();
-            source_key.set(target_key());
-            target_key.set(help);
+            batch(move || {
+                let help = source_key();
+                source_key.set(target_key());
+                target_key.set(help);
+            });
 
             set_dragged_sig(None);
         }
@@ -287,6 +277,13 @@ fn MaybeRenderAnalysis() -> impl IntoView {
     }
 }
 
+fn fmt_f64_stat(stat: f64, unit: &'static str) -> String {
+    format!("{:.3}{unit}", stat)
+        .trim_end_matches('0')
+        .trim_end_matches('.')
+        .to_owned()
+}
+
 #[component]
 fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> impl IntoView {
     let phys = expect_context::<PhysicalLayout>();
@@ -316,30 +313,37 @@ fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> 
     let unweighted_finger_distance =
         create_memo(move |_| stats_memo.with(|s| s.unweighted_finger_distance));
 
-    let trigrams = create_memo(move |_| stats_memo.with(|s| s.trigrams.clone()));
+    let t_sft = create_memo(move |_| stats_memo.with(|s| s.trigrams.sft));
+    let t_sfb = create_memo(move |_| stats_memo.with(|s| s.trigrams.sfb));
+    let t_inroll = create_memo(move |_| stats_memo.with(|s| s.trigrams.inroll));
+    let t_outroll = create_memo(move |_| stats_memo.with(|s| s.trigrams.outroll));
+    let t_alternate = create_memo(move |_| stats_memo.with(|s| s.trigrams.alternate));
+    let t_redirect = create_memo(move |_| stats_memo.with(|s| s.trigrams.redirect));
+    let t_onehandin = create_memo(move |_| stats_memo.with(|s| s.trigrams.onehandin));
+    let t_onehandout = create_memo(move |_| stats_memo.with(|s| s.trigrams.onehandout));
+    let t_thumb = create_memo(move |_| stats_memo.with(|s| s.trigrams.thumb));
+    let t_invalid = create_memo(move |_| stats_memo.with(|s| s.trigrams.invalid));
 
     view! {
         <div class="mx-auto text-sm sm:text-base sm:grid sm:grid-cols-[1fr_2.5fr] sm:gap-2">
             <div class="p-4 bg-header rounded-t-xl sm:rounded-b-xl">
-                <p class="font-bold text-lg">"Bigrams"</p>
-                <RenderStat name="sfbs" stat=sfbs unit="%"/>
-                <RenderStat name="sfs" stat=sfs unit="%"/>
-                <p class="mt-2 font-bold text-lg">"Trigrams"</p>
-                <RenderStat name="sft" stat=move || trigrams.with(|s| s.sft) unit="%"/>
-                <RenderStat name="sfb" stat=move || trigrams.with(|s| s.sfb) unit="%"/>
-                <RenderStat name="inroll" stat=move || trigrams.with(|s| s.inroll) unit="%"/>
-                <RenderStat name="outroll" stat=move || trigrams.with(|s| s.outroll) unit="%"/>
-                <RenderStat name="alternate" stat=move || trigrams.with(|s| s.alternate) unit="%"/>
-                <RenderStat name="redirect" stat=move || trigrams.with(|s| s.redirect) unit="%"/>
-                <RenderStat name="onehandin" stat=move || trigrams.with(|s| s.onehandin) unit="%"/>
-                <RenderStat
-                    name="onehandout"
-                    stat=move || trigrams.with(|s| s.onehandout)
-                    unit="%"
-                />
-                <RenderStat name="thumb" stat=move || trigrams.with(|s| s.thumb) unit="%"/>
-                <RenderStat name="invalid" stat=move || trigrams.with(|s| s.invalid) unit="%"/>
-                <RenderStat name="score" stat=move || (score() as f64).round() unit=""/>
+                <StatGroup description="Bigrams">
+                    <F64Stat name="sfbs:" stat=sfbs unit="%"/>
+                    <F64Stat name="sfs:" stat=sfs unit="%"/>
+                </StatGroup>
+                <StatGroup description="Trigrams">
+                    <F64Stat name="sft:" stat=t_sft unit="%"/>
+                    <F64Stat name="sfb:" stat=t_sfb unit="%"/>
+                    <F64Stat name="inroll:" stat=t_inroll unit="%"/>
+                    <F64Stat name="outroll:" stat=t_outroll unit="%"/>
+                    <F64Stat name="alternate:" stat=t_alternate unit="%"/>
+                    <F64Stat name="redirect:" stat=t_redirect unit="%"/>
+                    <F64Stat name="onehandin:" stat=t_onehandin unit="%"/>
+                    <F64Stat name="onehandout:" stat=t_onehandout unit="%"/>
+                    <F64Stat name="thumb:" stat=t_thumb unit="%"/>
+                    <F64Stat name="invalid:" stat=t_invalid unit="%"/>
+                </StatGroup>
+                <Stat name="score:" stat=move || score().to_string()/>
             </div>
             <div class="p-4 bg-header rounded-b-xl sm:rounded-t-xl overflow-x-scroll">
                 <table class="w-full text-left border-y border-y-hovered">
@@ -370,14 +374,41 @@ fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> 
 }
 
 #[component]
-fn RenderStat(
+fn StatGroup(description: &'static str, children: Children) -> impl IntoView {
+    view! {
+        <p class="font-bold text-lg">{description}</p>
+        <div class="w-fit">
+            <table>
+                <tbody>{children()}</tbody>
+            </table>
+        </div>
+    }
+}
+
+#[component]
+fn F64Stat(
     name: &'static str,
     stat: impl Fn() -> f64 + 'static,
     unit: &'static str,
 ) -> impl IntoView {
-    let rendered = move || format!("{:.3}{unit}", stat());
+    let stat = move || fmt_f64_stat(stat(), unit);
 
-    view! { <p>{name} : {rendered}</p> }
+    view! {
+        <tr class="py-1">
+            <td class="text-left align-center">{name}</td>
+            <td class="pl-3">{stat}</td>
+        </tr>
+    }
+}
+
+#[component]
+fn Stat(name: &'static str, stat: impl Fn() -> String + 'static) -> impl IntoView {
+    view! {
+        <tr class="py-1">
+            <td class="text-left align-center">{name}</td>
+            <td class="pl-3">{stat}</td>
+        </tr>
+    }
 }
 
 #[component]
