@@ -238,7 +238,7 @@ fn Key(
         true => {
             let theme = use_context::<HeatmapTheme>().unwrap_or_default();
             heatmap_gradient(freq(), theme)
-        },
+        }
         false => fingermap_colors(f).to_owned(),
     };
     let title = move || format!("Key usage: {:.2}%", freq());

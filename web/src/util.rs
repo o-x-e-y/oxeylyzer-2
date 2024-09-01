@@ -78,12 +78,16 @@ pub fn hex_to_rgb(hex: &str) -> Option<(f64, f64, f64)> {
 
     match (hex.get(..2), hex.get(2..4), hex.get(4..)) {
         (Some(s1), Some(s2), Some(s3)) => {
-            match (u8::from_str_radix(s1, 16), u8::from_str_radix(s2, 16), u8::from_str_radix(s3, 16), ) {
+            match (
+                u8::from_str_radix(s1, 16),
+                u8::from_str_radix(s2, 16),
+                u8::from_str_radix(s3, 16),
+            ) {
                 (Ok(n1), Ok(n2), Ok(n3)) => Some((n1 as f64, n2 as f64, n3 as f64)),
-            _ => None
+                _ => None,
             }
         }
-        _ => None
+        _ => None,
     }
 }
 
@@ -96,13 +100,16 @@ pub fn rgb_to_hex((r, g, b): (f64, f64, f64)) -> String {
 }
 
 pub fn heatmap_gradient(freq: f64, theme: HeatmapTheme) -> String {
-    let freq = freq.powf(theme.curve.get()).min(theme.max_freq.get()).max(0.0);
+    let freq = freq
+        .powf(theme.curve.get())
+        .min(theme.max_freq.get())
+        .max(0.0);
 
     // #90ccca
     // #72d7f1 to #e04546
     // #9890e3 to #b1f4cf
 
-    let factor = freq.powf(theme.curve.get()) / theme.max_freq.get().powf(theme.curve.get());
+    let factor = freq / theme.max_freq.get();
     let start = theme.low.get(); //(66.0 * 1.05, 120.0 * 1.05, 128.0 * 1.05);
     let end = theme.high.get(); //(255.0, 16.0, 16.0);
 

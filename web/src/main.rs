@@ -30,7 +30,6 @@ struct HeatmapTheme {
     pub high: RwSignal<(f64, f64, f64)>,
     pub curve: RwSignal<f64>,
     pub max_freq: RwSignal<f64>,
-
 }
 
 impl Default for HeatmapTheme {
@@ -38,8 +37,8 @@ impl Default for HeatmapTheme {
         Self {
             low: create_rw_signal((140.0, 140.0, 140.0)),
             high: create_rw_signal((255.0, 0.0, 0.0)),
-            max_freq: create_rw_signal(12.0),
-            curve: create_rw_signal(1.1),
+            max_freq: create_rw_signal(14.0),
+            curve: create_rw_signal(1.0),
         }
     }
 }
@@ -173,10 +172,11 @@ fn ToggleHeatmap() -> impl IntoView {
             let low = theme.low.get();
             let high = theme.high.get();
             format!("linear-gradient(to right top, rgb{:?}, rgb{:?})", high, low)
-        },
+        }
         false => r#"
             linear-gradient(to right top, #b4014b, #d53e4f, #f46d43, #fdae61,
-            #fee08b, #e6f598, #abdda4, #66c2a5, #3288bd, #6b5ab8)"#.to_owned(),
+            #fee08b, #e6f598, #abdda4, #66c2a5, #3288bd, #6b5ab8)"#
+            .to_owned(),
     };
 
     view! {
