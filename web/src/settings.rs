@@ -15,7 +15,7 @@ pub fn Settings() -> impl IntoView {
         <h2 class="text-3xl my-4 text-center">"Settings"</h2>
         <div class="mx-8 p-4 bg-black rounded-xl">
             <p class="text-lg">"Theme:"</p>
-            <div class="sm:flex">
+            <div class="md:flex">
                 <div class="my-3 p-2 border border-white/30 rounded-lg w-fit">
                     <table>
                         <tbody>
@@ -34,7 +34,7 @@ pub fn Settings() -> impl IntoView {
                         </tbody>
                     </table>
                 </div>
-                <div class="m-auto w-4/5 sm:w-[20rem] md:w-[28rem] lg:w-[36rem] px-4 md:px-8 py-2 md:py-4">
+                <div class="m-auto md:w-[28rem] lg:w-[36rem]">
                     <RenderNamedDof name="noctum".into()/>
                 </div>
             </div>
