@@ -7,15 +7,15 @@ edition = "2021"
 chrono = { version = "0.4.38", default-features = false }
 console_error_panic_hook = "0.1"
 fxhash = "0.2.1"
-gloo-net = { version = "0.5", default-features = false }
+gloo-net = { version = "0.6", default-features = false, features = ["http"] }
 gray_matter = { version = "0.2.8", default-features = false, features = ["yaml"] }
 leptos = { version = "0.6", features = ["csr", "nightly"] }
-leptos-use = "0.10"
+leptos-use = { version = "0.13", default-features = false, features = ["use_media_query"] }
 leptos_meta = { version = "0.6.13", features = ["csr", "nightly"] }
 leptos_router = { version = "0.6", features = ["csr", "nightly"] }
 libdof = { workspace = true }
 oxeylyzer-core = { workspace = true }
-pulldown-cmark = "0.11.0"
+pulldown-cmark = "0.12.0"
 rust-embed = { version = "8.4.0", features = ["debug-embed", "include-exclude"] }
 serde = { workspace = true }
 strsim = "0.11"
