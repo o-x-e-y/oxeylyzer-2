@@ -303,15 +303,28 @@ fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> 
 
     let sfbs = create_memo(move |_| stats_memo.with(|s| s.sfbs));
     let sfs = create_memo(move |_| stats_memo.with(|s| s.sfs));
-    let finger_use = create_memo(move |_| stats_memo.with(|s| s.finger_use));
-    let finger_sfbs = create_memo(move |_| stats_memo.with(|s| s.finger_sfbs));
     let score = create_memo(move |_| analyzer.with(|a| layout_memo.with(|l| a.score(l))));
 
-    let weighted_finger_distance =
-        create_memo(move |_| stats_memo.with(|s| s.weighted_finger_distance));
+    let finger_use =
+        create_memo(move |_| stats_memo.with(|s| s.finger_use.map(|v| create_memo(move |_| v))));
+    let finger_sfbs =
+        create_memo(move |_| stats_memo.with(|s| s.finger_sfbs.map(|v| create_memo(move |_| v))));
+    let weighted_finger_distance = create_memo(move |_| {
+        stats_memo.with(|s| s.weighted_finger_distance.map(|v| create_memo(move |_| v)))
+    });
+    let unweighted_finger_distance = create_memo(move |_| {
+        stats_memo.with(|s| {
+            s.unweighted_finger_distance
+                .map(|v| create_memo(move |_| v))
+        })
+    });
 
-    let unweighted_finger_distance =
-        create_memo(move |_| stats_memo.with(|s| s.unweighted_finger_distance));
+    let finger_stats = FingerStats {
+        finger_use,
+        finger_sfbs,
+        weighted_finger_distance,
+        unweighted_finger_distance,
+    };
 
     let t_sft = create_memo(move |_| stats_memo.with(|s| s.trigrams.sft));
     let t_sfb = create_memo(move |_| stats_memo.with(|s| s.trigrams.sfb));
@@ -324,8 +337,10 @@ fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> 
     let t_thumb = create_memo(move |_| stats_memo.with(|s| s.trigrams.thumb));
     let t_invalid = create_memo(move |_| stats_memo.with(|s| s.trigrams.invalid));
 
+    // let is_window_lg = leptos_use::use_media_query("(min-width: 1024px)");
+
     view! {
-        <div class="mx-auto text-sm sm:text-base sm:grid sm:grid-cols-[1fr_2.5fr] sm:gap-2">
+        <div class="mx-auto sm:flex text-xs sm:text-sm md:text-base lg:text-lg">
             <div class="p-4 bg-header rounded-t-xl sm:rounded-b-xl">
                 <StatGroup description="Bigrams">
                     <F64Stat name="sfbs:" stat=sfbs unit="%"/>
@@ -345,30 +360,22 @@ fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> 
                 </StatGroup>
                 <Stat name="score:" stat=move || score().to_string()/>
             </div>
-            <div class="p-4 bg-header rounded-b-xl sm:rounded-t-xl overflow-x-scroll">
-                <table class="w-full text-left border-y border-y-hovered">
-                    <tr class="text-darker">
-                        <th class="border border-hovered"></th>
-                        {Finger::FINGERS
-                            .map(|f| {
-                                let bg = fingermap_colors(f);
-                                view! {
-                                    <th class="border border-hovered" style:background-color=bg>
-                                        {f.to_string()}
-                                    </th>
-                                }
-                            })}
-
-                    </tr>
-                    <RenderFingerStat name="Finger usage" stat=finger_use/>
-                    <RenderFingerStat name="Finger sfbs" stat=finger_sfbs/>
-                    <RenderFingerStat name="Finger distance" stat=weighted_finger_distance/>
-                    <RenderFingerStat
-                        name="Unweighted finger distance"
-                        stat=unweighted_finger_distance
-                    />
-                </table>
-            </div>
+            // {move || {
+            //     if is_window_lg() {
+            //         view! {
+            //             <div class="hidden lg:block">
+            //                 <HorizontalFingerStats stats=finger_stats/>
+            //             </div>
+            //         }
+            //     } else {
+            //         view! {
+            //             <div class="lg:hidden">
+            //                 <VerticalFingerStats stats=finger_stats/>
+            //             </div>
+            //         }
+            //     }
+            // }}
+            <VerticalFingerStats stats=finger_stats/>
         </div>
     }
 }
@@ -376,7 +383,7 @@ fn RenderAnalysis(data: Data, weights: impl Fn() -> GlobalWeights + 'static) -> 
 #[component]
 fn StatGroup(description: &'static str, children: Children) -> impl IntoView {
     view! {
-        <p class="font-bold text-lg">{description}</p>
+        <p class="font-bold">{description}</p>
         <div class="w-fit">
             <table>
                 <tbody>{children()}</tbody>
@@ -412,14 +419,42 @@ fn Stat(name: &'static str, stat: impl Fn() -> String + 'static) -> impl IntoVie
 }
 
 #[component]
-fn RenderFingerStat(name: &'static str, stat: impl Fn() -> [f64; 10] + 'static) -> impl IntoView {
+fn HorizontalFingerStats(stats: FingerStats) -> impl IntoView {
+    view! {
+        <div class="p-4 ml-2 bg-header rounded-b-xl sm:rounded-t-xl overflow-x-scroll">
+            <table class="w-full text-left border-y border-y-hovered">
+                <tr class="text-darker">
+                    <th class="border border-hovered"></th>
+                    {Finger::FINGERS
+                        .map(|f| {
+                            let bg = fingermap_colors(f);
+                            view! {
+                                <th class="border border-hovered" style:background-color=bg>
+                                    {f.to_string()}
+                                </th>
+                            }
+                        })}
+
+                </tr>
+                <HorizontalFingerStat name="Finger usage" stat=stats.finger_use/>
+                <HorizontalFingerStat name="Finger sfbs" stat=stats.finger_sfbs/>
+                <HorizontalFingerStat name="Finger distance" stat=stats.weighted_finger_distance/>
+                <HorizontalFingerStat
+                    name="Unweighted finger distance"
+                    stat=stats.unweighted_finger_distance
+                />
+            </table>
+        </div>
+    }
+}
+
+#[component]
+fn HorizontalFingerStat(name: &'static str, stat: FingerStat) -> impl IntoView {
     let rows = move || {
         stat()
             .into_iter()
-            // .zip(Finger::FINGERS)
             .map(|v| {
-                // let bg = fingermap_colors(f);
-                view! { <td class="p-1 w-[8.5%] border border-hovered">{move || format!("{v:.2}")}</td> }
+                view! { <td class="p-1 border border-hovered">{move || format!("{:.2}", v())}</td> }
             })
             .collect::<Vec<_>>()
     };
@@ -433,19 +468,60 @@ fn RenderFingerStat(name: &'static str, stat: impl Fn() -> [f64; 10] + 'static) 
 }
 
 #[component]
-fn RenderStatRow(stats: Vec<(&'static str, impl Fn() -> f64 + 'static)>) -> impl IntoView {
-    let rows = stats
-        .into_iter()
-        .map(|(name, stat)| {
-            view! {
-                <td class="text-left align-top px-2 py-1">
-                    {name} ": " {move || format!("{:.3}%", stat())}
-                </td>
-            }
-        })
-        .collect::<Vec<_>>();
+fn VerticalFingerStats(stats: FingerStats) -> impl IntoView {
+    let FingerStats {
+        finger_use,
+        finger_sfbs,
+        weighted_finger_distance,
+        unweighted_finger_distance,
+    } = stats;
 
-    view! { <tr class="grid grid-flow-col even:bg-[#292929]">{rows}</tr> }
+    view! {
+        <div class="p-4 sm:ml-2 bg-header rounded-b-xl sm:rounded-t-xl overflow-x-scroll">
+            <table class="w-full text-left border-y border-y-hovered">
+                <tr>
+                    <th class="p-1 border border-hovered"></th>
+                    <th class="p-1 border border-hovered">"Finger usage"</th>
+                    <th class="p-1 border border-hovered">"Finger sfbs"</th>
+                    <th class="p-1 border border-hovered">"Finger distance"</th>
+                    <th class="p-1 border border-hovered">"Unweighted finger distance"</th>
+                </tr>
+                {move || {
+                    finger_use()
+                        .into_iter()
+                        .zip(finger_sfbs())
+                        .zip(weighted_finger_distance())
+                        .zip(unweighted_finger_distance())
+                        .zip(Finger::FINGERS)
+                        .map(|((((fu, fs), wfd), ufd), f)| {
+                            let bg = fingermap_colors(f);
+                            view! {
+                                <tr>
+                                    <th
+                                        style:background-color=bg
+                                        class="text-darker border border-hovered"
+                                    >
+                                        {f.to_string()}
+                                    </th>
+                                    <VerticalFingerStat stat=fu/>
+                                    <VerticalFingerStat stat=fs/>
+                                    <VerticalFingerStat stat=wfd/>
+                                    <VerticalFingerStat stat=ufd/>
+                                </tr>
+                            }
+                        })
+                        .collect_view()
+                }}
+            </table>
+        </div>
+    }
+}
+
+#[component]
+fn VerticalFingerStat(stat: Memo<f64>) -> impl IntoView {
+    let fmt = move || format!("{:.2}", stat());
+
+    view! { <td class="p-1 border border-hovered">{fmt}</td> }
 }
 
 fn collapse_data(data: RwSignal<Option<String>>, collapsed: ReadSignal<bool>) {
@@ -517,7 +593,7 @@ pub fn DofMetadata(dof: Dof) -> impl IntoView {
     };
 
     view! {
-        <div class="sm:p-4 border border-hovered rounded-lg">
+        <div class="sm:p-2 border border-hovered rounded-lg">
             <table class="w-full">
                 <thead>
                     <tr class="bg-header">
