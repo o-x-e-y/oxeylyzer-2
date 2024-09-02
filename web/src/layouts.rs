@@ -123,7 +123,9 @@ pub fn RenderNamedDof(name: String) -> impl IntoView {
             Some(Ok(dof)) => {
                 view! { <RenderDof dof/> }
             }
-            Some(Err(_)) => view! { <p>"Layout '" {name} "' doesn't exist :("</p> }.into_view(),
+            Some(Err(e)) => {
+                view! { <p>"Error encountered for '" {name} ":' " {e.to_string()}</p> }.into_view()
+            }
             None => {
                 view! {
                     // "Loading..."

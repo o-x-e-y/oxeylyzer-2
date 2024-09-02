@@ -45,7 +45,9 @@ pub fn RenderAnalyzer() -> impl IntoView {
             Some(Ok(dof)) => {
                 view! { <RenderDofAnalyzer dof/> }
             }
-            Some(Err(_)) => view! { <p>"Layout '" {name} "' doesn't exist :("</p> }.into_view(),
+            Some(Err(e)) => {
+                view! { <p>"Error encountered for '" {name} ":'" {e.to_string()}</p> }.into_view()
+            }
             None => {
                 view! {
                     // "Loading..."
