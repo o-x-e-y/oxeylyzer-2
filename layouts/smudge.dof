@@ -3,13 +3,23 @@
 	"authors": [
 		"Oxey"
 	],
-	"board": "ortho",
 	"layers": {
 		"main": [
-			"~ ~ ~ ~ ~ ~ ~ ~ ~ ~",
-			"~ s m o о g i e ~ ~",
-			"~ ~ ~ ~ ~ ~ ~ ~ ~ ~"
+			"s m o o g i e"
 		]
 	},
-	"fingering": "traditional"
+	"fingering": [
+		"LP LR LM LI LT RT RI"
+	],
+	"board": [
+		[
+			"0 0",
+			"1 0",
+			"2 0",
+			"3 0",
+			"4 0",
+			"5 0",
+			"6 0"
+		]
+	]
 }
