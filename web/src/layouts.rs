@@ -38,18 +38,17 @@ pub fn LayoutsWrapper() -> impl IntoView {
 }
 
 #[component]
-pub fn LayoutLinks(names: impl Fn() -> Vec<String> + 'static) -> impl IntoView {
+pub fn LayoutLinks(names: Memo<Vec<String>>) -> impl IntoView {
     let page = create_rw_signal(0);
     let max_per_page = 12;
+    let max_pages = create_memo(move |_| names().len() / 12);
 
     view! {
-        <div>
-            <PaginateSearch page/>
-            <div class="w-full md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3">
-                <Paginate page max_per_page names/>
-            </div>
-            <PaginateSearch page/>
+        <PaginateSearch page max_pages/>
+        <div class="my-2 md:my-3 grid gap-2 md:gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+            <Paginate page max_per_page names/>
         </div>
+        <PaginateSearch page max_pages/>
     }
 }
 
@@ -64,48 +63,82 @@ fn Paginate(
             names()
                 .into_iter()
                 .skip(page() * max_per_page)
-                .map(|name| {
-                    view! { <RenderLayoutLink name/> }
-                })
                 .take(max_per_page)
+                .map(|name| view! { <LayoutLink name/> })
                 .collect_view()
+        }}
+        // {move || {
+        //     let names = names();
+        //     match names.get((page() * max_per_page)..((page() + 1) * max_per_page)) {
+        //         Some(names) => {
+        //             names.iter().cloned().map(|name| view! { <LayoutLink name/> }).collect_view()
+        //         }
+        //         None => view! {}.into_view(),
+        //     }
+        // }}
+    }
+}
+
+#[component]
+fn PaginateSearch(page: RwSignal<usize>, max_pages: Memo<usize>) -> impl IntoView {
+    let show_left = move || page() > 0;
+    let show_right = move || page() < max_pages();
+    
+    view! {
+        {move || {
+            if show_left() || show_right() {
+                view! {
+                    <div class="bg-black rounded-lg flex justify-center sm:my-2 p-2 sm:p-4">
+                        <PaginateButton content="Prev" page page_diff=-1 show_when=show_left/>
+                        <div class="w-20 mx-2 my-auto text-center">{move || page()}</div>
+                        <PaginateButton content="Next" page page_diff=1 show_when=show_right/>
+                    </div>
+                }.into_view()
+            } else {
+                view! {}.into_view()
+            }
         }}
     }
 }
 
 #[component]
-fn PaginateSearch(page: RwSignal<usize>) -> impl IntoView {
+fn PaginateButton(
+    content: &'static str,
+    page: RwSignal<usize>,
+    page_diff: isize,
+    show_when: impl Fn() -> bool + 'static,
+) -> impl IntoView {
     view! {
-        <div class="my-3 p-4 bg-black rounded-lg flex justify-center">
-            <button
-                on:click=move |_| page.update(|v| *v = v.saturating_sub(1))
-                class="w-20 mx-2 p-2 text-center border-2 border-[#ccc] rounded-lg"
-            >
-                "<- "
-                {move || page().saturating_sub(1)}
-            </button>
-            <div class="mx-2 py-2 px-4 text-center border-2 border-[#ccc] rounded-lg">
-                Page {move || page()}
-            </div>
-            <button
-                on:click=move |_| page.update(|v| *v += 1)
-                class="w-20 mx-2 p-2 text-center border-2 border-[#ccc] rounded-lg"
-            >
-                {move || page() + 1}
-                " ->"
-            </button>
-        </div>
+        {move || {
+            if show_when() {
+                view! {
+                    <button
+                        on:click=move |_| page.update(|v| *v = (*v as isize + page_diff) as usize)
+                        class="
+                        w-20 mx-2 px-2 py-3 text-center border-2 border-header rounded-lg
+                        hover:bg-hovered"
+                    >
+                        {content}
+                    </button>
+                }
+                    .into_view()
+            } else {
+                view! { <div class="w-20 mx-2 px-2 py-3"></div> }.into_view()
+            }
+        }}
     }
 }
 
 #[component]
-pub fn RenderLayoutLink(name: String) -> impl IntoView {
+pub fn LayoutLink(name: String) -> impl IntoView {
     view! {
-        <div class="p-4 rounded-lg bg-black container-inline-size hover:bg-header">
+        <div class="p-4 rounded-lg bg-black container-inline-size hover:bg-[#141414]
+        duration-75
+        motion-safe:hover:bg-[#141414]">
             <A href=format!("/layouts/{name}")>
                 <p>{name.clone()}</p>
                 <div class="pt-2">
-                    <RenderNamedDof name/>
+                    <NamedDof name/>
                 </div>
             </A>
         </div>
@@ -113,7 +146,7 @@ pub fn RenderLayoutLink(name: String) -> impl IntoView {
 }
 
 #[component]
-pub fn RenderNamedDof(name: String) -> impl IntoView {
+pub fn NamedDof(name: String) -> impl IntoView {
     let (name, _) = create_signal(name);
 
     let dof = create_resource(move || format!("/layouts/{}.dof", name()), load_json::<Dof>);

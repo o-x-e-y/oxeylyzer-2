@@ -2,7 +2,7 @@ use std::{fmt::Display, str::FromStr};
 
 use leptos::*;
 
-use crate::{layouts::RenderNamedDof, util::*};
+use crate::{layouts::NamedDof, util::*};
 
 #[component]
 pub fn Settings() -> impl IntoView {
@@ -38,7 +38,7 @@ fn ThemeSettings() -> impl IntoView {
                 <ValueSetting description="Max color freq:" affect=max_freq/>
             </SettingGroup>
             <div class="m-auto md:w-[28rem] lg:w-[36rem]">
-                <RenderNamedDof name="noctum".into()/>
+                <NamedDof name="noctum".into()/>
             </div>
         </div>
     }

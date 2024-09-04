@@ -21,28 +21,42 @@ pub fn QuerySearch() -> impl IntoView {
         None => embedded_names::<LayoutsFolder>(),
     };
 
-    let names = move || search(&possible_results(), &query(), 24);
+    let names = create_memo(move |_| search(&possible_results(), &query(), 24));
 
     view! {
         <div class="mx-4">
             {move || match names().is_empty() {
-                false => {
-                    view! {
-                        <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
-                        <LayoutLinks names/>
-                    }
-                        .into_view()
-                }
-                true => {
-                    view! {
-                        <p class="text-2xl text-center py-4">"No matches for '" {query} "' :("</p>
-                    }
-                        .into_view()
-                }
+                false => view! {
+                    <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
+                    <LayoutLinks names/>
+                }.into_view(),
+                true => view! {
+                    <p class="text-2xl text-center py-4">"No matches for '" {query} "' :("</p>
+                }.into_view()
             }}
-
         </div>
     }
+
+    // view! {
+    //     <div class="mx-4">
+    //         {move || match names().is_empty() {
+    //             false => {
+    //                 view! {
+    //                     <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
+    //                     <LayoutLinks names/>
+    //                 }
+    //                     .into_view()
+    //             }
+    //             true => {
+    //                 view! {
+    //                     <p class="text-2xl text-center py-4">"No matches for '" {query} "' :("</p>
+    //                 }
+    //                     .into_view()
+    //             }
+    //         }}
+
+    //     </div>
+    // }
 }
 
 #[component]
@@ -135,7 +149,7 @@ fn SearchBar(
     width: &'static str,
     input_ref: Option<NodeRef<html::Input>>,
 ) -> impl IntoView {
-    let mut next_search_id = 0;
+    let mut next_search_id = 0u32;
 
     let (search_results, set_search_results) = create_signal(Vec::new());
     let (display_results, set_display_results) = create_signal(false);
@@ -161,7 +175,7 @@ fn SearchBar(
     };
 
     // Generates new search suggestions when the user is typing
-    let on_input_searchbox = move |ev: ev::Event| {
+    let on_input_searchbox = move |ev| {
         let current_search = event_target_value(&ev);
         if current_search.is_empty() {
             set_display_results(false);

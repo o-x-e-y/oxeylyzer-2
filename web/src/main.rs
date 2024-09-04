@@ -52,7 +52,7 @@ fn App() -> impl IntoView {
                         <Route
                             path=""
                             view=move || {
-                                let names = move || expect_context::<LayoutNames>().0;
+                                let names = create_memo(move |_| expect_context::<LayoutNames>().0);
                                 view! {
                                     <div class="m-6">
                                         <layouts::LayoutLinks names></layouts::LayoutLinks>
@@ -95,7 +95,7 @@ fn Home() -> impl IntoView {
             // </p>
             </div>
             <div class="w-full">
-                <layouts::RenderNamedDof name="noctum".to_string()></layouts::RenderNamedDof>
+                <layouts::NamedDof name="noctum".to_string()></layouts::NamedDof>
             </div>
         </div>
     }
