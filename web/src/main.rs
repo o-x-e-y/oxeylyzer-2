@@ -42,6 +42,15 @@ fn App() -> impl IntoView {
     provide_context(layout_names);
     provide_context(weights);
 
+    let view_layouts = move || {
+        let names = create_memo(move |_| expect_context::<LayoutNames>().0);
+        view! {
+            <div class="m-6">
+                <layouts::LayoutLinks names></layouts::LayoutLinks>
+            </div>
+        }
+    };
+
     view! {
         <Router trailing_slash=leptos_router::TrailingSlash::Redirect>
             <main class="text-txt">
@@ -51,14 +60,7 @@ fn App() -> impl IntoView {
                     <Route path="/layouts" view=layouts::LayoutsWrapper>
                         <Route
                             path=""
-                            view=move || {
-                                let names = create_memo(move |_| expect_context::<LayoutNames>().0);
-                                view! {
-                                    <div class="m-6">
-                                        <layouts::LayoutLinks names></layouts::LayoutLinks>
-                                    </div>
-                                }
-                            }
+                            view=view_layouts
                         />
 
                         <Route path=":name" view=analyze::RenderAnalyzer/>
