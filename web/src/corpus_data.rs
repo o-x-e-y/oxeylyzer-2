@@ -191,6 +191,13 @@ pub fn GenerateCorpusData() -> impl IntoView {
     };
 
     view! {
+        <div class="
+        absolute top-1/3 -left-[10vw] w-[120vw] h-[24vw] rotate-12 bg-yellow-500
+        text-black text-[8vw]
+        "
+        >
+            <p class="text-center align-middle leading-[22vw]">"Under\u{00A0}construction"</p>
+        </div>
         <h2 class="text-3xl my-3 sm:my-4 text-center">"Generate Corpus Data"</h2>
         <div class="m-4 p-4 bg-black rounded-xl">
             <div class="sm:grid sm:grid-cols-[2fr_1fr_1fr] sm:gap-4">
