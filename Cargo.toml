@@ -8,18 +8,19 @@ name = "benchmarks"
 harness = false
 
 [workspace]
-members = [ "core", "web", "repl" ]
+members = [ "core", "web", "repl" , "web-components"]
 
 [workspace.dependencies]
 thiserror = "1.0"
 itertools = "0.13"
-libdof = "0.19.0" #{ path = "../libdof" }
+libdof = "0.19" #{ path = "../libdof" }
 oxeylyzer-core = { path = "./core" }
-rayon = "1.10.0"
-serde = { version = "1.0.203", features = ["derive"] }
-serde_json = "1.0.117"
+rayon = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 serde_with = "3.9"
 toml = "0.8"
+web-components = { path = "./web-components" }
 
 [dependencies]
 oxeylyzer-core = { path = "./core" }

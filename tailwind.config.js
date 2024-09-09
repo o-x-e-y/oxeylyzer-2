@@ -1,7 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: {
-        files: ["./web/*.html", "./web/src/**/*.rs", "./web/public/posts/*.md"],
+        files: [
+            "./web/*.html",
+            "./web-components/src/**/*.rs",
+            "./web/src/**/*.rs",
+            "./web/public/posts/*.md"
+        ],
     },
     theme: {
         extend: {
@@ -30,6 +35,17 @@ module.exports = {
                 'darker': '#1a1a1a',
                 'hovered': '#ffffff10',
                 'txt': "#eee",
+                'ccc': "#ccc",
+                'pink-f': '#b4014b',
+                'red-f': '#d53e4f',
+                'orange-f': '#f46d43',
+                'light-orange-f': '#fdae61',
+                'yellow-f': '#fee08b',
+                'light-green-f': '#e6f598',
+                'green-f': '#abdda4',
+                'cyan-f': '#66c2a5',
+                'blue-f': '#3288bd',
+                'purple-f': '#6b5ab8',
             },
             gridTemplateColumns: {
                 'homepage': '1fr 2fr',

@@ -141,8 +141,8 @@ impl CorpusCleanerBuilder {
         self
     }
 
-    pub fn qwerty_punctuation_uppercase(&mut self, include: bool) -> &mut Self {
-        if include {
+    pub fn qwerty_punctuation_mappings(&mut self, enable: bool) -> &mut Self {
+        if enable {
             self.with_uppercase_mappings([
                 ('`', '~'),
                 ('1', '!'),
@@ -171,7 +171,7 @@ impl CorpusCleanerBuilder {
         }
     }
 
-    pub fn normalize_punctuation(&mut self, normalize: bool) -> &mut Self {
+    pub fn normalize_misc_punctuation(&mut self, normalize: bool) -> &mut Self {
         if normalize {
             self.with_char_mappings([
                 ('´', '\''),
@@ -368,7 +368,7 @@ mod tests {
 
         let cleaner = CorpusCleaner::builder()
             .with_chars("abcde".chars())
-            .qwerty_punctuation_uppercase(true)
+            .qwerty_punctuation_mappings(true)
             .build();
 
         let translation = corpus

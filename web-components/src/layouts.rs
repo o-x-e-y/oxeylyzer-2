@@ -33,11 +33,6 @@ impl HeatmapData {
 }
 
 #[component]
-pub fn LayoutsWrapper() -> impl IntoView {
-    view! { <Outlet/> }
-}
-
-#[component]
 pub fn LayoutLinks(names: Memo<Vec<String>>) -> impl IntoView {
     let page = create_rw_signal(0);
     let max_per_page = 12;
@@ -67,15 +62,6 @@ fn Paginate(
                 .map(|name| view! { <LayoutLink name/> })
                 .collect_view()
         }}
-        // {move || {
-        //     let names = names();
-        //     match names.get((page() * max_per_page)..((page() + 1) * max_per_page)) {
-        //         Some(names) => {
-        //             names.iter().cloned().map(|name| view! { <LayoutLink name/> }).collect_view()
-        //         }
-        //         None => view! {}.into_view(),
-        //     }
-        // }}
     }
 }
 
@@ -83,7 +69,7 @@ fn Paginate(
 fn PaginateSearch(page: RwSignal<usize>, max_pages: Memo<usize>) -> impl IntoView {
     let show_left = move || page() > 0;
     let show_right = move || page() < max_pages();
-    
+
     view! {
         {move || {
             if show_left() || show_right() {
@@ -93,7 +79,8 @@ fn PaginateSearch(page: RwSignal<usize>, max_pages: Memo<usize>) -> impl IntoVie
                         <div class="w-20 mx-2 my-auto text-center">{move || page()}</div>
                         <PaginateButton content="Next" page page_diff=1 show_when=show_right/>
                     </div>
-                }.into_view()
+                }
+                    .into_view()
             } else {
                 view! {}.into_view()
             }
@@ -134,7 +121,7 @@ pub fn LayoutLink(name: String) -> impl IntoView {
     view! {
         <div class="p-4 rounded-lg bg-black container-inline-size hover:bg-[#141414]
         duration-75
-        motion-safe:hover:bg-[#141414]">
+        ">
             <A href=format!("/layouts/{name}")>
                 <p>{name.clone()}</p>
                 <div class="pt-2">

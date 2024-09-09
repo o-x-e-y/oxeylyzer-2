@@ -87,7 +87,7 @@ mod bench {
     fn generate_real_data(bencher: Bencher, name: &str) {
         let cleaner = CorpusCleaner::builder()
             .with_chars("abcdefghijklmnopqrstuvwxyz".chars())
-            .qwerty_punctuation_uppercase(true)
+            .qwerty_punctuation_mappings(true)
             .with_chars([' '])
             .build();
 

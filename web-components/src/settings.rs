@@ -2,7 +2,7 @@ use std::{fmt::Display, str::FromStr};
 
 use leptos::*;
 
-use web_components::{layouts::NamedDof, util::*};
+use crate::{layouts::NamedDof, util::*};
 
 #[component]
 pub fn Settings() -> impl IntoView {

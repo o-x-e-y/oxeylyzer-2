@@ -1,14 +1,14 @@
-mod analyze;
-mod layouts;
-mod posts;
-mod search;
+mod corpus_data;
 mod settings;
-mod util;
+mod tools;
 
-use search::*;
-use util::*;
+use web_components::{
+    layouts::{HeatmapData, LayoutsFolder},
+    search::*,
+    util::*,
+    *
+};
 
-use layouts::{HeatmapData, LayoutsFolder};
 use leptos::*;
 use leptos_meta::provide_meta_context;
 use leptos_router::*;
@@ -53,21 +53,22 @@ fn App() -> impl IntoView {
 
     view! {
         <Router trailing_slash=leptos_router::TrailingSlash::Redirect>
-            <main class="text-txt">
+            <main class="bg-darker text-txt">
                 <Navigation/>
                 <Routes>
                     <Route path="/" view=Home/>
-                    <Route path="/layouts" view=layouts::LayoutsWrapper>
-                        <Route
-                            path=""
-                            view=view_layouts
-                        />
+                    <Route path="/layouts" view=|| view! { <Outlet/> }>
+                        <Route path="" view=view_layouts/>
 
                         <Route path=":name" view=analyze::RenderAnalyzer/>
                     </Route>
                     <Route path="/posts" view=|| view! { <Outlet/> }>
                         <Route path="" view=posts::RenderPostLinks/>
                         <Route path=":name" view=posts::RenderPost/>
+                    </Route>
+                    <Route path="/tools" view=|| view! { <Outlet/> }>
+                        <Route path="" view=tools::Tools/>
+                        <Route path="/generate-corpus-data" view=corpus_data::GenerateCorpusData/>
                     </Route>
                     <Route path="/search/:query" view=search::QuerySearch/>
                     <Route path="/settings" view=settings::Settings/>
@@ -105,7 +106,7 @@ fn Home() -> impl IntoView {
 
 #[component]
 fn Navigation() -> impl IntoView {
-    let is_window_sm = leptos_use::use_media_query("(max-width: 560px)");
+    let is_window_sm = leptos_use::use_media_query("(min-width: 640px)");
 
     view! {
         <header class="w-full bg-header">
@@ -115,9 +116,9 @@ fn Navigation() -> impl IntoView {
                 </A>
                 {move || {
                     if is_window_sm() {
-                        view! { <SmallNav/> }
-                    } else {
                         view! { <NormalNav/> }
+                    } else {
+                        view! { <SmallNav/> }
                     }
                 }}
 
@@ -184,8 +185,9 @@ fn NormalNav() -> impl IntoView {
 
     view! {
         <ul class="hidden w-full justify-end list-none sm:flex sm:gap-5">
-            <NavElem text="Posts" href="/posts"/>
             <NavElem text="Layouts" href="/layouts"/>
+            <NavElem text="Tools" href="/tools"/>
+            <NavElem text="Posts" href="/posts"/>
             <NavSearch possible_results/>
             <NavSettings/>
             <ToggleHeatmap/>
@@ -219,8 +221,8 @@ fn SmallNav() -> impl IntoView {
             <div class="flex justify-end">
                 <ul class="m-4 p-4 pr-16 bg-header rounded-xl list-none">
                     <NavElem text="Layouts" href="/layouts"/>
+                    <NavElem text="Tools" href="/tools"/>
                     <NavElem text="Posts" href="/posts"/>
-                    <NavElem text="Analyze" href="/analyze"/>
                     <NavElem text="Github" href="https://github.com/o-x-e-y/oxeylyzer-2"/>
                 </ul>
             </div>
@@ -231,7 +233,7 @@ fn SmallNav() -> impl IntoView {
 #[component]
 fn NavElem(text: &'static str, href: &'static str) -> impl IntoView {
     view! {
-        <A class="my-auto text-xl text-[#ccc] visited:text-[#ccc] hover:text-txt" href>
+        <A class="my-auto text-xl text-ccc visited:text-ccc hover:text-txt" href>
             <ul>{text}</ul>
         </A>
     }

@@ -4,8 +4,7 @@ use strsim::jaro_winkler;
 
 use crate::{
     layouts::{LayoutLinks, LayoutsFolder},
-    util::embedded_names,
-    LayoutNames,
+    util::{embedded_names, LayoutNames},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -26,14 +25,21 @@ pub fn QuerySearch() -> impl IntoView {
     view! {
         <div class="mx-4">
             {move || match names().is_empty() {
-                false => view! {
-                    <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
-                    <LayoutLinks names/>
-                }.into_view(),
-                true => view! {
-                    <p class="text-2xl text-center py-4">"No matches for '" {query} "' :("</p>
-                }.into_view()
+                false => {
+                    view! {
+                        <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
+                        <LayoutLinks names/>
+                    }
+                        .into_view()
+                }
+                true => {
+                    view! {
+                        <p class="text-2xl text-center py-4">"No matches for '" {query} "' :("</p>
+                    }
+                        .into_view()
+                }
             }}
+
         </div>
     }
 
@@ -65,14 +71,14 @@ pub fn NavSearch(possible_results: Vec<String>) -> impl IntoView {
 
     provide_context(DisplaySearch(display_search));
 
-    let is_window_md = leptos_use::use_media_query("(min-width: 768px)");
+    let is_window_lg = leptos_use::use_media_query("(min-width: 1024px)");
 
     view! {
         <div class="my-auto">
             {move || {
-                if is_window_md() {
+                if is_window_lg() {
                     view! {
-                        <div class="hidden md:block">
+                        <div class="hidden lg:block">
                             <SearchBar
                                 possible_results=possible_results.clone()
                                 width="25ch"
@@ -82,7 +88,7 @@ pub fn NavSearch(possible_results: Vec<String>) -> impl IntoView {
                     }
                 } else {
                     view! {
-                        <div class="md:hidden">
+                        <div class="lg:hidden">
                             <SmallSearchBar possible_results=possible_results.clone()/>
                         </div>
                     }
@@ -273,7 +279,7 @@ fn SearchBar(
             }
 
             class="
-            absolute z-[9001] mt-3 text-[#ccc] list-none bg-header border border-hovered rounded-lg"
+            absolute z-[9001] mt-3 text-ccc list-none bg-header border border-hovered rounded-lg"
         >
             <For
                 each=search_results

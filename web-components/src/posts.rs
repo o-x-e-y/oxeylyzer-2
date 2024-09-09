@@ -24,7 +24,7 @@ pub struct Post {
 }
 
 #[derive(Embed)]
-#[folder = "./public/posts"]
+#[folder = "./../web/public/posts"]
 #[include = "*.md"]
 pub struct PostsFolder;
 
