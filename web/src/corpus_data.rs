@@ -190,11 +190,23 @@ pub fn GenerateCorpusData() -> impl IntoView {
         }
     };
 
+    let (construction, set_construction) = create_signal("block");
+    let (construction_opacity, set_construction_opacity) = create_signal(7);
+
     view! {
-        <div class="
-        absolute top-1/3 -left-[10vw] w-[120vw] h-[24vw] rotate-12 bg-yellow-500
-        text-black text-[8vw]
-        "
+        <div
+            on:click=move |_| {
+                set_construction_opacity.update(|v| *v -= 1);
+                if construction_opacity() == 0 {
+                    set_construction("none");
+                }
+            }
+            style:display=construction
+            style:opacity=move || (construction_opacity() as f64) / 7.0
+            class="
+            absolute top-1/3 -left-[10vw] w-[120vw] h-[24vw] rotate-12 bg-yellow-500
+            text-black text-[8vw] select-none
+            "
         >
             <p class="text-center align-middle leading-[22vw]">"Under\u{00A0}construction"</p>
         </div>
