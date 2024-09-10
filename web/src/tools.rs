@@ -16,11 +16,12 @@ fn Tool(name: &'static str) -> impl IntoView {
     let url = name.to_lowercase().replace(' ', "-");
 
     view! {
-        <A href=url>
-            <div class="w-full max-w-[32rem] h-48 content-end p-8 text-lg bg-black rounded-lg
-            hover:bg-[#141414] duration-75">
-                <div>{name}</div>
-            </div>
-        </A>
+        <div class="max-w-[32rem] h-48 content-end p-8 text-lg bg-black rounded-lg
+            hover:bg-[#141414] duration-75"
+        >
+            <A href=url>
+                <div class="w-full h-full">{name}</div>
+            </A>
+        </div>
     }
 }
