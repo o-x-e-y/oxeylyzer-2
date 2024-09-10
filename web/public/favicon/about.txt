@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Roboto Condensed
+- Font Author: Copyright 2011 Google Inc. All Rights Reserved.
+- Font Source: https://fonts.gstatic.com/s/robotocondensed/v27/ieVo2ZhZI2eCN5jzbjEETS9weq8-_d6T_POl0fRJeyVVpfBJ731BKMSK.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))
