@@ -135,7 +135,7 @@ pub fn search(possible_results: &[String], search: &str, max_results: usize) -> 
     let search = search.to_lowercase();
 
     let mut results = possible_results
-        .into_iter()
+        .iter()
         .map(|s| (jaro_winkler(&s.to_lowercase(), &search), s))
         .filter(|(d, _)| *d >= 0.55)
         .collect::<Vec<_>>();
@@ -174,7 +174,7 @@ fn SearchBar(
     };
 
     // generate a search result with a unique ID
-    let mut new_search_result = move |r: String| {
+    let new_search_result = move |r: String| {
         let res = (next_search_id, r);
         next_search_id += 1;
         res
@@ -190,7 +190,7 @@ fn SearchBar(
 
         let results = search(&possible_results, &current_search, 8)
             .into_iter()
-            .map(|r| new_search_result(r))
+            .map(new_search_result)
             .collect::<Vec<_>>();
 
         if !results.is_empty() {

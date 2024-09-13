@@ -265,7 +265,7 @@ fn Key(k: Key, f: Finger, pos: PhysicalKey, i: usize) -> impl IntoView {
 fn MaybeRenderAnalysis() -> impl IntoView {
     let err = move |e: &str| format!("Analysis failed: {}", e);
 
-    let data = create_resource(move || format!("/data/shai.json"), load_json::<Data>);
+    let data = create_resource(move || "/data/shai.json".to_owned(), load_json::<Data>);
     let weights = move || use_context::<GlobalWeights>().unwrap_or_default();
 
     view! {
@@ -529,16 +529,8 @@ fn VerticalFingerStat(stat: Memo<f64>) -> impl IntoView {
 
 fn collapse_data(data: RwSignal<Option<String>>, collapsed: ReadSignal<bool>) {
     if collapsed() {
-        match data() {
-            None => data.set(Some("Unknown".to_owned())),
-            _ => {}
-        };
-    } else {
-        match data().as_deref() {
-            Some("Unknown") => data.set(None),
-            _ => {}
-        }
-    }
+        if data().is_none() { data.set(Some("Unknown".to_owned())) };
+    } else if let Some("Unknown") = data().as_deref() { data.set(None) }
 }
 
 #[component]
@@ -604,7 +596,7 @@ pub fn DofMetadata(dof: Dof) -> impl IntoView {
                             <label name="collapse-metadata">
                                 <button on:click=collapse>
                                     <span>"Info"</span>
-                                    <span class="absolute -mt-3 opacity-70">{move || info()}</span>
+                                    <span class="absolute -mt-3 opacity-70">{info}</span>
                                 </button>
                             </label>
                         </th>
@@ -631,18 +623,11 @@ fn Metadata(
     data: RwSignal<Option<impl IntoView + Clone + 'static>>,
 ) -> impl IntoView {
     view! {
-        {move || match data() {
-            Some(data) => {
-                Some(
-                    view! {
-                        <tr class="even:bg-header px-2">
-                            <th class="text-left align-top py-1 pr-3">{name}</th>
-                            <td class="text-left align-top py-1 pl-3">{data}</td>
-                        </tr>
-                    },
-                )
-            }
-            None => None,
-        }}
+        {move || data().map(|data| view! {
+            <tr class="even:bg-header px-2">
+                <th class="text-left align-top py-1 pr-3">{name}</th>
+                <td class="text-left align-top py-1 pl-3">{data}</td>
+            </tr>
+        })}
     }
 }

@@ -48,7 +48,7 @@ pub fn RenderPostLinks() -> impl IntoView {
         })
         .collect::<Vec<_>>();
 
-    posts.sort_by(|(_, _, d1), (_, _, d2)| d2.cmp(&d1));
+    posts.sort_by(|(_, _, d1), (_, _, d2)| d2.cmp(d1));
 
     let post_links = posts
         .into_iter()

@@ -76,7 +76,7 @@ fn PaginateSearch(page: RwSignal<usize>, max_pages: Memo<usize>) -> impl IntoVie
                 view! {
                     <div class="bg-black rounded-lg flex justify-center sm:my-2 p-2 sm:p-4">
                         <PaginateButton content="Prev" page page_diff=-1 show_when=show_left/>
-                        <div class="w-20 mx-2 my-auto text-center">{move || page()}</div>
+                        <div class="w-20 mx-2 my-auto text-center">{page}</div>
                         <PaginateButton content="Next" page page_diff=1 show_when=show_right/>
                     </div>
                 }

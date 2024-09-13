@@ -13,13 +13,15 @@ pub struct CorpusInput {
     pub text: String,
 }
 
+pub type DeadKeyMappings = Vec<(char, Vec<(char, char)>)>;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CorpusDataSettings {
     pub chars: RwSignal<String>,
     pub char_mappings: RwSignal<Vec<(char, char)>>,
     pub uppercase_mappings: RwSignal<Vec<(char, char)>>,
     pub multi_mappings: RwSignal<Vec<(char, String)>>,
-    pub dead_key_mappings: RwSignal<Vec<(char, Vec<(char, char)>)>>,
+    pub dead_key_mappings: RwSignal<DeadKeyMappings>,
     pub include_space: RwSignal<bool>,
     pub include_tab: RwSignal<bool>,
     pub include_enter: RwSignal<bool>,
@@ -78,8 +80,7 @@ async fn generate_data(files: Vec<CorpusInput>, settings: CorpusDataSettings) ->
 
     files
         .into_iter()
-        .map(|f| f.text.chars().clean_corpus(&cleaner).collect::<Vec<_>>())
-        .flatten()
+        .flat_map(|f| f.text.chars().clean_corpus(&cleaner).collect::<Vec<_>>())
         .collect()
 }
 
@@ -148,7 +149,7 @@ pub fn GenerateCorpusData() -> impl IntoView {
     let data = data_action.value();
 
     let texts = create_blocking_resource(
-        move || files(),
+        files,
         move |files| {
             set_loaded_texts.update(|v| *v += 1);
             get_texts(files)
@@ -184,10 +185,7 @@ pub fn GenerateCorpusData() -> impl IntoView {
     let data_on_click = move |_| {
         let settings = settings.clone();
 
-        match texts() {
-            Some(texts) => data_action.dispatch((texts, settings)),
-            None => {},
-        }
+        if let Some(texts) = texts() { data_action.dispatch((texts, settings)) }
     };
 
     let (construction, set_construction) = create_signal("block");
