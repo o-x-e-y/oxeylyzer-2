@@ -643,11 +643,16 @@ fn Metadata(
     data: RwSignal<Option<impl IntoView + Clone + 'static>>,
 ) -> impl IntoView {
     view! {
-        {move || data().map(|data| view! {
-            <tr class="even:bg-header px-2">
-                <th class="text-left align-top py-1 pr-3">{name}</th>
-                <td class="text-left align-top py-1 pl-3">{data}</td>
-            </tr>
-        })}
+        {move || {
+            data()
+                .map(|data| {
+                    view! {
+                        <tr class="even:bg-header px-2">
+                            <th class="text-left align-top py-1 pr-3">{name}</th>
+                            <td class="text-left align-top py-1 pl-3">{data}</td>
+                        </tr>
+                    }
+                })
+        }}
     }
 }

@@ -36,9 +36,9 @@ pub fn ThemeSettings() -> impl IntoView {
                 <ValueSetting description="Curve power:" affect=curve/>
                 <ValueSetting description="Max color freq:" affect=max_freq/>
             </SettingGroup>
-        <div class="m-auto px-1 py-3 sm:px-3 md:w-[28rem] lg:w-[36rem]">
-            <NamedDof name="noctum".into()/>
-        </div>
+            <div class="m-auto px-1 py-3 sm:px-3 md:w-[28rem] lg:w-[36rem]">
+                <NamedDof name="noctum".into()/>
+            </div>
         </div>
     }
 }
@@ -186,7 +186,7 @@ pub fn CheckboxInput(affect: RwSignal<bool>) -> impl IntoView {
     view! {
         <input
             type="checkbox"
-            prop:checked=move || {affect()}
+            prop:checked=move || { affect() }
             on:click=move |_| affect.update(|v| *v = !*v)
             class="w-4 h-4 my-auto"
         />

@@ -198,6 +198,7 @@ pub fn GenerateCorpusData() -> impl IntoView {
                     set_construction("none");
                 }
             }
+
             style:display=construction
             style:opacity=move || (construction_opacity() as f64) / 7.0
             class="
@@ -255,11 +256,9 @@ pub fn GenerateCorpusData() -> impl IntoView {
             </div>
             <CorpusCleanerSettings>
                 <SettingGroup header="Data">
-                    <Suspense fallback=move || "Loading data...">
-                        {move || {
-                            data()
-                                .map(|data| format!("{:#?}", data.chars))
-                        }}
+                    <Suspense fallback=move || {
+                        "Loading data..."
+                    }>{move || { data().map(|data| format!("{:#?}", data.chars)) }}
                     </Suspense>
                 </SettingGroup>
             </CorpusCleanerSettings>
@@ -340,20 +339,6 @@ fn CorpusCleanerSettings(children: Children) -> impl IntoView {
             </SettingGroup>
             {children()}
         </div>
-        // <div>
-        //     <p>"chars: " {chars}</p>
-        //     <p>"uppercase_mappings: " {uppercase_mappings}</p>
-        //     <p>"char_mappings: " {char_mappings}</p>
-        //     <p>"multi_mappings: " {multi_mappings}</p>
-        //     <p>"dead_key_mappings: " {dead_key_mappings}</p>
-        //     <p>"include_space: " {include_space}</p>
-        //     <p>"include_tab: " {include_tab}</p>
-        //     <p>"include_enter: " {include_enter}</p>
-        //     <p>"enable_repeat_key: " {enable_repeat_key}</p>
-        //     <p>"shift_char: " {shift_char}</p>
-        //     <p>"uppercase_qwerty_punctuation: " {uppercase_qwerty_punctuation}</p>
-        //     <p>"normalize_misc_punctuation: " {normalize_misc_punctuation}</p>
-        // </div>
     }
 }
 
