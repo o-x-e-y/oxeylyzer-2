@@ -42,27 +42,6 @@ pub fn QuerySearch() -> impl IntoView {
 
         </div>
     }
-
-    // view! {
-    //     <div class="mx-4">
-    //         {move || match names().is_empty() {
-    //             false => {
-    //                 view! {
-    //                     <p class="text-2xl text-center py-4">"Layouts matching '" {query} "'"</p>
-    //                     <LayoutLinks names/>
-    //                 }
-    //                     .into_view()
-    //             }
-    //             true => {
-    //                 view! {
-    //                     <p class="text-2xl text-center py-4">"No matches for '" {query} "' :("</p>
-    //                 }
-    //                     .into_view()
-    //             }
-    //         }}
-
-    //     </div>
-    // }
 }
 
 #[component]
@@ -241,9 +220,9 @@ fn SearchBar(
         <div
             style:width=width
             style:border-color=border_focus_color
-            class="grid grid-cols-[1fr_2.4rem] bg-darker border-2 rounded-full"
+            class="grid grid-cols-[1fr_2.5rem] bg-darker border-2 rounded-full"
         >
-            <div class="ml-4">
+            <div class="ml-[0.9rem]">
                 <label name="search layouts">
                     <input
                         node_ref=input_ref
