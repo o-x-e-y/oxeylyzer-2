@@ -1,16 +1,13 @@
 {
 	"name": "Bone",
 	"authors": [
-		"Effchen and Darnos"
+		"Effchen", "Darnos"
 	],
 	"board": "ansi",
 	"year": 2014,
-	"languages": [
-		{
-			"language": "German",
-			"weight": 100
-		}
-	],
+	"languages": {
+		"German": 100
+	},
 	"link": "neo-layout.org/Layouts/",
 	"layers": {
 		"main": [

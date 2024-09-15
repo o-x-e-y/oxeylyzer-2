@@ -5,12 +5,9 @@
 	],
 	"board": "ansi",
 	"year": 2008,
-	"languages": [
-		{
-			"language": "French",
-			"weight": 100
-		}
-	],
+	"languages": {
+		"French": 100
+	},
 	"link": "bepo.fr",
 	"layers": {
 		"main": [

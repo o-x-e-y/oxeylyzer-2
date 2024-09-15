@@ -5,6 +5,9 @@
 	],
 	"board": "ansi",
 	"year": 2022,
+	"languages": {
+		"German": 100
+	},
 	"layers": {
 		"main": [
 			"j c a ö y ß k l f p .",

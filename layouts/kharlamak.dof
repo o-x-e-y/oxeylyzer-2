@@ -4,6 +4,9 @@
 		"Kharlee (she/they)"
 	],
 	"board": "ansi",
+	"languages": {
+		"Russian": 100
+	},
 	"layers": {
 		"main": [
 			"э ь у к ю ш п р д г ц ф",

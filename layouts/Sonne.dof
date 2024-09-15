@@ -4,6 +4,9 @@
 		"Sagittarius"
 	],
 	"board": "ansi",
+	"languages": {
+		"German": 100
+	},
 	"layers": {
 		"main": [
 			"ä u o m , p d c l q '",
