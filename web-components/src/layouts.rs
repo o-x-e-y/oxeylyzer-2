@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use leptos::*;
 use leptos_router::*;
-use libdof::Dof;
+use libdof::{Dof, Language};
 use oxeylyzer_core::layout::Layout;
 use rust_embed::Embed;
 use serde::{Deserialize, Serialize};
@@ -159,6 +159,11 @@ pub fn NamedDof(name: String) -> impl IntoView {
 
 #[component]
 pub fn RenderDof(dof: Dof) -> impl IntoView {
+    let language = match dof.languages().first() {
+        Some(l) => l.language.clone().to_lowercase(),
+        None => Language::default().language.to_lowercase(),
+    };
+
     let Layout {
         name,
         keys,
@@ -180,5 +185,5 @@ pub fn RenderDof(dof: Dof) -> impl IntoView {
         shape,
     };
 
-    view! { <RenderAnalyzeLayout phys keys/> }
+    view! { <RenderAnalyzeLayout phys keys language/> }
 }

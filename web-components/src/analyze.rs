@@ -4,7 +4,10 @@ use ev::{DragEvent, MouseEvent};
 use fxhash::FxHashSet;
 use leptos::*;
 use leptos_router::*;
-use libdof::prelude::{Dof, Finger, PhysicalKey, Shape};
+use libdof::{
+    prelude::{Dof, Finger, PhysicalKey, Shape},
+    Language,
+};
 use oxeylyzer_core::prelude::{Analyzer, Data, Layout};
 
 pub type Key = RwSignal<char>;
@@ -61,6 +64,11 @@ pub fn RenderAnalyzer() -> impl IntoView {
 
 #[component]
 pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
+    let language = match dof.languages().first() {
+        Some(l) => l.language.clone().to_lowercase(),
+        None => Language::default().language.to_lowercase(),
+    };
+
     let Layout {
         name,
         keys,
@@ -91,7 +99,7 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
             // <div class="flex justify-center my-4">
             // <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
             <div class="p-4 xl:w-7/12 lg:w-2/3 md:w-3/4 sm:w-5/6 mx-auto">
-                <RenderAnalyzeLayout phys keys=LayoutKeys(keys)/>
+                <RenderAnalyzeLayout phys keys=LayoutKeys(keys) language/>
             </div>
             // </div>
             // <div class="sm:ml-[1%] md:ml-[2%] lg:ml-[3%]">
@@ -113,7 +121,11 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
 }
 
 #[component]
-pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoView {
+pub fn RenderAnalyzeLayout(
+    phys: PhysicalLayout,
+    keys: LayoutKeys,
+    language: String,
+) -> impl IntoView {
     let keys = keys.0;
     let pins = use_context::<RwSignal<Pins>>();
 
@@ -171,7 +183,7 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
         .zip(phys.keyboard)
         .zip(phys.fingers)
         .enumerate()
-        .map(|(i, ((k, pos), f))| {
+        .map(move |(i, ((k, pos), f))| {
             let x = (pos.x() - lx) * kw + 0.15;
             let y = (pos.y() - ly) * kw * ym + 0.15 * ym;
 
@@ -179,6 +191,21 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
             let height = ((pos.height()) * kw - 0.3) * ym;
 
             let pos = PhysicalKey::xywh(x, y, width, height);
+
+            let language = language.clone();
+
+            let freq = create_memo(move |_| {
+                let language = language.clone();
+
+                expect_context::<JsonResource<HeatmapData>>().with(move |data| match data {
+                    Some(Ok(data)) => data.get(language, k()).unwrap_or_default(),
+                    Some(Err(e)) => {
+                        logging::log!("{e}");
+                        0.0
+                    }
+                    None => 0.0,
+                })
+            });
 
             view! {
                 <div
@@ -189,7 +216,7 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
                     on:dragover=on_drag_over
                     on:contextmenu=move |ev| on_contextmenu(ev, i)
                 >
-                    <Key k f pos i/>
+                    <Key k f pos i freq/>
                 </div>
             }
         })
@@ -205,24 +232,13 @@ pub fn RenderAnalyzeLayout(phys: PhysicalLayout, keys: LayoutKeys) -> impl IntoV
 }
 
 #[component]
-fn Key(k: Key, f: Finger, pos: PhysicalKey, i: usize) -> impl IntoView {
+fn Key(k: Key, f: Finger, pos: PhysicalKey, i: usize, freq: Memo<f64>) -> impl IntoView {
     let op = move || match use_context::<RwSignal<Pins>>() {
         Some(pins) => match pins().0.contains(&i) {
             true => 1,
             false => 0,
         },
         None => 0,
-    };
-
-    let freq = move || {
-        expect_context::<JsonResource<HeatmapData>>().with(|data| match data {
-            Some(Ok(data)) => data.get("shai".to_owned(), k()).unwrap_or_default(),
-            Some(Err(e)) => {
-                logging::log!("{e}");
-                0.0
-            }
-            None => 0.0,
-        })
     };
 
     let enable_heatmap = expect_context::<EnableHeatmap>().0;
@@ -529,8 +545,12 @@ fn VerticalFingerStat(stat: Memo<f64>) -> impl IntoView {
 
 fn collapse_data(data: RwSignal<Option<String>>, collapsed: ReadSignal<bool>) {
     if collapsed() {
-        if data().is_none() { data.set(Some("Unknown".to_owned())) };
-    } else if let Some("Unknown") = data().as_deref() { data.set(None) }
+        if data().is_none() {
+            data.set(Some("Unknown".to_owned()))
+        };
+    } else if let Some("Unknown") = data().as_deref() {
+        data.set(None)
+    }
 }
 
 #[component]
@@ -542,7 +562,7 @@ pub fn DofMetadata(dof: Dof) -> impl IntoView {
     let langs_str = dof
         .languages()
         .iter()
-        .map(|l| format!("{l:?}"))
+        .map(|l| format!("{}: {}", l.language, l.weight))
         .collect::<Vec<_>>();
     let languages = Some(langs_str.join(", "));
     let link_base = dof.link().map(move |l| {
