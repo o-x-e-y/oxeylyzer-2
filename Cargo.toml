@@ -13,7 +13,7 @@ members = [ "core", "web", "repl" , "web-components"]
 [workspace.dependencies]
 thiserror = "1.0"
 itertools = "0.13"
-libdof = "0.19" #{ path = "../libdof" }
+libdof = "0.20" #{ path = "../libdof" }
 oxeylyzer-core = { path = "./core" }
 rayon = "1.10"
 serde = { version = "1.0", features = ["derive"] }
