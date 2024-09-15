@@ -381,4 +381,64 @@ mod tests {
             println!("{c}");
         }
     }
+
+    fn gen_save_data(name: &str, cleaner: &CorpusCleaner) {
+        let data = crate::data::Data::from_path(format!("../corpora/{name}"), name, cleaner)
+            .expect("couldn't create data:");
+
+        data.save("../data").expect("couldn't save data:");
+    }
+
+    #[test]
+    fn generate_data() {
+        let cleaner_ru = CorpusCleaner::builder()
+            .with_chars("абвгдеёжзийклмнопрстуфхцчшщъыьэюя".chars())
+            .qwerty_punctuation_mappings(true)
+            .normalize_misc_punctuation(true)
+            .with_chars([' '])
+            .build();
+
+        gen_save_data("russian", &cleaner_ru);
+
+        let cleaner_de = CorpusCleaner::builder()
+            .with_chars("abcdefghijklmnopqrstuvwxyzäöüß".chars())
+            .qwerty_punctuation_mappings(true)
+            .normalize_misc_punctuation(true)
+            .with_chars([' '])
+            .build();
+
+        gen_save_data("german", &cleaner_de);
+
+        let cleaner_fr = CorpusCleaner::builder()
+            .with_chars("abcdefghijklmnopqrstuvwxyzéàçœâêîôûèìòùáíóúäëïöü".chars())
+            .qwerty_punctuation_mappings(true)
+            .normalize_misc_punctuation(true)
+            .with_chars([' '])
+            .build();
+
+        gen_save_data("french", &cleaner_fr);
+
+        let cleaner_no = CorpusCleaner::builder()
+            .with_chars("abcdefghijklmnopqrstuvwxyzåøæ".chars())
+            .qwerty_punctuation_mappings(true)
+            .normalize_misc_punctuation(true)
+            .with_chars([' '])
+            .build();
+
+        gen_save_data("bokmal", &cleaner_no);
+        gen_save_data("nynorsk", &cleaner_no);
+
+        let cleaner_it = CorpusCleaner::builder()
+            .with_chars("abcdefghijklmnopqrstuvwxyz".chars())
+            .with_dead_key(
+                [('à', 'a'), ('è', 'e'), ('ì', 'i'), ('ò', 'o'), ('ù', 'u')],
+                '*',
+            )
+            .qwerty_punctuation_mappings(true)
+            .normalize_misc_punctuation(true)
+            .with_chars([' '])
+            .build();
+
+        gen_save_data("italian", &cleaner_it);
+    }
 }

@@ -5,7 +5,7 @@ use oxeylyzer_core::prelude::{Analyzer, Layout};
 pub fn analyzer_layout(corpus: &str, layout: &str) -> (Analyzer, Layout) {
     use oxeylyzer_core::{analyze::Analyzer, data::Data, layout::Layout};
 
-    let data = Data::load(&format!("./data/{corpus}.json")).expect("this should exist");
+    let data = Data::load(format!("./data/{corpus}.json")).expect("this should exist");
 
     let weights = oxeylyzer_core::weights::dummy_weights();
 

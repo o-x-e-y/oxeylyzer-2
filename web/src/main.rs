@@ -7,7 +7,7 @@ use web_components::{
     layouts::{HeatmapData, LayoutsFolder},
     search::*,
     util::*,
-    *
+    *,
 };
 
 use leptos::*;

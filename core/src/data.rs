@@ -484,7 +484,8 @@ where
 impl FromParallelIterator<Vec<char>> for Data {
     fn from_par_iter<I>(par_iter: I) -> Self
     where
-        I: IntoParallelIterator<Item = Vec<char>> {
+        I: IntoParallelIterator<Item = Vec<char>>,
+    {
         par_iter
             .into_par_iter()
             .map(|v| v.into_iter().collect::<IntermediateData>())

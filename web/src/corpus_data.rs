@@ -55,7 +55,7 @@ impl From<&CorpusDataSettings> for CorpusCleaner {
         let special = match (
             settings.include_space.get_untracked(),
             settings.include_tab.get_untracked(),
-            settings.include_enter.get_untracked()
+            settings.include_enter.get_untracked(),
         ) {
             (true, true, true) => " \t\n",
             (true, true, false) => " \t",
@@ -138,23 +138,20 @@ pub fn GenerateCorpusData() -> impl IntoView {
     let (files, set_files) = create_signal(None);
     let (loaded_texts, set_loaded_texts) = create_signal(0usize);
 
-    let data_action = create_action(|(texts, settings): &(Vec<CorpusInput>, CorpusDataSettings)| {
-        let texts = texts.clone();
-        let settings = settings.clone();
+    let data_action = create_action(
+        |(texts, settings): &(Vec<CorpusInput>, CorpusDataSettings)| {
+            let texts = texts.clone();
+            let settings = settings.clone();
 
-        async move {
-            generate_data(texts, settings).await
-        }
-    });
-    let data = data_action.value();
-
-    let texts = create_blocking_resource(
-        files,
-        move |files| {
-            set_loaded_texts.update(|v| *v += 1);
-            get_texts(files)
+            async move { generate_data(texts, settings).await }
         },
     );
+    let data = data_action.value();
+
+    let texts = create_blocking_resource(files, move |files| {
+        set_loaded_texts.update(|v| *v += 1);
+        get_texts(files)
+    });
 
     let bytes = create_memo(move |_| {
         texts()
@@ -185,7 +182,9 @@ pub fn GenerateCorpusData() -> impl IntoView {
     let data_on_click = move |_| {
         let settings = settings.clone();
 
-        if let Some(texts) = texts() { data_action.dispatch((texts, settings)) }
+        if let Some(texts) = texts() {
+            data_action.dispatch((texts, settings))
+        }
     };
 
     let (construction, set_construction) = create_signal("block");
