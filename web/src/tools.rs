@@ -5,7 +5,7 @@ use leptos_router::*;
 #[component]
 pub fn Tools() -> impl IntoView {
     view! {
-        <div class="m-4 p-4 rounded-lg">
+        <div class="-mt-2 sm:-mt-2 p-4 rounded-lg">
             <Tool name="Generate corpus data"/>
         </div>
     }
@@ -17,7 +17,7 @@ fn Tool(name: &'static str) -> impl IntoView {
 
     view! {
         <div class="max-w-[32rem] h-48 content-end p-8 text-lg bg-black rounded-lg
-            hover:bg-[#141414] duration-75"
+            hover:bg-[#141414] duration-75 my-2 sm:my-4"
         >
             <A href=url>
                 <div class="w-full h-full">{name}</div>

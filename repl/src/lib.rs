@@ -190,7 +190,7 @@ impl Repl {
 
     pub fn trigrams(&self, name: &str) -> Result<()> {
         let layout = self.layout(name)?;
-        let trigram_stats = self.a.stats(&layout).trigrams;
+        let trigram_stats = self.a.stats(layout).trigrams;
 
         if trigram_stats.sft != 0.0 {
             println!("Sft:          {:.3}%", trigram_stats.sft);

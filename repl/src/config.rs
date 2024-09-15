@@ -39,9 +39,9 @@ mod tests {
         let s2 = r#"layouts = ["./vec", "./p2"]"#;
         let s3 = "layouts = []";
 
-        let p1 = toml::from_str::<Layouts>(&s1);
-        let p2 = toml::from_str::<Layouts>(&s2);
-        let p3 = toml::from_str::<Layouts>(&s3);
+        let p1 = toml::from_str::<Layouts>(s1);
+        let p2 = toml::from_str::<Layouts>(s2);
+        let p3 = toml::from_str::<Layouts>(s3);
 
         println!("{:?}", p1);
         println!("{:?}", p2);
