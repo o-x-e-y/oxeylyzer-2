@@ -1,4 +1,4 @@
-corpus = "./data/shai.json"
+corpus = "./data/english.json"
 layouts = "./layouts" # can be an array of folders
 
 [weights]

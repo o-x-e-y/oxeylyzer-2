@@ -99,7 +99,7 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
             // <div class="flex justify-center my-4">
             // <div class="w-2/3 sm:mr-[1%] md:mr-[2%] lg:mr-[3%]">
             <div class="p-4 xl:w-7/12 lg:w-2/3 md:w-3/4 sm:w-5/6 mx-auto">
-                <RenderAnalyzeLayout phys keys=LayoutKeys(keys) language/>
+                <RenderAnalyzeLayout phys keys=LayoutKeys(keys) language=language.clone()/>
             </div>
             // </div>
             // <div class="sm:ml-[1%] md:ml-[2%] lg:ml-[3%]">
@@ -110,7 +110,7 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
             // </div>
             <div class="mx-4">
                 <div class="mb-2">
-                    <MaybeRenderAnalysis/>
+                    <MaybeRenderAnalysis language/>
                 </div>
                 <div class="mb-4">
                     <DofMetadata dof/>
@@ -278,10 +278,10 @@ fn Key(k: Key, f: Finger, pos: PhysicalKey, i: usize, freq: Memo<f64>) -> impl I
 }
 
 #[component]
-fn MaybeRenderAnalysis() -> impl IntoView {
+fn MaybeRenderAnalysis(language: String) -> impl IntoView {
     let err = move |e: &str| format!("Analysis failed: {}", e);
 
-    let data = create_resource(move || "/data/shai.json".to_owned(), load_json::<Data>);
+    let data = create_resource(move || format!("/data/{language}.json"), load_json::<Data>);
     let weights = move || use_context::<GlobalWeights>().unwrap_or_default();
 
     view! {
