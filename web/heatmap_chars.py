@@ -15,5 +15,8 @@ for path in glob('../data/*.json'):
         heatmap_chars[name] = chars
 
 
+heatmap_chars = dict(sorted(heatmap_chars.items()))
+
+
 with open('./public/heatmap_data.json', 'w+', encoding='utf-8') as f:
     json.dump(heatmap_chars, f, indent='\t', separators=(',', ': '), ensure_ascii=False)
