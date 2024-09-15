@@ -1,4 +1,5 @@
 mod corpus_data;
+mod create_keyboard;
 mod settings;
 mod tools;
 
@@ -69,6 +70,7 @@ fn App() -> impl IntoView {
                     <Route path="/tools" view=|| view! { <Outlet/> }>
                         <Route path="" view=tools::Tools/>
                         <Route path="/generate-corpus-data" view=corpus_data::GenerateCorpusData/>
+                        <Route path="/create-keyboard" view=create_keyboard::CreateKeyboard/>
                     </Route>
                     <Route path="/search/:query" view=search::QuerySearch/>
                     <Route path="/settings" view=settings::Settings/>

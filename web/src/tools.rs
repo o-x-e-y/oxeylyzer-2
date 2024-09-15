@@ -7,6 +7,7 @@ pub fn Tools() -> impl IntoView {
     view! {
         <div class="-mt-2 sm:-mt-2 p-4 rounded-lg">
             <Tool name="Generate corpus data"/>
+            <Tool name="Create keyboard"/>
         </div>
     }
 }
