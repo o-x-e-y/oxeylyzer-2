@@ -142,7 +142,8 @@ From here, we can create a member function that loops over these indices to find
 that we take both the given sfb indices, but also the reverse!
 
 ```rust
-pub fn sfbs(&self, layout: &Layout) -> f64 {
+impl Analyzer {
+    pub fn sfbs(&self, layout: &Layout) -> f64 {
     self
         .sfb_indices
         .iter()
@@ -156,6 +157,7 @@ pub fn sfbs(&self, layout: &Layout) -> f64 {
             sfb1 + sfb2
         })
         .sum()
+    }
 }
 ```
 
@@ -172,14 +174,16 @@ positions, so the strategy here is to go from trigram -> 3 indices -> 3 fingers 
 Step one is easy enough: simply extend our `Layout` to map three characters to three indices:
 
 ```rust
-fn trigram_positions(&self, [c1, c2, c3]: [char; 3]) -> Option<[usize; 3]> {
-    let p1 = self.positions.get(&c1);
-    let p2 = self.positions.get(&c3);
-    let p3 = self.positions.get(&c3);
+impl Layout {
+    fn trigram_positions(&self, [c1, c2, c3]: [char; 3]) -> Option<[usize; 3]> {
+        let p1 = self.positions.get(&c1);
+        let p2 = self.positions.get(&c3);
+        let p3 = self.positions.get(&c3);
 
-    match (p1, p2, p3) {
-        (Some(p1), Some(p2), Some(p3)) => Some((p1, p2, p3)),
-        _ => None
+        match (p1, p2, p3) {
+            (Some(p1), Some(p2), Some(p3)) => Some((p1, p2, p3)),
+            _ => None
+        }
     }
 }
 ```
@@ -190,19 +194,21 @@ have a predefined array to go from one to the other. We represent each finger as
 0 and 7, which we can do because we ignore thumbs:
 
 ```rust
-pub const POS_FINGERS: [usize; 30] = [
-    0, 1, 2, 3, 3,  4, 4, 5, 6, 7,
-    0, 1, 2, 3, 3,  4, 4, 5, 6, 7,
-    0, 1, 2, 3, 3,  4, 4, 5, 6, 7,
-];
+impl Layout {
+    pub const POS_FINGERS: [usize; 30] = [
+        0, 1, 2, 3, 3,  4, 4, 5, 6, 7,
+        0, 1, 2, 3, 3,  4, 4, 5, 6, 7,
+        0, 1, 2, 3, 3,  4, 4, 5, 6, 7,
+    ];
+}
 ```
 
-We can also add this to the analysis struct. Now we have three fingers we want to get a
-corresponding trigram. Considering the fact we have three integers, the strategy here is to populate
-an array first to only have to index into it for every trigram. The way to do this is by going over
-each finger combinations, and writing some code to determine what trigram it is. Rolls will be the
-example here. Rolls are defined as trigrams where one key is one hand, and two are on the other. To
-check if something is a roll we can do something like this:
+Now we have three fingers we want to get a corresponding trigram. Considering the fact we have three
+integers, the strategy here is to populate an array first to only have to index into it for every
+trigram. The way to do this is by going over each finger combinations, and writing some code to
+determine what trigram it is. Rolls will be the example here. Rolls are defined as trigrams where
+one key is one hand, and two are on the other. To check if something is a roll we can do something
+like this:
 
 ```rust
 fn is_roll([f1, f2, f3]: [usize; 3]) -> bool {
@@ -264,8 +270,6 @@ tally up the results in an intermediate struct.
 
 As far as analyzing a layout goes, this is really all there is to it. There are some things we can
 optimize here however. The main slowdown we can get ouf the way is the char -> position map. Instead
-of actual characters we could map them to integers and use an array, which speeds things up a _lot_.
+of actual characters we could map them to integers and use an array, which speeds things up a lot!
 
-Thanks for reading cutie patooties
-
-<img src="/public/images/iandof.png" />
+[![iandof](/public/images/iandof.png)](https://discord.com/invite/dvorak)
