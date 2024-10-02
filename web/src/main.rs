@@ -1,10 +1,15 @@
 mod corpus_data;
 mod create_keyboard;
-mod settings;
+// mod settings;
 mod tools;
+// mod layouts;
+// mod home;
+// mod search;
+// mod analyze;
 
-use web_components::{
-    layouts::{HeatmapData, LayoutsFolder},
+use layouts::{HeatmapData, LayoutsFolder};
+
+use oxeylyzer_web_components::{
     util::*,
     *,
 };
@@ -59,7 +64,6 @@ fn App() -> impl IntoView {
                     <Route path="/" view=home::Home/>
                     <Route path="/layouts" view=|| view! { <Outlet/> }>
                         <Route path="" view=view_layouts/>
-
                         <Route path=":name" view=analyze::RenderAnalyzer/>
                     </Route>
                     <Route path="/posts" view=|| view! { <Outlet/> }>

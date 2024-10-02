@@ -119,7 +119,7 @@ fn PaginateButton(
 #[component]
 pub fn LayoutLink(name: String) -> impl IntoView {
     view! {
-        <div class="p-4 rounded-lg bg-black container-inline-size hover:bg-[#141414]
+        <div class="p-4 rounded-lg bg-black hover:bg-[#141414]
         duration-75
         ">
             <A href=format!("/layouts/{name}")>
@@ -184,6 +184,8 @@ pub fn RenderDof(dof: Dof) -> impl IntoView {
         keyboard,
         shape,
     };
+
+    logging::log!("language: {language}");
 
     view! { <RenderAnalyzeLayout phys keys language/> }
 }

@@ -2,5 +2,8 @@
 /corpora/*
 /web/dist
 /node_modules
+/core/test-layouts
+/data-csv/dofs/*
+/data-csv/cmini-layouts-data.csv
 .venv
 .direnv

@@ -1,10 +1,6 @@
+use crate::{search::NavSearch, util::*, *};
 use leptos::*;
 use leptos_router::*;
-use crate::{
-    search::NavSearch,
-    util::*,
-    *
-};
 
 #[component]
 pub fn Home() -> impl IntoView {

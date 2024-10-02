@@ -120,6 +120,30 @@ pub fn RenderDofAnalyzer(dof: Dof) -> impl IntoView {
     }
 }
 
+// #[component]
+// pub fn RenderAnalyzeLayout(
+//     phys: PhysicalLayout,
+//     keys: LayoutKeys,
+//     language: String,
+// ) -> impl IntoView {
+//     let (lx, hx) = minmax_x(&phys.keyboard);
+//     let (ly, hy) = minmax_y(&phys.keyboard);
+//     let (dx, dy) = (hx - lx, hy - ly);
+
+//     let width = 100.0;
+//     let kw = width / dx;
+//     let height = dy * kw;
+//     let ym = dx / dy;
+
+//     let font_size = 2.8;
+
+//     view! {
+//         <div class="br" style=format!("width: 100%; aspect-ratio: 100/{height}; font-size: {font_size}%")>
+            
+//         </div>
+//     }
+// }
+
 #[component]
 pub fn RenderAnalyzeLayout(
     phys: PhysicalLayout,
@@ -138,7 +162,7 @@ pub fn RenderAnalyzeLayout(
     let height = dy * kw;
     let ym = dx / dy;
 
-    let font_size = 2.8;
+    let font_size = kw / 2.5;
 
     let (dragged_sig, set_dragged_sig) = create_signal::<Option<Key>>(None);
 
@@ -184,11 +208,11 @@ pub fn RenderAnalyzeLayout(
         .zip(phys.fingers)
         .enumerate()
         .map(move |(i, ((k, pos), f))| {
-            let x = (pos.x() - lx) * kw + 0.15;
-            let y = (pos.y() - ly) * kw * ym + 0.15 * ym;
+            let x = (pos.x() - lx) * kw + 0.2;
+            let y = (pos.y() - ly) * kw * ym + 0.2 * ym;
 
-            let width = (pos.width()) * kw - 0.3;
-            let height = ((pos.height()) * kw - 0.3) * ym;
+            let width = (pos.width()) * kw - 0.4;
+            let height = ((pos.height()) * kw - 0.4) * ym;
 
             let pos = PhysicalKey::xywh(x, y, width, height);
 
@@ -224,9 +248,14 @@ pub fn RenderAnalyzeLayout(
 
     view! {
         <div class="container-inline-size">
-            <div style=move || {
-                format!("width: {width}cqw; height: {height}cqw; font-size: {font_size}cqw")
-            }>{key_views}</div>
+            <div
+                class="relative"
+                style=format!(
+                    "width: {width}%; aspect-ratio: 100/{height}; font-size: {font_size}cqw"
+                )
+            >
+                {key_views}
+            </div>
         </div>
     }
 }
@@ -250,12 +279,17 @@ fn Key(k: Key, f: Finger, pos: PhysicalKey, i: usize, freq: Memo<f64>) -> impl I
         false => fingermap_colors(f).to_owned(),
     };
     let title = move || format!("Key usage: {:.2}%", freq());
+    let bs = 0.3;
+    let border = format!(
+        "border-left: {bs}em solid transparent; border-right: {bs}em solid #1a1a1a;
+        border-top: {bs}em solid #1a1a1a; border-bottom: {bs}em solid transparent"
+    );
 
     view! {
         <div
             class="
-            absolute flex border-[0.3cqw] border-darker items-center justify-center
-            bg-darker text-darker rounded-[1cqw] container-inline-size
+            absolute flex border-[0.25cqw] border-darker items-center justify-center
+            bg-darker text-darker rounded-[10%]
             "
             style:left=format!("{}%", pos.x())
             style:top=format!("{}%", pos.y())
@@ -265,12 +299,9 @@ fn Key(k: Key, f: Finger, pos: PhysicalKey, i: usize, freq: Memo<f64>) -> impl I
             title=title
         >
             <div
-                class="
-                absolute top-0 right-0 w-0 h-0
-                border-l-[0.8ch] border-l-transparent border-b-[0.8ch] border-b-transparent
-                border-r-[0.8ch] border-r-darker border-t-[0.8ch] border-t-darker
-                "
+                class="w-0 h-0 absolute top-0 right-0    "
                 style:opacity=op
+                style=border
             ></div>
             {k}
         </div>

@@ -70,7 +70,7 @@ pub fn RenderPostLinks() -> impl IntoView {
 #[component]
 pub fn RenderPostLink(name: String, metadata: Metadata) -> impl IntoView {
     view! {
-        <div class="p-4 m-2 rounded-lg bg-black container-inline-size hover:bg-header">
+        <div class="p-4 m-2 rounded-lg bg-black hover:bg-header">
             <A href=format!("/posts/{name}")>
                 <p class="text-lg md:text-base">{metadata.title}</p>
                 <p class="text-lg md:text-base text-[#aaa]">{metadata.date}</p>
@@ -152,11 +152,6 @@ fn ViewPost(post: Post) -> impl IntoView {
     view! {
         <Link rel="stylesheet" href="/public/highlighter/styles/gruvbox-dark-medium.min.css"/>
         <script src="/public/highlighter/load_highlight.js"></script>
-        // <div class="absolute w-full flex justify-end">
-        // <div class="m-6">
-        // "WHAT"
-        // </div>
-        // </div>
         <div class="flex justify-center my-6">
             <div
                 class="
