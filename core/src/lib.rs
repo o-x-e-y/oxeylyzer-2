@@ -11,6 +11,7 @@ pub mod depth_optimization;
 pub mod layout;
 pub mod optimization;
 pub mod simulated_annealing;
+pub mod stat_caches;
 pub mod stats;
 pub mod trigrams;
 pub mod weights;

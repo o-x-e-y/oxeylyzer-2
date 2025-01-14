@@ -8,6 +8,7 @@ use crate::{
     char_mapping::CharMapping,
     data::Data,
     layout::*,
+    stat_caches::*,
     trigrams::TRIGRAMS,
     weights::{FingerWeights, Weights},
 };

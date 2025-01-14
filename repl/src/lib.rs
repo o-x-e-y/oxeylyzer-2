@@ -3,7 +3,7 @@ mod flags;
 
 use config::Config;
 use itertools::Itertools;
-use oxeylyzer_core::{cached_layout::BigramPair, prelude::*};
+use oxeylyzer_core::{prelude::*, stat_caches::BigramPair};
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use std::{
     collections::{HashMap, HashSet},
