@@ -1,5 +1,6 @@
 mod sfb_cache;
 mod stretch_cache;
+mod trigram_cache;
 
 pub use sfb_cache::SfbIndices;
 pub use stretch_cache::StretchCache;
