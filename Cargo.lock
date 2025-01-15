@@ -85,11 +85,12 @@ dependencies = [
 
 [[package]]
 name = "anstyle-wincon"
-version = "3.0.6"
+version = "3.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2109dbce0e72be3ec00bed26e6a7479ca384ad226efdd66db8fa2e3a38c83125"
+checksum = "ca3534e77181a9cc07539ad51f2141fe32f6c3ffd4df76db8ad92346b003ae4e"
 dependencies = [
  "anstyle",
+ "once_cell",
  "windows-sys",
 ]
 
@@ -169,9 +170,9 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "bitflags"
-version = "2.7.0"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1be3f42a67d6d345ecd59f675f3f012d6974981560836e938c22b424b85ce1be"
+checksum = "8f68f53c83ab957f72c32642f3868eec03eb974d1fb82e453128456482613d36"
 
 [[package]]
 name = "block-buffer"
@@ -1428,9 +1429,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.22"
+version = "0.4.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
+checksum = "04cbf5b083de1c7e0222a7a51dbfdba1cbe1c6ab0b15e29fff3f6c077fd9cd9f"
 
 [[package]]
 name = "manyhow"
@@ -1545,7 +1546,6 @@ dependencies = [
  "oxeylyzer-repl",
  "oxeylyzer-web",
  "rand",
- "xflags 0.4.0-pre.1",
 ]
 
 [[package]]
@@ -1584,7 +1584,7 @@ dependencies = [
  "shlex",
  "thiserror 2.0.11",
  "toml",
- "xflags 0.4.0-pre.1 (git+https://github.com/o-x-e-y/xflags/)",
+ "xflags",
 ]
 
 [[package]]
@@ -2625,9 +2625,9 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "uuid"
-version = "1.11.1"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b913a3b5fe84142e269d63cc62b64319ccaf89b748fc31fe025177f767a756c4"
+checksum = "744018581f9a3454a9e15beb8a33b017183f1e7c0cd170232a2d1453b23a51c4"
 dependencies = [
  "getrandom",
 ]
@@ -2862,27 +2862,16 @@ checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
 
 [[package]]
 name = "xflags"
-version = "0.4.0-pre.1"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/matklad/xflags#0e53fe08bfe0c31914df3d3c49bd265e9710ead9"
 dependencies = [
- "xflags-macros 0.4.0-pre.1",
-]
-
-[[package]]
-name = "xflags"
-version = "0.4.0-pre.1"
-source = "git+https://github.com/o-x-e-y/xflags/#60e238c43a9da8892a90e2652162288aa4153b2c"
-dependencies = [
- "xflags-macros 0.4.0-pre.1 (git+https://github.com/o-x-e-y/xflags/)",
+ "xflags-macros",
 ]
 
 [[package]]
 name = "xflags-macros"
-version = "0.4.0-pre.1"
-
-[[package]]
-name = "xflags-macros"
-version = "0.4.0-pre.1"
-source = "git+https://github.com/o-x-e-y/xflags/#60e238c43a9da8892a90e2652162288aa4153b2c"
+version = "0.4.0-pre.2"
+source = "git+https://github.com/matklad/xflags#0e53fe08bfe0c31914df3d3c49bd265e9710ead9"
 
 [[package]]
 name = "xxhash-rust"

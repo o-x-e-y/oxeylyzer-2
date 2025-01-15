@@ -26,7 +26,6 @@ oxeylyzer-web-components = { path = "./web-components" }
 oxeylyzer-core = { path = "./core" }
 oxeylyzer-repl = { path = "./repl" }
 oxeylyzer-web = { path = "./web" }
-xflags = { path = "../xflags/crates/xflags" }
 
 [dev-dependencies]
 diol = { version = "0.8.3", default-features = false }
