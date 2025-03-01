@@ -134,9 +134,12 @@ impl Repl {
             .into_par_iter()
             .map(|_| {
                 let l = layout.random_with_pins(&pins);
-                let res = self.a.alternative_d3(l, &pins);
+                // let res = self.a.alternative_d3(l, &pins);
                 // self.a.greedy_depth2_improve(l)
                 // .annealing_improve(starting_layout, 20_500_000_000_000.0, 0.987, 5000)
+                let (annealed_layout, _) =
+                    self.a.annealing_improve(l, &pins, 10.0, 1E-5, 10_000_000);
+                let res = self.a.alternative_d3(annealed_layout, &pins);
 
                 iteration.fetch_add(1, Ordering::Relaxed);
 

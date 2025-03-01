@@ -25,9 +25,6 @@ pub struct GreedyAlternativeD3;
 #[derive(Debug, Clone)]
 pub struct SimulatedAnnealing;
 
-#[derive(Debug, Clone)]
-pub struct SimulatedAnnealingDepth2;
-
 #[derive(Clone, Copy, Debug)]
 pub enum OptimizationMethod {
     Greedy,
@@ -89,14 +86,8 @@ impl OptimizeLayout for GreedyAlternativeD3 {
     }
 }
 
-// impl OptimizeLayout<3> for SimulatedAnnealing {
+// impl OptimizeLayout for SimulatedAnnealing {
 //     fn optimize(a: &Analyzer, layout: Layout, [initial_temperature, cooling_rate, max_iterations]: [f64; 3]) -> (Layout, i64) {
 //         a.annealing_improve(layout, initial_temperature, cooling_rate, max_iterations as usize)
-//     }
-// }
-
-// impl OptimizeLayout<3> for SimulatedAnnealingDepth2 {
-//     fn optimize(a: &Analyzer, layout: Layout, [initial_temperature, cooling_rate, max_iterations]: [f64; 3]) -> (Layout, i64) {
-//         a.annealing_depth2_improve(layout, initial_temperature, cooling_rate, max_iterations as usize)
 //     }
 // }
